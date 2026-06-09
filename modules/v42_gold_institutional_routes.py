@@ -151,3 +151,15 @@ def v42_market_breadth_text():
     except Exception as e:
         return Response(f"ไม่สามารถดึง Market Breadth ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
+
+
+@v42_gold_bp.route("/v42/us-extended-hours-line", methods=["GET"])
+def v42_us_extended_hours_line_text():
+    try:
+        from flask import request
+        from modules.v42_gold_institutional_core import build_us_extended_hours_line_message
+        symbols_raw = request.args.get("symbols", "")
+        symbols = [s.strip().upper() for s in symbols_raw.split(",") if s.strip()] if symbols_raw else None
+        return Response(build_us_extended_hours_line_message(symbols), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง US Extended Hours สำหรับ LINE ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")

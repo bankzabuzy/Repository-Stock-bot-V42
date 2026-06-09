@@ -1854,3 +1854,66 @@ def build_market_breadth_text() -> str:
         lines.append(f"{key}: {fmt_num(s.get('last'), 2)} | Change: {fmt_num(s.get('change_pct'), 2)}% | Trend: {s.get('trend')}")
     lines += ["", f"Version : {V42_GOLD_VERSION}"]
     return "\n".join(lines)
+
+# ============================================================
+# V42.6 LINE US EXTENDED HOURS COMMAND EXTENSION
+# Premarket / After-hours current price + % change in LINE
+# ============================================================
+
+V426_US_DEFAULT_SYMBOLS = ["NVDA", "AAPL", "TSLA", "META", "AMD", "QQQ", "SPY"]
+
+
+def build_us_extended_hours_line_message(symbols: Optional[List[str]] = None) -> str:
+    symbols = symbols or V426_US_DEFAULT_SYMBOLS
+    payload = us_stock_extended_hours(symbols)
+    session = payload.get("session", "UNKNOWN")
+
+    title_map = {
+        "PRE_MARKET": "ก่อนตลาดเปิด (Pre-Market)",
+        "REGULAR": "ตลาดเปิดปกติ (Regular Session)",
+        "AFTER_HOURS": "หลังตลาดปิด (After Hours)",
+        "CLOSED_OR_OVERNIGHT": "ตลาดปิด / Overnight",
+    }
+    session_th = title_map.get(session, session)
+
+    lines = [
+        "🇺🇸 ราคาหุ้นสหรัฐ Extended Hours",
+        f"Session: {session_th}",
+        "",
+    ]
+
+    items = payload.get("items", []) or []
+    if not items:
+        lines.append("ยังไม่พบข้อมูลราคา Extended Hours")
+    else:
+        for item in items:
+            sym = item.get("symbol", "N/A")
+            active_price = item.get("active_price")
+            prev = item.get("previous_close")
+            chg = item.get("active_change_pct")
+            active_type = item.get("active_type", "regular")
+
+            if active_price is None:
+                lines.append(f"{sym}: ยังไม่มีข้อมูล Extended Hours")
+                continue
+
+            sign = "+" if chg is not None and float(chg) > 0 else ""
+            lines.append(
+                f"{sym}: ${fmt_num(active_price, 2)} | {sign}{fmt_num(chg, 2)}% "
+                f"| เทียบปิดก่อนหน้า ${fmt_num(prev, 2)} | {active_type}"
+            )
+
+    lines += [
+        "",
+        "คำสั่ง: premarket / afterhours / nvda / aapl / tsla",
+        "หมายเหตุ: ข้อมูล Extended Hours ขึ้นกับ Yahoo Finance ว่ามี pre/post market หรือไม่",
+        "Version : V42.6_LINE_US_EXTENDED_HOURS_STABLE",
+    ]
+    return "\n".join(lines)
+
+
+def build_single_us_symbol_line_message(symbol: str) -> str:
+    sym = (symbol or "").strip().upper()
+    if not sym:
+        return build_us_extended_hours_line_message()
+    return build_us_extended_hours_line_message([sym])

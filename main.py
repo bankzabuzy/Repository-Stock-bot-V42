@@ -2971,6 +2971,22 @@ def handle_line_command(user_text):
     text = (user_text or "").strip()
     low = text.lower()
 
+    
+
+    # V42.6 LINE US EXTENDED HOURS COMMANDS
+    us_symbols_v426 = {"NVDA", "AAPL", "TSLA", "META", "AMD", "QQQ", "SPY", "MSFT", "GOOGL", "AMZN", "TSM", "WDC", "AAOI"}
+    if low in ("premarket", "pre-market", "afterhours", "after-hours", "extended", "หุ้นสหรัฐ", "ราคาหุ้นสหรัฐ", "ก่อนตลาดเปิด", "หลังตลาดปิด"):
+        from modules.v42_gold_institutional_core import build_us_extended_hours_line_message
+        return build_us_extended_hours_line_message()
+
+    if low.upper() in us_symbols_v426:
+        from modules.v42_gold_institutional_core import build_single_us_symbol_line_message
+        return build_single_us_symbol_line_message(low.upper())
+
+    if low.startswith("us "):
+        from modules.v42_gold_institutional_core import build_us_extended_hours_line_message
+        parts = [p.strip().upper() for p in low[3:].replace(",", " ").split() if p.strip()]
+        return build_us_extended_hours_line_message(parts or None)
     if low in {"/health", "health"}:
         return "OK"
 
@@ -12756,6 +12772,19 @@ def v42_market_breadth_route():
         return Response(build_market_breadth_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
         return Response(f"ไม่สามารถดึง Market Breadth ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+
+# V42.6 US Extended Hours LINE text route
+@app.route("/v42/us-extended-hours-line", methods=["GET"], endpoint="v42_us_extended_hours_line_unique")
+def v42_us_extended_hours_line_route():
+    try:
+        symbols_raw = request.args.get("symbols", "")
+        symbols = [s.strip().upper() for s in symbols_raw.split(",") if s.strip()] if symbols_raw else None
+        from modules.v42_gold_institutional_core import build_us_extended_hours_line_message
+        return Response(build_us_extended_hours_line_message(symbols), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง US Extended Hours สำหรับ LINE ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 if __name__ == "__main__":
