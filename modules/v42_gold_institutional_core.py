@@ -552,13 +552,89 @@ def build_v42_gold_text() -> str:
     return "\n".join(lines)
 
 
+
 # ============================================================
-# V42.2 GOLD INSTITUTIONAL ENTRY FILTER
-# Strict alert layer: alerts only when all high-quality conditions pass.
-# This block intentionally overrides selected V42.1 functions while keeping
-# all existing fallback price functions intact.
+# V42.3 GOLD INSTITUTIONAL HIGH CONVICTION STABLE
+# High-conviction alert layer: Entry Score + Session + News + Spread
+# + Smart Trailing Stop + STRONG BUY. Existing Thai Gold fallback remains intact.
 # ============================================================
-V42_GOLD_VERSION = "V42.2_GOLD_INSTITUTIONAL_ENTRY_FILTER_STABLE"
+V42_GOLD_VERSION = "V42.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE"
+
+
+def _env_bool(name: str, default: bool = False) -> bool:
+    return str(os.getenv(name, "true" if default else "false")).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, str(default)))
+    except Exception:
+        return default
+
+
+def session_filter(now_utc: Optional[datetime] = None) -> Dict[str, Any]:
+    """Allow higher-conviction alerts mainly during London/New York sessions.
+    London: 07:00-16:59 UTC, New York: 12:00-21:59 UTC.
+    Can be bypassed with V42_ALLOW_ALL_SESSIONS=true.
+    """
+    now_utc = now_utc or datetime.now(timezone.utc)
+    hour = int(now_utc.hour)
+    london = 7 <= hour <= 16
+    new_york = 12 <= hour <= 21
+    allowed_all = _env_bool("V42_ALLOW_ALL_SESSIONS", False)
+    allowed = bool(allowed_all or london or new_york)
+    if london and new_york:
+        name = "LONDON_NEWYORK_OVERLAP"
+    elif london:
+        name = "LONDON"
+    elif new_york:
+        name = "NEW_YORK"
+    else:
+        name = "ASIA_OR_OFF_SESSION"
+    return {"allowed": allowed, "session": name, "utc_hour": hour, "allow_all_sessions": allowed_all}
+
+
+def high_impact_news_filter() -> Dict[str, Any]:
+    """Fail-safe high-impact news filter.
+    Set HIGH_IMPACT_NEWS_ACTIVE=true in Railway manually when FOMC/CPI/NFP/Powell is within 30 minutes.
+    Optional HIGH_IMPACT_NEWS_EVENT can describe the event.
+    """
+    active = _env_bool("HIGH_IMPACT_NEWS_ACTIVE", False)
+    event = os.getenv("HIGH_IMPACT_NEWS_EVENT", "FOMC/CPI/NFP/Powell")
+    minutes = int(_env_float("HIGH_IMPACT_NEWS_WINDOW_MIN", 30))
+    return {
+        "blocked": active,
+        "event": event if active else None,
+        "window_minutes": minutes,
+        "decision": "WAIT_NEWS" if active else "PASS",
+    }
+
+
+def spread_filter(thai_gold: Dict[str, Any], fx: Dict[str, Any]) -> Dict[str, Any]:
+    """Reject alerts when spread is abnormal. Thai baht-gold spread is used when available.
+    Defaults are conservative and adjustable in Railway variables:
+    GOLD_MAX_THAI_SPREAD=450, GOLD_MAX_XAU_SPREAD=5.
+    """
+    bar_buy = safe_float(thai_gold.get("bar_buy"))
+    bar_sell = safe_float(thai_gold.get("bar_sell"))
+    thai_spread = None
+    if bar_buy is not None and bar_sell is not None:
+        thai_spread = abs(bar_sell - bar_buy)
+    max_thai = _env_float("GOLD_MAX_THAI_SPREAD", 450)
+    ok_thai = True if thai_spread is None else thai_spread <= max_thai
+    # yfinance usually has no live bid/ask; allow manual override if available.
+    xau_spread = safe_float(os.getenv("GOLD_CURRENT_XAU_SPREAD"), 0)
+    max_xau = _env_float("GOLD_MAX_XAU_SPREAD", 5)
+    ok_xau = xau_spread <= max_xau
+    ok = bool(ok_thai and ok_xau)
+    return {
+        "ok": ok,
+        "thai_spread": thai_spread,
+        "max_thai_spread": max_thai,
+        "xau_spread": xau_spread,
+        "max_xau_spread": max_xau,
+        "decision": "PASS" if ok else "NO_TRADE_SPREAD",
+    }
 
 
 def _market_snapshot(symbol: str = "GC=F", period: str = "1mo", interval: str = "1h") -> Dict[str, Any]:
@@ -580,7 +656,6 @@ def _market_snapshot(symbol: str = "GC=F", period: str = "1mo", interval: str = 
 def _volume_confirm(volumes: List[float]) -> bool:
     vols = [float(v) for v in (volumes or []) if v is not None and float(v) >= 0]
     if len(vols) < 21:
-        # Some XAUUSD sources have no volume. Do not fabricate confirmation.
         return False
     avg20 = sum(vols[-21:-1]) / 20 if sum(vols[-21:-1]) > 0 else 0
     if avg20 <= 0:
@@ -648,13 +723,13 @@ def xauusd_engine() -> Dict[str, Any]:
         "multi_tf_aligned": bool(multi_tf_buy or multi_tf_sell),
         "volume_confirm": bool(volume_confirm),
         "direction": "BUY" if multi_tf_buy else "SELL" if multi_tf_sell else "WAIT",
+        "trend_score": int(max(0, min(100, base + (bullish_count - bearish_count) * 5))),
     }
 
 
 def gold_trade_plan(bar_sell: Optional[float], prob: int, signal: str) -> Dict[str, Any]:
     if not bar_sell:
         return {}
-    # Conservative baht-gold plan designed to keep RR above 1:2.
     entry_gap = 100 if prob >= 85 else 150
     risk_amt = 250 if prob >= 85 else 300
     reward1 = risk_amt * 2.1
@@ -679,7 +754,112 @@ def gold_trade_plan(bar_sell: Optional[float], prob: int, signal: str) -> Dict[s
     return {"entries": entries, "take_profits": tps, "stop_loss": sl, "rr": round(rr, 2), "base_entry": base_entry}
 
 
-def institutional_entry_filter(engine: Dict[str, Any], news: Dict[str, Any], plan: Dict[str, Any]) -> Dict[str, Any]:
+def _score_rr(rr: float) -> float:
+    return max(0, min(100, (float(rr or 0) / 2.5) * 100))
+
+
+def _score_news(sentiment: str) -> float:
+    s = str(sentiment or "NEUTRAL").upper()
+    if s == "BULLISH":
+        return 100
+    if s == "NEUTRAL":
+        return 70
+    if s == "BEARISH":
+        return 20
+    return 60
+
+
+def calculate_entry_score(probability: int, confidence: int, rr: float, trend_score: float, news_sentiment: str) -> Dict[str, Any]:
+    rr_score = _score_rr(rr)
+    news_score = _score_news(news_sentiment)
+    score = (
+        float(probability or 0) * 0.30 +
+        float(confidence or 0) * 0.25 +
+        rr_score * 0.20 +
+        float(trend_score or 0) * 0.15 +
+        news_score * 0.10
+    )
+    score = round(max(0, min(100, score)), 2)
+    if score >= 90:
+        grade = "A+"
+    elif score >= 85:
+        grade = "A"
+    elif score >= 80:
+        grade = "B+"
+    else:
+        grade = "NO_ALERT"
+    return {
+        "entry_score": score,
+        "entry_grade": grade,
+        "rr_score": round(rr_score, 2),
+        "trend_score": round(float(trend_score or 0), 2),
+        "news_score": news_score,
+        "formula": "probability*0.30 + confidence*0.25 + rr_score*0.20 + trend_score*0.15 + news_score*0.10",
+    }
+
+
+def smart_trailing_stop(plan: Dict[str, Any], current_price: Optional[float] = None, direction: str = "BUY") -> Dict[str, Any]:
+    entries = plan.get("entries") or []
+    tps = plan.get("take_profits") or []
+    sl = plan.get("stop_loss")
+    if not entries or len(tps) < 3 or sl is None:
+        return {"enabled": False, "reason": "missing_plan"}
+    entry = float(plan.get("base_entry") or entries[0])
+    price = safe_float(current_price, entry)
+    direction = str(direction or "BUY").upper()
+    new_sl = sl
+    stage = "PRE_TP1"
+    if direction == "SELL":
+        if price <= tps[0]:
+            new_sl = entry
+            stage = "TP1_MOVE_SL_TO_BE"
+        if price <= tps[1]:
+            new_sl = tps[0]
+            stage = "TP2_LOCK_PROFIT"
+        if price <= tps[2]:
+            stage = "TP3_CLOSE_ALL"
+    else:
+        if price >= tps[0]:
+            new_sl = entry
+            stage = "TP1_MOVE_SL_TO_BE"
+        if price >= tps[1]:
+            new_sl = tps[0]
+            stage = "TP2_LOCK_PROFIT"
+        if price >= tps[2]:
+            stage = "TP3_CLOSE_ALL"
+    return {"enabled": True, "stage": stage, "entry": entry, "original_sl": sl, "new_sl": new_sl, "rule": "TP1→BE, TP2→lock profit, TP3→close all"}
+
+
+def strong_buy_engine(engine: Dict[str, Any], news: Dict[str, Any], plan: Dict[str, Any]) -> Dict[str, Any]:
+    probability = int(engine.get("probability") or 0)
+    confidence = int(engine.get("confidence") or 0)
+    risk = str(engine.get("risk_grade") or "C")
+    rr = float(plan.get("rr") or 0)
+    mtf = bool(engine.get("multi_tf_aligned"))
+    news_positive = str(news.get("sentiment") or "NEUTRAL").upper() == "BULLISH"
+    passed = (
+        probability >= 90 and
+        confidence >= 90 and
+        risk == "A" and
+        rr >= 2.5 and
+        mtf and
+        news_positive
+    )
+    return {
+        "passed": passed,
+        "label": "STRONG_BUY" if passed else "NOT_STRONG_BUY",
+        "checks": {
+            "probability_ge_90": probability >= 90,
+            "confidence_ge_90": confidence >= 90,
+            "risk_A": risk == "A",
+            "rr_ge_2_5": rr >= 2.5,
+            "multi_tf_aligned": mtf,
+            "news_positive": news_positive,
+        },
+    }
+
+
+def institutional_entry_filter(engine: Dict[str, Any], news: Dict[str, Any], plan: Dict[str, Any], session: Dict[str, Any], news_event: Dict[str, Any], spread: Dict[str, Any], entry_score: Dict[str, Any], strong_buy: Dict[str, Any]) -> Dict[str, Any]:
     signal = str(engine.get("signal") or "WAIT")
     probability = int(engine.get("probability") or 0)
     confidence = int(engine.get("confidence") or 0)
@@ -696,10 +876,26 @@ def institutional_entry_filter(engine: Dict[str, Any], news: Dict[str, Any], pla
         "news_not_negative": news_sentiment != "BEARISH",
         "rr_gt_2": rr > 2.0,
         "risk_grade_ok": risk_grade in {"A", "B+"},
+        "session_ok": bool(session.get("allowed")),
+        "high_impact_news_ok": not bool(news_event.get("blocked")),
+        "spread_ok": bool(spread.get("ok")),
+        "entry_score_ok": entry_score.get("entry_grade") in {"A+", "A", "B+"},
     }
     passed = all(checks.values())
     failed = [k for k, v in checks.items() if not v]
-    if passed:
+    if news_event.get("blocked"):
+        decision = "WAIT_NEWS"
+        action = "รอข่าวแรงผ่านก่อน"
+    elif not session.get("allowed"):
+        decision = "WAIT_SESSION"
+        action = "รอ London/New York Session"
+    elif not spread.get("ok"):
+        decision = "NO_TRADE_SPREAD"
+        action = "Spread สูงผิดปกติ"
+    elif strong_buy.get("passed"):
+        decision = "HIGH_CONVICTION_PUSH"
+        action = "STRONG BUY ผ่านทุกเงื่อนไข Institutional"
+    elif passed:
         decision = "PUSH_ALERT"
         action = "เข้าเงื่อนไขแจ้งเตือนทันที"
     elif signal in {"BUY", "STRONG_BUY", "SELL"} and probability > 75:
@@ -708,11 +904,16 @@ def institutional_entry_filter(engine: Dict[str, Any], news: Dict[str, Any], pla
     else:
         decision = "NO_TRADE"
         action = "ยังไม่เข้าเงื่อนไข"
-    return {"passed": passed, "decision": decision, "action": action, "checks": checks, "failed_checks": failed}
+    return {"passed": passed or bool(strong_buy.get("passed")), "decision": decision, "action": action, "checks": checks, "failed_checks": failed}
 
 
 def should_push_alert(engine: Dict[str, Any], news: Optional[Dict[str, Any]] = None, plan: Optional[Dict[str, Any]] = None) -> bool:
-    return institutional_entry_filter(engine, news or {}, plan or {}).get("passed", False)
+    session = session_filter()
+    news_event = high_impact_news_filter()
+    spread = {"ok": True}
+    entry_score = calculate_entry_score(int(engine.get("probability") or 0), int(engine.get("confidence") or 0), float((plan or {}).get("rr") or 0), float(engine.get("trend_score") or engine.get("score") or 50), str((news or {}).get("sentiment") or "NEUTRAL"))
+    strong = strong_buy_engine(engine, news or {}, plan or {})
+    return institutional_entry_filter(engine, news or {}, plan or {}, session, news_event, spread, entry_score, strong).get("passed", False)
 
 
 def build_v42_gold_payload() -> Dict[str, Any]:
@@ -721,7 +922,6 @@ def build_v42_gold_payload() -> Dict[str, Any]:
     engine = xauusd_engine()
     news = news_ai()
 
-    # News adjustment: do not allow bullish signal if news is clearly negative.
     if news.get("sentiment") == "BULLISH" and engine["signal"] in {"BUY", "STRONG_BUY", "WAIT"}:
         engine["probability"] = min(94, int(engine.get("probability") or 50) + 2)
         engine["confidence"] = min(94, int(engine.get("confidence") or 50) + 2)
@@ -732,7 +932,19 @@ def build_v42_gold_payload() -> Dict[str, Any]:
             engine["signal"] = "WAIT"
 
     plan = gold_trade_plan(safe_float(thai.get("bar_sell")), int(engine.get("probability") or 50), engine.get("signal", "WAIT"))
-    entry_filter = institutional_entry_filter(engine, news, plan)
+    session = session_filter()
+    news_event = high_impact_news_filter()
+    spread = spread_filter(thai, fx)
+    entry_score = calculate_entry_score(
+        int(engine.get("probability") or 0),
+        int(engine.get("confidence") or 0),
+        float(plan.get("rr") or 0),
+        float(engine.get("trend_score") or engine.get("score") or 50),
+        str(news.get("sentiment") or "NEUTRAL"),
+    )
+    strong_buy = strong_buy_engine(engine, news, plan)
+    entry_filter = institutional_entry_filter(engine, news, plan, session, news_event, spread, entry_score, strong_buy)
+    trailing = smart_trailing_stop(plan, safe_float(thai.get("bar_sell")), engine.get("direction", "BUY"))
     return {
         "ok": bool(thai.get("ok")),
         "version": V42_GOLD_VERSION,
@@ -741,11 +953,51 @@ def build_v42_gold_payload() -> Dict[str, Any]:
         "xauusd": fx,
         "engine": engine,
         "news": news,
+        "session_filter": session,
+        "high_impact_news_filter": news_event,
+        "spread_filter": spread,
         "trade_plan": plan,
+        "entry_score": entry_score,
+        "strong_buy": strong_buy,
+        "smart_trailing_stop": trailing,
         "entry_filter": entry_filter,
         "push_alert": bool(entry_filter.get("passed")),
-        "quality_rule": "V42.2: Multi TF aligned + Volume confirm + Probability >80 + Confidence >85 + News not bearish + RR >2 + Risk A/B+",
+        "quality_rule": "V42.3: EntryScore>=80 + London/NY + no high-impact news + spread ok + institutional checks + STRONG BUY engine",
     }
+
+
+def build_v42_gold_high_conviction_text(payload: Optional[Dict[str, Any]] = None) -> str:
+    p = payload or build_v42_gold_payload()
+    tg = p.get("thai_gold", {})
+    eng = p.get("engine", {})
+    plan = p.get("trade_plan", {})
+    entries = plan.get("entries", [])
+    tps = plan.get("take_profits", [])
+    score = p.get("entry_score", {})
+    lines = [
+        "🔥 V42.3 INSTITUTIONAL HIGH CONVICTION",
+        "",
+        f"{eng.get('signal', 'WAIT')} GOLD",
+        "",
+        f"Probability : {eng.get('probability')}%",
+        f"Confidence : {eng.get('confidence')}%",
+        f"Risk : {eng.get('risk_grade')}",
+        f"RR : 1:{fmt_num(plan.get('rr'), 2)}",
+        f"Entry Score : {fmt_num(score.get('entry_score'), 2)} ({score.get('entry_grade')})",
+        "",
+        "เข้าไม้:",
+        " / ".join(fmt_num(x, 0) for x in entries) if entries else "N/A",
+        "",
+        "TP:",
+        " / ".join(fmt_num(x, 0) for x in tps) if tps else "N/A",
+        "",
+        f"SL: {fmt_num(plan.get('stop_loss'), 0)}",
+        "",
+        "ผ่านทุกเงื่อนไข Institutional" if p.get("push_alert") else "ยังไม่ผ่านทุกเงื่อนไข Institutional",
+        f"ราคาอ้างอิงทองแท่งขายออก: {fmt_num(tg.get('bar_sell'), 0)} บาท",
+        f"Version : {V42_GOLD_VERSION}",
+    ]
+    return "\n".join(lines)
 
 
 def build_v42_gold_text() -> str:
@@ -756,14 +1008,21 @@ def build_v42_gold_text() -> str:
     news = p.get("news", {})
     plan = p.get("trade_plan", {})
     filt = p.get("entry_filter", {})
+    score = p.get("entry_score", {})
+    session = p.get("session_filter", {})
+    news_event = p.get("high_impact_news_filter", {})
+    spread = p.get("spread_filter", {})
+    trailing = p.get("smart_trailing_stop", {})
+    strong = p.get("strong_buy", {})
     entries = plan.get("entries", [])
     tps = plan.get("take_profits", [])
     tf = eng.get("timeframes", {})
     tf_line = " | ".join(f"{k}:{v.get('trend','UNKNOWN')}" for k, v in tf.items())
     note = "ราคาเป็นค่าประมาณจาก XAUUSD × USDTHB เพราะแหล่งราคาทองไทยล่ม" if tg.get("is_estimate") else "ใช้ราคาจากแหล่งราคาทองไทย"
     action = filt.get("action") or "ยังไม่เข้าเงื่อนไข"
+    title = "🔥 V42.3 GOLD HIGH CONVICTION" if strong.get("passed") else "🏆 V42.3 GOLD INSTITUTIONAL ENTRY FILTER"
     lines = [
-        "🏆 V42.2 GOLD INSTITUTIONAL ENTRY FILTER",
+        title,
         f"เวลาไทย: {p.get('time_th')}",
         "",
         f"ราคาทองไทย: {note}",
@@ -777,6 +1036,10 @@ def build_v42_gold_text() -> str:
         f"XAUUSD/GC=F: ${fmt_num(fx.get('xauusd'), 2)} | USDTHB: {fmt_num(fx.get('usd_thb'), 2)}",
         f"Signal: {eng.get('signal')} | Decision: {filt.get('decision')} | {action}",
         f"Probability: {eng.get('probability')}% | Confidence: {eng.get('confidence')}% | Risk: {eng.get('risk_grade')} | Regime: {eng.get('regime')}",
+        f"Entry Score: {fmt_num(score.get('entry_score'), 2)} | Grade: {score.get('entry_grade')}",
+        f"Session: {session.get('session')} | {'ผ่าน' if session.get('allowed') else 'ยังไม่ผ่าน'}",
+        f"High Impact News: {news_event.get('decision')}",
+        f"Spread: {'ผ่าน' if spread.get('ok') else 'ไม่ผ่าน'} | Thai Spread: {fmt_num(spread.get('thai_spread'), 0)}",
         f"Multi TF: {tf_line}",
         f"Volume Confirm: {'ผ่าน' if eng.get('volume_confirm') else 'ยังไม่ผ่าน'}",
         f"News AI: {news.get('sentiment')} ({news.get('source')})",
@@ -803,6 +1066,9 @@ def build_v42_gold_text() -> str:
     else:
         lines.append("ยังไม่พอข้อมูลสำหรับ TP/SL")
     lines += [
+        "",
+        "🧠 Smart Trailing Stop",
+        f"Stage: {trailing.get('stage')} | New SL: {fmt_num(trailing.get('new_sl'), 0)}",
         "",
         "🚨 Auto LINE Push:",
         "พร้อมแจ้งเตือนทันที" if p.get("push_alert") else "ยังไม่แจ้งเตือน เพราะเงื่อนไข Institutional ยังไม่ครบ",

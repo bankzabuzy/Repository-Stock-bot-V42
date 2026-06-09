@@ -5182,12 +5182,12 @@ def maybe_send_v42_gold_institutional_alert():
         try:
             thai = payload.get("thai_gold", {})
             eng = payload.get("engine", {})
-            save_signal("THAI_GOLD", "THAI_GOLD", thai.get("bar_sell"), eng.get("score"), eng.get("signal"), "V42.2_GOLD_ALERT", eng.get("regime"), eng.get("probability"), msg)
+            save_signal("THAI_GOLD", "THAI_GOLD", thai.get("bar_sell"), eng.get("score"), eng.get("signal"), "V42.3_GOLD_ALERT", eng.get("regime"), eng.get("probability"), msg)
         except Exception as e:
-            print("V42.2 gold alert save warning:", e)
+            print("V42.3 gold alert save warning:", e)
         return {"ok": True, "sent": sent, "reason": "sent", "entry_filter": payload.get("entry_filter")}
     except Exception as e:
-        print("V42.2 gold alert error:", e)
+        print("V42.3 gold alert error:", e)
         return {"ok": False, "error": str(e)}
 
 
@@ -5367,8 +5367,8 @@ def _production_build_scan_report(symbol, asset, analysis, quote=None):
     return "\n".join(lines)
 
 
-@app.route("/v42/gold-filter", methods=["GET"])
-def v42_gold_filter_route():
+@app.route("/v42/gold-filter-legacy", methods=["GET"], endpoint="v42_gold_filter_legacy")
+def v42_gold_filter_route_legacy():
     try:
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         payload = build_v42_gold_payload()
@@ -5382,7 +5382,7 @@ def v42_gold_filter_route():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.2_GOLD_INSTITUTIONAL_ENTRY_FILTER_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 def production_scan_once(symbols=None, save_all=True):
@@ -12595,7 +12595,7 @@ def thai_gold_latest_route():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.2_GOLD_INSTITUTIONAL_ENTRY_FILTER_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/v42/gold", methods=["GET"])
@@ -12604,7 +12604,7 @@ def v42_gold_route():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.2_GOLD_INSTITUTIONAL_ENTRY_FILTER_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/v42/gold-text", methods=["GET"])
@@ -12615,12 +12615,16 @@ def v42_gold_text_route():
     except Exception as e:
         return Response(f"ไม่สามารถดึงระบบ V42 GOLD ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
+@app.route("/v42/gold-high-conviction", methods=["GET"])
+def v42_gold_high_conviction_route():
+    try:
+        from modules.v42_gold_institutional_core import build_v42_gold_high_conviction_text
+        return Response(build_v42_gold_high_conviction_text(), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง V42.3 High Conviction ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
-@app.route(
-    "/v42/gold-filter",
-    methods=["GET"],
-    endpoint="v42_gold_filter_unique"
-)
+
+@app.route("/v42/gold-filter", methods=["GET"], endpoint="v42_gold_filter_unique")
 def v42_gold_filter_route_v2():
     try:
         from modules.v42_gold_institutional_core import build_v42_gold_payload
@@ -12635,7 +12639,7 @@ def v42_gold_filter_route_v2():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.2_GOLD_INSTITUTIONAL_ENTRY_FILTER_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 def production_scan_once(symbols=None, save_all=True):
