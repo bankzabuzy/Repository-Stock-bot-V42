@@ -1,9 +1,9 @@
-# V42.4 GOLD INSTITUTIONAL HIGH CONVICTION ROUTES
+# V42.5 GOLD INSTITUTIONAL HIGH CONVICTION ROUTES
 # Optional blueprint. main.py also exposes direct routes, but this file keeps the module complete.
 
 from flask import Blueprint, jsonify, Response
 
-V42_ROUTE_VERSION = "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE"
+V42_ROUTE_VERSION = "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE"
 v42_gold_bp = Blueprint("v42_gold", __name__)
 
 
@@ -22,7 +22,7 @@ def v42_gold_text():
         from modules.v42_gold_institutional_core import build_v42_gold_text
         return Response(build_v42_gold_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึงระบบ V42.4 GOLD ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึงระบบ V42.5 GOLD ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @v42_gold_bp.route("/v42/gold-high-conviction", methods=["GET"])
@@ -31,7 +31,7 @@ def v42_gold_high_conviction_text():
         from modules.v42_gold_institutional_core import build_v42_gold_high_conviction_text
         return Response(build_v42_gold_high_conviction_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.4 High Conviction ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V42.5 High Conviction ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 
@@ -41,7 +41,7 @@ def v42_gold_dashboard_text():
         from modules.v42_gold_institutional_core import build_v42_gold_dashboard_text
         return Response(build_v42_gold_dashboard_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.4 Gold Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V42.5 Gold Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @v42_gold_bp.route("/v42/gold-fund-grade", methods=["GET"])
@@ -64,6 +64,11 @@ def v42_gold_fund_grade_json():
             "engine": payload.get("engine"),
             "trade_plan": payload.get("trade_plan"),
             "push_alert": payload.get("push_alert"),
+            "raw_confidence": payload.get("raw_confidence"),
+            "final_confidence": payload.get("final_confidence"),
+            "explainable_ai": payload.get("explainable_ai"),
+            "us_stock_extended_hours": payload.get("us_stock_extended_hours"),
+            "market_breadth": payload.get("market_breadth"),
         })
     except Exception as e:
         return jsonify({"ok": False, "version": V42_ROUTE_VERSION, "error": str(e)}), 200
@@ -107,6 +112,42 @@ def v42_gold_filter():
             "engine": payload.get("engine"),
             "trade_plan": payload.get("trade_plan"),
             "push_alert": payload.get("push_alert"),
+            "raw_confidence": payload.get("raw_confidence"),
+            "final_confidence": payload.get("final_confidence"),
+            "explainable_ai": payload.get("explainable_ai"),
+            "us_stock_extended_hours": payload.get("us_stock_extended_hours"),
+            "market_breadth": payload.get("market_breadth"),
         })
     except Exception as e:
         return jsonify({"ok": False, "version": V42_ROUTE_VERSION, "error": str(e)}), 200
+
+
+@v42_gold_bp.route("/v42/gold-explain", methods=["GET"])
+def v42_gold_explain_text():
+    try:
+        from modules.v42_gold_institutional_core import build_v42_gold_explainable_text
+        return Response(build_v42_gold_explainable_text(), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง V42.5 Explainable AI ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+@v42_gold_bp.route("/v42/us-extended-hours", methods=["GET"])
+def v42_us_extended_hours_text():
+    try:
+        from flask import request
+        from modules.v42_gold_institutional_core import build_us_extended_hours_text
+        symbols_raw = request.args.get("symbols", "")
+        symbols = [s.strip().upper() for s in symbols_raw.split(",") if s.strip()] if symbols_raw else None
+        return Response(build_us_extended_hours_text(symbols), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง US Extended Hours ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+@v42_gold_bp.route("/v42/market-breadth", methods=["GET"])
+def v42_market_breadth_text():
+    try:
+        from modules.v42_gold_institutional_core import build_market_breadth_text
+        return Response(build_market_breadth_text(), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง Market Breadth ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+

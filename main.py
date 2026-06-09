@@ -5382,7 +5382,7 @@ def v42_gold_filter_route_legacy():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 
@@ -5392,7 +5392,7 @@ def v42_gold_dashboard_route():
         from modules.v42_gold_institutional_core import build_v42_gold_dashboard_text
         return Response(build_v42_gold_dashboard_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.4 Gold Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V42.5 Gold Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @app.route("/v42/gold-fund-grade", methods=["GET"], endpoint="v42_gold_fund_grade_unique")
@@ -5417,7 +5417,7 @@ def v42_gold_fund_grade_route():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 def production_scan_once(symbols=None, save_all=True):
@@ -12630,7 +12630,7 @@ def thai_gold_latest_route():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/v42/gold", methods=["GET"])
@@ -12639,7 +12639,7 @@ def v42_gold_route():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/v42/gold-text", methods=["GET"])
@@ -12656,7 +12656,7 @@ def v42_gold_high_conviction_route():
         from modules.v42_gold_institutional_core import build_v42_gold_high_conviction_text
         return Response(build_v42_gold_high_conviction_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.4 Fund Grade ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V42.5 Fund Grade ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @app.route("/v42/gold-filter", methods=["GET"], endpoint="v42_gold_filter_unique")
@@ -12674,7 +12674,7 @@ def v42_gold_filter_route_v2():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 def production_scan_once(symbols=None, save_all=True):
@@ -12723,6 +12723,40 @@ def production_scan_once(symbols=None, save_all=True):
 # ============================================================
 # Start background workers when imported by Gunicorn/Railway.
 start_production_workers_once()
+
+
+# ============================================================
+# V42.5 Explainable AI + US Extended Hours + Market Breadth routes
+# ============================================================
+
+@app.route("/v42/gold-explain", methods=["GET"], endpoint="v42_gold_explain_unique")
+def v42_gold_explain_route():
+    try:
+        from modules.v42_gold_institutional_core import build_v42_gold_explainable_text
+        return Response(build_v42_gold_explainable_text(), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง V42.5 Explainable AI ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+@app.route("/v42/us-extended-hours", methods=["GET"], endpoint="v42_us_extended_hours_unique")
+def v42_us_extended_hours_route():
+    try:
+        symbols_raw = request.args.get("symbols", "")
+        symbols = [s.strip().upper() for s in symbols_raw.split(",") if s.strip()] if symbols_raw else None
+        from modules.v42_gold_institutional_core import build_us_extended_hours_text
+        return Response(build_us_extended_hours_text(symbols), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง US Extended Hours ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+@app.route("/v42/market-breadth", methods=["GET"], endpoint="v42_market_breadth_unique")
+def v42_market_breadth_route():
+    try:
+        from modules.v42_gold_institutional_core import build_market_breadth_text
+        return Response(build_market_breadth_text(), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง Market Breadth ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)

@@ -1543,3 +1543,314 @@ def build_v42_gold_dashboard_text(payload: Optional[Dict[str, Any]] = None) -> s
         f"Version : {V42_GOLD_VERSION}",
     ]
     return "\n".join(lines)
+
+# ============================================================
+# V42.5 GOLD + US EXTENDED HOURS EXPLAINABLE EXTENSION
+# Raw/Final Confidence + Explainable AI + US Extended Hours
+# Market Breadth SPY/QQQ/VIX
+# ============================================================
+
+V42_GOLD_VERSION = "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE"
+
+try:
+    _V424_BUILD_V42_GOLD_PAYLOAD = build_v42_gold_payload
+except Exception:
+    _V424_BUILD_V42_GOLD_PAYLOAD = None
+
+
+def _v425_clamp(value: Any, low: float = 0, high: float = 100) -> float:
+    v = safe_float(value, low)
+    if v is None:
+        v = low
+    return max(low, min(high, float(v)))
+
+
+def _v425_percent_change(last: Any, prev: Any) -> Optional[float]:
+    a = safe_float(last)
+    b = safe_float(prev)
+    if a is None or b in (None, 0):
+        return None
+    return round((a - b) / b * 100, 2)
+
+
+def _v425_score_from_change(change_pct: Optional[float], bullish_when_up: bool = True) -> float:
+    if change_pct is None:
+        return 50.0
+    s = 50 + (change_pct * 10 if bullish_when_up else -change_pct * 10)
+    return round(_v425_clamp(s, 0, 100), 2)
+
+
+def us_stock_extended_hours(symbols: Optional[List[str]] = None) -> Dict[str, Any]:
+    """
+    V42.5 US Stock Extended Hours.
+    Uses yfinance fast_info/info where available. Fails safe when extended data is unavailable.
+    Supports pre-market / after-hours tracking for US symbols.
+    """
+    default_symbols = os.getenv("V42_US_EXTENDED_SYMBOLS", "NVDA,AAPL,TSLA,QQQ,SPY,AMD,META")
+    symbols = symbols or [s.strip().upper() for s in default_symbols.split(",") if s.strip()]
+    session = "UNKNOWN"
+    now_utc = datetime.now(timezone.utc)
+    h = now_utc.hour + now_utc.minute / 60.0
+    # Approx US Eastern sessions in UTC. DST is approximate but fail-safe.
+    if 8 <= h < 13.5:
+        session = "PRE_MARKET"
+    elif 13.5 <= h < 20:
+        session = "REGULAR"
+    elif 20 <= h < 24:
+        session = "AFTER_HOURS"
+    else:
+        session = "CLOSED_OR_OVERNIGHT"
+
+    out = {"ok": True, "session": session, "time_utc": now_utc.isoformat(), "items": [], "note": "Extended prices depend on data provider availability."}
+    if yf is None:
+        out.update({"ok": False, "reason": "yfinance_not_available"})
+        return out
+
+    for sym in symbols[:20]:
+        item = {"symbol": sym, "ok": False}
+        try:
+            ticker = yf.Ticker(sym)
+            fast = getattr(ticker, "fast_info", {}) or {}
+            info = {}
+            try:
+                info = ticker.info or {}
+            except Exception:
+                info = {}
+
+            regular = safe_float(
+                info.get("regularMarketPrice"),
+                safe_float(fast.get("last_price"), safe_float(info.get("previousClose")))
+            )
+            prev_close = safe_float(info.get("previousClose"), safe_float(fast.get("previous_close")))
+            pre = safe_float(info.get("preMarketPrice"))
+            post = safe_float(info.get("postMarketPrice"))
+
+            active_price = regular
+            active_type = "regular"
+            if session == "PRE_MARKET" and pre is not None:
+                active_price, active_type = pre, "pre_market"
+            elif session == "AFTER_HOURS" and post is not None:
+                active_price, active_type = post, "after_hours"
+
+            item.update({
+                "ok": regular is not None or active_price is not None,
+                "regular_price": regular,
+                "previous_close": prev_close,
+                "pre_market_price": pre,
+                "after_hours_price": post,
+                "active_price": active_price,
+                "active_type": active_type,
+                "active_change_pct": _v425_percent_change(active_price, prev_close),
+                "source": "Yahoo Finance/yfinance",
+            })
+        except Exception as e:
+            item.update({"ok": False, "error": str(e)})
+        out["items"].append(item)
+    return out
+
+
+def market_breadth_spy_qqq_vix() -> Dict[str, Any]:
+    """
+    V42.5 Market Breadth using SPY, QQQ and VIX.
+    Risk-on if SPY/QQQ rise while VIX falls. Risk-off if SPY/QQQ fall or VIX rises.
+    """
+    symbols = {"SPY": "SPY", "QQQ": "QQQ", "VIX": "^VIX"}
+    data: Dict[str, Any] = {}
+    scores = []
+    for key, sym in symbols.items():
+        snap = _v424_latest_close(sym, "1mo", "1d")
+        chg = _v425_percent_change(snap.get("last"), snap.get("prev"))
+        snap["change_pct"] = chg
+        data[key] = snap
+        if key == "VIX":
+            scores.append(_v425_score_from_change(chg, bullish_when_up=False))
+        else:
+            scores.append(_v425_score_from_change(chg, bullish_when_up=True))
+
+    breadth_score = round(sum(scores) / len(scores), 2) if scores else 50.0
+    if breadth_score >= 65:
+        regime = "RISK_ON"
+    elif breadth_score <= 40:
+        regime = "RISK_OFF"
+    else:
+        regime = "NEUTRAL"
+
+    return {
+        "ok": True,
+        "breadth_score": breadth_score,
+        "regime": regime,
+        "SPY": data.get("SPY"),
+        "QQQ": data.get("QQQ"),
+        "VIX": data.get("VIX"),
+        "rule": "SPY/QQQ/VIX ใช้ดู risk-on/risk-off เพื่อช่วยกรองหุ้นสหรัฐและทอง",
+    }
+
+
+def explainable_ai_adjustments(raw_engine: Dict[str, Any], final_engine: Dict[str, Any], payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    V42.5 Explainable AI: separates raw vs final confidence and lists why score was reduced.
+    """
+    raw_prob = int(_v425_clamp(raw_engine.get("probability", final_engine.get("probability", 0))))
+    raw_conf = int(_v425_clamp(raw_engine.get("confidence", final_engine.get("confidence", 0))))
+    final_prob = int(_v425_clamp(final_engine.get("probability", raw_prob)))
+    final_conf = int(_v425_clamp(final_engine.get("confidence", raw_conf)))
+
+    reasons: List[Dict[str, Any]] = []
+    total_penalty = 0
+
+    macro = payload.get("dxy_bond_yield_filter") or {}
+    if macro.get("penalty"):
+        p = int(macro.get("penalty") or 0)
+        total_penalty += p
+        reasons.append({"factor": "DXY + Bond Yield", "penalty": -p, "reason": "DXY และ Bond Yield ขึ้นพร้อมกัน กดคะแนน Buy ทอง"})
+
+    liq = payload.get("liquidity_sweep_detection") or {}
+    if liq.get("detected"):
+        total_penalty += 10
+        reasons.append({"factor": "Liquidity Sweep", "penalty": -10, "reason": "พบ Stop Hunt / Fake Breakout"})
+
+    econ = payload.get("economic_calendar_filter") or payload.get("high_impact_news_filter") or {}
+    if econ.get("blocked"):
+        total_penalty += 20
+        reasons.append({"factor": "High Impact News", "penalty": -20, "reason": f"ใกล้ข่าวแรง {econ.get('event') or ''}".strip()})
+
+    session = payload.get("session_filter") or {}
+    if session.get("decision") not in {None, "PASS"} and not session.get("ok", True):
+        total_penalty += 5
+        reasons.append({"factor": "Session", "penalty": -5, "reason": "อยู่นอก London/New York session"})
+
+    spread = payload.get("spread_filter") or {}
+    if spread.get("decision") == "NO_TRADE" or spread.get("ok") is False:
+        total_penalty += 8
+        reasons.append({"factor": "Spread", "penalty": -8, "reason": "Spread สูงผิดปกติ"})
+
+    entry_filter = payload.get("entry_filter") or {}
+    failed = entry_filter.get("failed_checks") or []
+    for f in failed[:8]:
+        reasons.append({"factor": str(f), "penalty": 0, "reason": f"เงื่อนไข {f} ยังไม่ผ่าน"})
+
+    return {
+        "ok": True,
+        "raw_probability": raw_prob,
+        "raw_confidence": raw_conf,
+        "final_probability": final_prob,
+        "final_confidence": final_conf,
+        "probability_delta": final_prob - raw_prob,
+        "confidence_delta": final_conf - raw_conf,
+        "total_detected_penalty": -total_penalty,
+        "reduction_reasons": reasons,
+        "summary": "Final Confidence คือคะแนนหลังผ่านตัวกรอง Institutional; Raw Confidence คือคะแนนก่อนโดนกรอง",
+    }
+
+
+def build_v42_gold_payload() -> Dict[str, Any]:
+    """
+    V42.5 keeps V42.4 Fund Grade logic, then adds:
+    Raw/Final confidence, Explainable AI, US Extended Hours, Market Breadth.
+    """
+    if _V424_BUILD_V42_GOLD_PAYLOAD is not None:
+        p = _V424_BUILD_V42_GOLD_PAYLOAD()
+    else:
+        p = {}
+
+    raw_engine = dict(p.get("raw_engine") or p.get("engine") or {})
+    final_engine = dict(p.get("engine") or raw_engine)
+
+    us_ext = us_stock_extended_hours()
+    breadth = market_breadth_spy_qqq_vix()
+    explain = explainable_ai_adjustments(raw_engine, final_engine, p)
+
+    # Market breadth context: risk-off can mildly reduce buy-side gold only when existing macro risk is already negative.
+    # Do not over-penalize by default; use as context unless env enables.
+    apply_breadth_penalty = _v424_env_bool("V42_APPLY_MARKET_BREADTH_TO_GOLD", False)
+    if apply_breadth_penalty and breadth.get("regime") == "RISK_OFF" and str(final_engine.get("direction") or final_engine.get("signal")).upper() in {"BUY", "STRONG_BUY"}:
+        old_p = int(final_engine.get("probability") or 50)
+        old_c = int(final_engine.get("confidence") or 50)
+        final_engine["probability"] = max(25, old_p - 5)
+        final_engine["confidence"] = max(25, old_c - 5)
+        final_engine["market_breadth_adjustment"] = -5
+        p["engine"] = final_engine
+        explain = explainable_ai_adjustments(raw_engine, final_engine, p)
+
+    p.update({
+        "version": V42_GOLD_VERSION,
+        "raw_engine": raw_engine,
+        "final_engine": final_engine,
+        "raw_confidence": {
+            "probability": explain.get("raw_probability"),
+            "confidence": explain.get("raw_confidence"),
+        },
+        "final_confidence": {
+            "probability": explain.get("final_probability"),
+            "confidence": explain.get("final_confidence"),
+        },
+        "explainable_ai": explain,
+        "us_stock_extended_hours": us_ext,
+        "market_breadth": breadth,
+        "quality_rule": "V42.5: Raw/Final Confidence + Explainable AI + US Extended Hours + SPY/QQQ/VIX Market Breadth",
+    })
+    return p
+
+
+def build_v42_gold_explainable_text(payload: Optional[Dict[str, Any]] = None) -> str:
+    p = payload or build_v42_gold_payload()
+    eng = p.get("engine", {})
+    raw = p.get("raw_confidence", {})
+    final = p.get("final_confidence", {})
+    explain = p.get("explainable_ai", {})
+    breadth = p.get("market_breadth", {})
+    us_ext = p.get("us_stock_extended_hours", {})
+    reasons = explain.get("reduction_reasons") or []
+
+    lines = [
+        "🧠 V42.5 GOLD EXPLAINABLE AI",
+        "",
+        f"Signal: {eng.get('signal', 'WAIT')} | Decision: {(p.get('entry_filter') or {}).get('decision', 'NO_TRADE')}",
+        f"Raw Probability: {raw.get('probability')}% | Raw Confidence: {raw.get('confidence')}%",
+        f"Final Probability: {final.get('probability')}% | Final Confidence: {final.get('confidence')}%",
+        f"Delta: Prob {explain.get('probability_delta')} | Conf {explain.get('confidence_delta')}",
+        "",
+        "เหตุผลที่ลด/ไม่ผ่าน:",
+    ]
+    if reasons:
+        lines += [f"- {r.get('factor')}: {r.get('reason')} ({r.get('penalty')})" for r in reasons[:10]]
+    else:
+        lines.append("- ไม่มี penalty สำคัญ")
+
+    lines += [
+        "",
+        f"Market Breadth: {breadth.get('regime')} | Score {breadth.get('breadth_score')}",
+        f"US Extended Session: {us_ext.get('session')}",
+        f"Version : {V42_GOLD_VERSION}",
+    ]
+    return "\n".join(lines)
+
+
+def build_us_extended_hours_text(symbols: Optional[List[str]] = None) -> str:
+    p = us_stock_extended_hours(symbols)
+    lines = [
+        "🇺🇸 V42.5 US STOCK EXTENDED HOURS",
+        f"Session: {p.get('session')}",
+        "",
+    ]
+    for item in p.get("items", [])[:20]:
+        lines.append(
+            f"{item.get('symbol')} | {item.get('active_type')}: {fmt_num(item.get('active_price'), 2)} | "
+            f"Prev: {fmt_num(item.get('previous_close'), 2)} | Change: {fmt_num(item.get('active_change_pct'), 2)}%"
+        )
+    lines += ["", f"Version : {V42_GOLD_VERSION}"]
+    return "\n".join(lines)
+
+
+def build_market_breadth_text() -> str:
+    b = market_breadth_spy_qqq_vix()
+    lines = [
+        "📊 V42.5 MARKET BREADTH",
+        f"Regime: {b.get('regime')} | Score: {b.get('breadth_score')}",
+        "",
+    ]
+    for key in ["SPY", "QQQ", "VIX"]:
+        s = b.get(key) or {}
+        lines.append(f"{key}: {fmt_num(s.get('last'), 2)} | Change: {fmt_num(s.get('change_pct'), 2)}% | Trend: {s.get('trend')}")
+    lines += ["", f"Version : {V42_GOLD_VERSION}"]
+    return "\n".join(lines)
