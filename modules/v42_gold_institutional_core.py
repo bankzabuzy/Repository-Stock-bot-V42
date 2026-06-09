@@ -1877,7 +1877,7 @@ def build_us_extended_hours_line_message(symbols: Optional[List[str]] = None) ->
     session_th = title_map.get(session, session)
 
     lines = [
-        "🇺🇸 ราคาหุ้นสหรัฐ Extended Hours",
+        "🇺🇸 ราคาหุ้นสหรัฐ Extended Hours / Pre-After Market",
         f"Session: {session_th}",
         "",
     ]
@@ -1907,7 +1907,7 @@ def build_us_extended_hours_line_message(symbols: Optional[List[str]] = None) ->
         "",
         "คำสั่ง: premarket / afterhours / nvda / aapl / tsla",
         "หมายเหตุ: ข้อมูล Extended Hours ขึ้นกับ Yahoo Finance ว่ามี pre/post market หรือไม่",
-        "Version : V42.6_LINE_US_EXTENDED_HOURS_STABLE",
+        "Version : V42.6.3_LINE_EXTENDED_PRICE_FIRST_STABLE",
     ]
     return "\n".join(lines)
 
@@ -1917,3 +1917,94 @@ def build_single_us_symbol_line_message(symbol: str) -> str:
     if not sym:
         return build_us_extended_hours_line_message()
     return build_us_extended_hours_line_message([sym])
+
+# ============================================================
+# V42.6.2 SHORT EXTENDED HOURS TAIL
+# Compact one-line tail for full stock reports in LINE
+# ============================================================
+
+def build_us_extended_hours_short_tail(symbol: str) -> str:
+    sym = (symbol or "").strip().upper()
+    if not sym:
+        return ""
+
+    payload = us_stock_extended_hours([sym])
+    items = payload.get("items") or []
+    if not items:
+        return f"🇺🇸 Extended: {sym} ไม่มีข้อมูล Pre/After"
+
+    item = items[0]
+    prev = item.get("previous_close")
+    pre = item.get("pre_market_price")
+    post = item.get("after_hours_price")
+    regular = item.get("regular_price")
+    session = payload.get("session", "UNKNOWN")
+
+    def _fmt_part(label: str, price: Any) -> str:
+        if price is None:
+            return f"{label}: N/A"
+        chg = _v425_percent_change(price, prev)
+        sign = "+" if chg is not None and float(chg) > 0 else ""
+        return f"{label}: ${fmt_num(price, 2)} ({sign}{fmt_num(chg, 2)}%)"
+
+    pre_txt = _fmt_part("Pre-market", pre)
+    post_txt = _fmt_part("After-hours", post)
+    reg_txt = _fmt_part("Regular", regular)
+
+    return (
+        f"🇺🇸 Extended Hours [{session}] | "
+        f"{pre_txt} | {reg_txt} | {post_txt} | Prev Close: ${fmt_num(prev, 2)}"
+    )
+
+# ============================================================
+# V42.6.3 EXTENDED PRICE FIRST LINE
+# Put current Pre-market / After-hours price directly on first line
+# ============================================================
+
+def build_us_extended_hours_first_line(symbol: str) -> str:
+    sym = (symbol or "").strip().upper()
+    if not sym:
+        return ""
+
+    payload = us_stock_extended_hours([sym])
+    items = payload.get("items") or []
+    session = payload.get("session", "UNKNOWN")
+
+    if not items:
+        return f"🇺🇸 {sym}: ยังไม่มีข้อมูล Pre-market / After-hours"
+
+    item = items[0]
+    prev = safe_float(item.get("previous_close"))
+    regular = safe_float(item.get("regular_price"))
+    pre = safe_float(item.get("pre_market_price"))
+    post = safe_float(item.get("after_hours_price"))
+
+    if session == "PRE_MARKET" and pre is not None:
+        current = pre
+        label = "Pre-market"
+    elif session == "AFTER_HOURS" and post is not None:
+        current = post
+        label = "After-hours"
+    elif regular is not None:
+        current = regular
+        label = "Regular"
+    elif pre is not None:
+        current = pre
+        label = "Pre-market"
+    elif post is not None:
+        current = post
+        label = "After-hours"
+    else:
+        return f"🇺🇸 {sym}: ปิดก่อนหน้า ${fmt_num(prev, 2)} | ยังไม่มีราคา Pre-market / After-hours"
+
+    change = None if prev in (None, 0) else current - prev
+    change_pct = None if prev in (None, 0) else (change / prev * 100)
+
+    sign = "+" if change is not None and change > 0 else ""
+    sign_pct = "+" if change_pct is not None and change_pct > 0 else ""
+
+    return (
+        f"🇺🇸 {sym}: ปิดก่อนหน้า ${fmt_num(prev, 2)} | "
+        f"{label} ${fmt_num(current, 2)} | "
+        f"{sign}{fmt_num(change, 2)} ({sign_pct}{fmt_num(change_pct, 2)}%)"
+    )

@@ -2973,15 +2973,39 @@ def handle_line_command(user_text):
 
     
 
-    # V42.6 LINE US EXTENDED HOURS COMMANDS
-    us_symbols_v426 = {"NVDA", "AAPL", "TSLA", "META", "AMD", "QQQ", "SPY", "MSFT", "GOOGL", "AMZN", "TSM", "WDC", "AAOI"}
+    # V42.6.1 LINE US STOCK FULL REPORT + EXTENDED HOURS
+    us_symbols_v426 = {"NVDA", "AAPL", "TSLA", "META", "AMD", "QQQ", "SPY", "MSFT", "GOOGL", "AMZN", "TSM", "WDC", "AAOI", "ZS"}
     if low in ("premarket", "pre-market", "afterhours", "after-hours", "extended", "หุ้นสหรัฐ", "ราคาหุ้นสหรัฐ", "ก่อนตลาดเปิด", "หลังตลาดปิด"):
         from modules.v42_gold_institutional_core import build_us_extended_hours_line_message
         return build_us_extended_hours_line_message()
 
     if low.upper() in us_symbols_v426:
+        symbol = low.upper()
         from modules.v42_gold_institutional_core import build_single_us_symbol_line_message
-        return build_single_us_symbol_line_message(low.upper())
+        extended_text = build_single_us_symbol_line_message(symbol)
+
+        try:
+            if "build_asset_report" in globals():
+                full_report = build_asset_report(symbol)
+            elif "handle_message" in globals():
+                full_report = handle_message("", symbol)
+            else:
+                full_report = ""
+        except Exception as e:
+            full_report = f"ไม่สามารถดึงรายงานหุ้นตัวเต็มได้: {e}"
+
+        if full_report:
+            try:
+                from modules.v42_gold_institutional_core import build_us_extended_hours_first_line, build_us_extended_hours_short_tail
+                first_line = build_us_extended_hours_first_line(symbol)
+                short_tail = build_us_extended_hours_short_tail(symbol)
+            except Exception:
+                first_line = ""
+                short_tail = extended_text
+            if first_line:
+                return f"{first_line}\n\n{full_report}\n\n{short_tail}"
+            return f"{full_report}\n\n{short_tail}"
+        return extended_text
 
     if low.startswith("us "):
         from modules.v42_gold_institutional_core import build_us_extended_hours_line_message
