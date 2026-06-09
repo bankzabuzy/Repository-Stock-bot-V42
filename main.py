@@ -12616,8 +12616,12 @@ def v42_gold_text_route():
         return Response(f"ไม่สามารถดึงระบบ V42 GOLD ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
-@app.route("/v42/gold-filter", methods=["GET"])
-def v42_gold_filter_route():
+@app.route(
+    "/v42/gold-filter",
+    methods=["GET"],
+    endpoint="v42_gold_filter_unique"
+)
+def v42_gold_filter_route_v2():
     try:
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         payload = build_v42_gold_payload()
