@@ -5382,7 +5382,42 @@ def v42_gold_filter_route_legacy():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE", "error": str(e), "time_th": now_text()}), 200
+
+
+
+@app.route("/v42/gold-dashboard", methods=["GET"])
+def v42_gold_dashboard_route():
+    try:
+        from modules.v42_gold_institutional_core import build_v42_gold_dashboard_text
+        return Response(build_v42_gold_dashboard_text(), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง V42.4 Gold Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+@app.route("/v42/gold-fund-grade", methods=["GET"], endpoint="v42_gold_fund_grade_unique")
+def v42_gold_fund_grade_route():
+    try:
+        from modules.v42_gold_institutional_core import build_v42_gold_payload
+        payload = build_v42_gold_payload()
+        return jsonify({
+            "ok": payload.get("ok", False),
+            "version": payload.get("version"),
+            "time_th": payload.get("time_th"),
+            "entry_filter": payload.get("entry_filter"),
+            "entry_score": payload.get("entry_score"),
+            "economic_calendar_filter": payload.get("economic_calendar_filter"),
+            "dxy_bond_yield_filter": payload.get("dxy_bond_yield_filter"),
+            "order_block_detection": payload.get("order_block_detection"),
+            "liquidity_sweep_detection": payload.get("liquidity_sweep_detection"),
+            "winrate_dashboard": payload.get("winrate_dashboard"),
+            "self_learning": payload.get("self_learning"),
+            "engine": payload.get("engine"),
+            "trade_plan": payload.get("trade_plan"),
+            "push_alert": payload.get("push_alert"),
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "version": "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 def production_scan_once(symbols=None, save_all=True):
@@ -12595,7 +12630,7 @@ def thai_gold_latest_route():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/v42/gold", methods=["GET"])
@@ -12604,7 +12639,7 @@ def v42_gold_route():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/v42/gold-text", methods=["GET"])
@@ -12621,7 +12656,7 @@ def v42_gold_high_conviction_route():
         from modules.v42_gold_institutional_core import build_v42_gold_high_conviction_text
         return Response(build_v42_gold_high_conviction_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.3 High Conviction ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V42.4 Fund Grade ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @app.route("/v42/gold-filter", methods=["GET"], endpoint="v42_gold_filter_unique")
@@ -12639,7 +12674,7 @@ def v42_gold_filter_route_v2():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE", "error": str(e), "time_th": now_text()}), 200
 
 
 def production_scan_once(symbols=None, save_all=True):

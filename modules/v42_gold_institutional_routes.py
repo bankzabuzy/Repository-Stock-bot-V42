@@ -1,9 +1,9 @@
-# V42.3 GOLD INSTITUTIONAL HIGH CONVICTION ROUTES
+# V42.4 GOLD INSTITUTIONAL HIGH CONVICTION ROUTES
 # Optional blueprint. main.py also exposes direct routes, but this file keeps the module complete.
 
 from flask import Blueprint, jsonify, Response
 
-V42_ROUTE_VERSION = "V42.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE"
+V42_ROUTE_VERSION = "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE"
 v42_gold_bp = Blueprint("v42_gold", __name__)
 
 
@@ -22,7 +22,7 @@ def v42_gold_text():
         from modules.v42_gold_institutional_core import build_v42_gold_text
         return Response(build_v42_gold_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึงระบบ V42.3 GOLD ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึงระบบ V42.4 GOLD ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @v42_gold_bp.route("/v42/gold-high-conviction", methods=["GET"])
@@ -31,7 +31,42 @@ def v42_gold_high_conviction_text():
         from modules.v42_gold_institutional_core import build_v42_gold_high_conviction_text
         return Response(build_v42_gold_high_conviction_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.3 High Conviction ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V42.4 High Conviction ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+
+@v42_gold_bp.route("/v42/gold-dashboard", methods=["GET"])
+def v42_gold_dashboard_text():
+    try:
+        from modules.v42_gold_institutional_core import build_v42_gold_dashboard_text
+        return Response(build_v42_gold_dashboard_text(), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง V42.4 Gold Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+@v42_gold_bp.route("/v42/gold-fund-grade", methods=["GET"])
+def v42_gold_fund_grade_json():
+    try:
+        from modules.v42_gold_institutional_core import build_v42_gold_payload
+        payload = build_v42_gold_payload()
+        return jsonify({
+            "ok": payload.get("ok", False),
+            "version": payload.get("version"),
+            "time_th": payload.get("time_th"),
+            "entry_filter": payload.get("entry_filter"),
+            "entry_score": payload.get("entry_score"),
+            "economic_calendar_filter": payload.get("economic_calendar_filter"),
+            "dxy_bond_yield_filter": payload.get("dxy_bond_yield_filter"),
+            "order_block_detection": payload.get("order_block_detection"),
+            "liquidity_sweep_detection": payload.get("liquidity_sweep_detection"),
+            "winrate_dashboard": payload.get("winrate_dashboard"),
+            "self_learning": payload.get("self_learning"),
+            "engine": payload.get("engine"),
+            "trade_plan": payload.get("trade_plan"),
+            "push_alert": payload.get("push_alert"),
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "version": V42_ROUTE_VERSION, "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/thai-gold", methods=["GET"])

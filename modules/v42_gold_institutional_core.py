@@ -1077,3 +1077,469 @@ def build_v42_gold_text() -> str:
         f"Version : {V42_GOLD_VERSION}",
     ]
     return "\n".join(lines)
+
+
+
+# ============================================================
+# V42.4 GOLD INSTITUTIONAL FUND GRADE EXTENSION
+# Economic Calendar + DXY/Yield + Order Block + Liquidity Sweep
+# Winrate Dashboard + Self Learning
+# ============================================================
+
+V42_GOLD_VERSION = "V42.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE"
+
+try:
+    _V423_BUILD_V42_GOLD_PAYLOAD = build_v42_gold_payload
+except Exception:
+    _V423_BUILD_V42_GOLD_PAYLOAD = None
+
+
+def _v424_env_float(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, str(default)))
+    except Exception:
+        return default
+
+
+def _v424_env_bool(name: str, default: bool = False) -> bool:
+    try:
+        return str(os.getenv(name, "true" if default else "false")).lower() in {"1", "true", "yes", "y", "on"}
+    except Exception:
+        return default
+
+
+def _v424_latest_close(symbol: str, period: str = "1mo", interval: str = "1d") -> Dict[str, Any]:
+    try:
+        snap = _market_snapshot(symbol, period=period, interval=interval)
+        closes = [safe_float(x) for x in snap.get("closes", []) if safe_float(x) is not None]
+        if len(closes) >= 3:
+            last = float(closes[-1])
+            prev = float(closes[-2])
+            base = float(closes[-6]) if len(closes) >= 6 else prev
+            trend = "UP" if last > base else "DOWN" if last < base else "FLAT"
+            return {"ok": True, "symbol": symbol, "last": last, "prev": prev, "base": base, "trend": trend, "source": snap.get("source")}
+    except Exception as e:
+        return {"ok": False, "symbol": symbol, "error": str(e)}
+    return {"ok": False, "symbol": symbol, "reason": "insufficient_data"}
+
+
+def economic_calendar_filter() -> Dict[str, Any]:
+    """
+    V42.4 high impact calendar fail-safe.
+    Manual Railway env is supported:
+      HIGH_IMPACT_NEWS_ACTIVE=true
+      HIGH_IMPACT_NEWS_EVENT=CPI/FOMC/NFP/Powell
+      V42_ECON_EVENT_TIME_UTC=2026-06-09T12:30:00+00:00
+    If event time is within +/- window minutes, decision becomes WAIT_NEWS.
+    """
+    window = int(_v424_env_float("HIGH_IMPACT_NEWS_WINDOW_MIN", 30))
+    active = _v424_env_bool("HIGH_IMPACT_NEWS_ACTIVE", False)
+    event = os.getenv("HIGH_IMPACT_NEWS_EVENT", "CPI/FOMC/NFP/Powell Speech")
+    event_time_raw = os.getenv("V42_ECON_EVENT_TIME_UTC", "").strip()
+    within_window = False
+    minutes_to_event = None
+    if event_time_raw:
+        try:
+            event_time = datetime.fromisoformat(event_time_raw.replace("Z", "+00:00"))
+            if event_time.tzinfo is None:
+                event_time = event_time.replace(tzinfo=timezone.utc)
+            minutes_to_event = (event_time - datetime.now(timezone.utc)).total_seconds() / 60
+            within_window = abs(minutes_to_event) <= window
+            if within_window:
+                active = True
+        except Exception:
+            pass
+    keywords = ["CPI", "FOMC", "NFP", "POWELL", "PCE", "FED", "JOBS"]
+    return {
+        "ok": not active,
+        "blocked": bool(active),
+        "event": event if active else None,
+        "keywords": keywords,
+        "window_minutes": window,
+        "minutes_to_event": round(minutes_to_event, 2) if minutes_to_event is not None else None,
+        "decision": "WAIT_NEWS" if active else "PASS",
+        "rule": "หยุดเทรดก่อน/หลังข่าวแรง เช่น CPI, FOMC, NFP, Powell ภายในหน้าต่างเวลาที่กำหนด",
+    }
+
+
+def dxy_bond_yield_filter(engine: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    V42.4 macro filter for gold.
+    If DXY and US10Y both rise, buy-side gold score is penalized.
+    """
+    engine = engine or {}
+    dxy = _v424_latest_close(os.getenv("V42_DXY_SYMBOL", "DX-Y.NYB"), "1mo", "1d")
+    yld = _v424_latest_close(os.getenv("V42_YIELD_SYMBOL", "^TNX"), "1mo", "1d")
+
+    # Manual override for markets where yfinance symbol is unavailable on Railway.
+    dxy_trend = os.getenv("V42_DXY_TREND", dxy.get("trend", "UNKNOWN")).upper()
+    yield_trend = os.getenv("V42_US10Y_TREND", yld.get("trend", "UNKNOWN")).upper()
+    bearish_for_gold_buy = dxy_trend == "UP" and yield_trend == "UP"
+    buy_side = str(engine.get("direction") or engine.get("signal") or "").upper() in {"BUY", "STRONG_BUY", "CALL", "STRONG_CALL"}
+    penalty = int(_v424_env_float("V42_MACRO_BUY_PENALTY", 8)) if bearish_for_gold_buy and buy_side else 0
+    return {
+        "ok": not bool(penalty),
+        "dxy": dxy,
+        "us10y": yld,
+        "dxy_trend": dxy_trend,
+        "yield_trend": yield_trend,
+        "bearish_for_gold_buy": bearish_for_gold_buy,
+        "buy_side": buy_side,
+        "penalty": penalty,
+        "decision": "REDUCE_BUY_SCORE" if penalty else "PASS",
+        "rule": "ถ้า DXY ขึ้นพร้อม Bond Yield ขึ้น ให้ลดคะแนนฝั่ง Buy ทอง",
+    }
+
+
+def order_block_detection(fx: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Lightweight institutional zone detector.
+    Uses recent GC=F/XAUUSD closes to estimate demand/supply zone.
+    This is decision support, not a guaranteed order block.
+    """
+    snap = _market_snapshot("GC=F", period="3mo", interval="1d")
+    closes = [safe_float(x) for x in snap.get("closes", []) if safe_float(x) is not None]
+    if len(closes) < 20:
+        return {"ok": False, "reason": "insufficient_data", "source": snap.get("source")}
+    recent = [float(x) for x in closes[-30:]]
+    last = safe_float((fx or {}).get("xauusd"), recent[-1]) or recent[-1]
+    high = max(recent)
+    low = min(recent)
+    atr_proxy = max(1.0, (high - low) / 6.0)
+    demand = [round(low, 2), round(low + atr_proxy * 0.65, 2)]
+    supply = [round(high - atr_proxy * 0.65, 2), round(high, 2)]
+    in_demand = demand[0] <= last <= demand[1]
+    in_supply = supply[0] <= last <= supply[1]
+    if in_demand:
+        zone_bias = "DEMAND_ZONE"
+    elif in_supply:
+        zone_bias = "SUPPLY_ZONE"
+    else:
+        zone_bias = "MID_RANGE"
+    return {
+        "ok": True,
+        "last": round(last, 2),
+        "demand_zone": demand,
+        "supply_zone": supply,
+        "in_demand_zone": in_demand,
+        "in_supply_zone": in_supply,
+        "zone_bias": zone_bias,
+        "source": snap.get("source"),
+        "rule": "หา Institutional Demand Zone / Supply Zone แบบ fail-safe จากกรอบราคาล่าสุด",
+    }
+
+
+def liquidity_sweep_detection(fx: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """
+    Detect simple stop-hunt/fake-breakout behavior from recent closes.
+    Conservative: flags only when last close returns back inside recent range.
+    """
+    snap = _market_snapshot("GC=F", period="1mo", interval="1h")
+    closes = [safe_float(x) for x in snap.get("closes", []) if safe_float(x) is not None]
+    if len(closes) < 30:
+        return {"ok": True, "detected": False, "reason": "insufficient_data", "risk": "UNKNOWN", "source": snap.get("source")}
+    values = [float(x) for x in closes]
+    prev_range = values[-30:-1]
+    last = safe_float((fx or {}).get("xauusd"), values[-1]) or values[-1]
+    prev_high = max(prev_range)
+    prev_low = min(prev_range)
+    buffer = max(0.5, (prev_high - prev_low) * 0.02)
+    fake_breakout_high = values[-2] > prev_high + buffer and last < prev_high
+    fake_breakdown_low = values[-2] < prev_low - buffer and last > prev_low
+    detected = bool(fake_breakout_high or fake_breakdown_low)
+    if fake_breakout_high:
+        sweep_type = "STOP_HUNT_HIGH_FAKE_BREAKOUT"
+    elif fake_breakdown_low:
+        sweep_type = "STOP_HUNT_LOW_FAKE_BREAKDOWN"
+    else:
+        sweep_type = "NONE"
+    risk = "HIGH" if detected else "LOW"
+    return {
+        "ok": not detected,
+        "detected": detected,
+        "type": sweep_type,
+        "risk": risk,
+        "last": round(last, 2),
+        "prev_high": round(prev_high, 2),
+        "prev_low": round(prev_low, 2),
+        "source": snap.get("source"),
+        "rule": "ตรวจ Stop Hunt / Fake Breakout จากการกลับเข้า range",
+    }
+
+
+def winrate_dashboard(symbol: str = "THAI_GOLD") -> Dict[str, Any]:
+    """
+    V42.4 forward-test dashboard.
+    If realized outcome table is not present, returns sample count safely.
+    Optional table supported:
+      v42_trade_outcomes(symbol, created_at, pnl, rr)
+    """
+    import sqlite3
+    db_path = os.getenv("DB_PATH", "signals.db")
+    result = {
+        "ok": True,
+        "symbol": symbol,
+        "sample_signals": 0,
+        "closed_trades": 0,
+        "win_rate_pct": None,
+        "profit_factor": None,
+        "max_drawdown_pct": None,
+        "average_rr": None,
+        "source": db_path,
+        "note": "ยังไม่มีผลปิดออเดอร์จริงพอสำหรับ self learning" 
+    }
+    try:
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        try:
+            cur.execute("SELECT COUNT(*) FROM signals WHERE symbol IN (?, ?, ?)", (symbol, "GOLD", "XAUUSD"))
+            result["sample_signals"] = int(cur.fetchone()[0] or 0)
+        except Exception:
+            pass
+        try:
+            cur.execute("SELECT pnl, rr FROM v42_trade_outcomes WHERE symbol IN (?, ?, ?) ORDER BY created_at", (symbol, "GOLD", "XAUUSD"))
+            rows = cur.fetchall()
+            pnls = [float(r[0] or 0) for r in rows]
+            rrs = [float(r[1] or 0) for r in rows if r[1] is not None]
+            if pnls:
+                wins = [x for x in pnls if x > 0]
+                losses = [abs(x) for x in pnls if x < 0]
+                gross_win = sum(wins)
+                gross_loss = sum(losses)
+                equity = 0.0
+                peak = 0.0
+                max_dd = 0.0
+                for pnl in pnls:
+                    equity += pnl
+                    peak = max(peak, equity)
+                    max_dd = max(max_dd, peak - equity)
+                result.update({
+                    "closed_trades": len(pnls),
+                    "win_rate_pct": round(len(wins) / len(pnls) * 100, 2),
+                    "profit_factor": round(gross_win / gross_loss, 2) if gross_loss else None,
+                    "max_drawdown_pct": round(max_dd, 2),
+                    "average_rr": round(sum(rrs) / len(rrs), 2) if rrs else None,
+                    "note": "ใช้ผลปิดออเดอร์จริงจาก v42_trade_outcomes",
+                })
+        except Exception:
+            pass
+        conn.close()
+    except Exception as e:
+        result.update({"ok": False, "error": str(e)})
+    return result
+
+
+def self_learning_adjustment(engine: Dict[str, Any], dashboard: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Self learning layer based on real outcome statistics.
+    Conservative until at least V42_SELF_LEARNING_MIN_TRADES closed trades.
+    """
+    min_trades = int(_v424_env_float("V42_SELF_LEARNING_MIN_TRADES", 30))
+    closed = int(dashboard.get("closed_trades") or 0)
+    win_rate = safe_float(dashboard.get("win_rate_pct"))
+    pf = safe_float(dashboard.get("profit_factor"))
+    adjustment = 0
+    reason = "insufficient_closed_trades"
+    if closed >= min_trades and win_rate is not None:
+        if win_rate >= 58 and (pf or 0) >= 1.5:
+            adjustment = 4
+            reason = "positive_edge_confirmed"
+        elif win_rate < 48 or ((pf is not None) and pf < 1.1):
+            adjustment = -6
+            reason = "edge_weak_reduce_score"
+        else:
+            reason = "neutral_edge"
+    return {
+        "applied": adjustment != 0,
+        "adjustment": adjustment,
+        "reason": reason,
+        "min_trades": min_trades,
+        "closed_trades": closed,
+        "rule": "ระบบจำผลชนะ/แพ้จริงแล้วปรับคะแนนแบบอนุรักษ์นิยม",
+    }
+
+
+def institutional_entry_filter_v424(
+    engine: Dict[str, Any],
+    news: Dict[str, Any],
+    plan: Dict[str, Any],
+    session: Dict[str, Any],
+    econ: Dict[str, Any],
+    spread: Dict[str, Any],
+    entry_score: Dict[str, Any],
+    strong_buy: Dict[str, Any],
+    macro: Dict[str, Any],
+    order_block: Dict[str, Any],
+    liquidity: Dict[str, Any],
+) -> Dict[str, Any]:
+    base = institutional_entry_filter(engine, news, plan, session, econ, spread, entry_score, strong_buy)
+    checks = dict(base.get("checks") or {})
+    checks.update({
+        "economic_calendar_ok": bool(econ.get("ok")),
+        "dxy_yield_filter_ok": not bool(macro.get("penalty")),
+        "liquidity_sweep_ok": bool(liquidity.get("ok")),
+        "order_block_detected": bool(order_block.get("ok")),
+    })
+    failed = [k for k, v in checks.items() if not v]
+    passed = all(checks.values()) or bool(strong_buy.get("passed"))
+    if econ.get("blocked"):
+        decision = "WAIT_NEWS"
+        action = f"รอข่าวแรงผ่านก่อน: {econ.get('event')}"
+    elif macro.get("penalty"):
+        decision = "WAIT_MACRO"
+        action = "DXY และ Bond Yield หนุนแรงกดดันทองฝั่ง Buy"
+    elif not liquidity.get("ok"):
+        decision = "WAIT_LIQUIDITY_SWEEP"
+        action = "พบความเสี่ยง Stop Hunt / Fake Breakout"
+    elif strong_buy.get("passed"):
+        decision = "HIGH_CONVICTION_PUSH"
+        action = "STRONG BUY ผ่านทุกเงื่อนไข Institutional Fund Grade"
+    elif passed:
+        decision = "PUSH_ALERT"
+        action = "เข้าเงื่อนไขแจ้งเตือนทันที"
+    else:
+        decision = base.get("decision", "NO_TRADE")
+        action = base.get("action", "ยังไม่เข้าเงื่อนไข")
+    return {"passed": passed, "decision": decision, "action": action, "checks": checks, "failed_checks": failed}
+
+
+def build_v42_gold_payload() -> Dict[str, Any]:
+    # Start from the latest stable V42.3 engine to preserve all previous fallback behavior.
+    if _V423_BUILD_V42_GOLD_PAYLOAD is not None:
+        p = _V423_BUILD_V42_GOLD_PAYLOAD()
+    else:
+        p = {}
+
+    thai = p.get("thai_gold") or get_thai_gold_v42()
+    fx = p.get("xauusd") or fetch_xauusd()
+    engine = dict(p.get("engine") or xauusd_engine())
+    news = p.get("news") or news_ai()
+    plan = p.get("trade_plan") or gold_trade_plan(safe_float(thai.get("bar_sell")), int(engine.get("probability") or 50), engine.get("signal", "WAIT"))
+
+    econ = economic_calendar_filter()
+    session = session_filter()
+    spread = spread_filter(thai, fx)
+    macro = dxy_bond_yield_filter(engine)
+    order_block = order_block_detection(fx)
+    liquidity = liquidity_sweep_detection(fx)
+    dashboard = winrate_dashboard("THAI_GOLD")
+    learning = self_learning_adjustment(engine, dashboard)
+
+    # Apply macro + self-learning score adjustments conservatively.
+    penalty = int(macro.get("penalty") or 0)
+    learn_adj = int(learning.get("adjustment") or 0)
+    if penalty or learn_adj:
+        engine["probability"] = max(25, min(95, int(engine.get("probability") or 50) - penalty + learn_adj))
+        engine["confidence"] = max(25, min(95, int(engine.get("confidence") or 50) - penalty + learn_adj))
+        engine["macro_adjustment"] = -penalty
+        engine["self_learning_adjustment"] = learn_adj
+        if engine["probability"] < 80 and str(engine.get("signal")).upper() in {"BUY", "STRONG_BUY"}:
+            engine["signal"] = "WAIT"
+
+    # Order block zone adds context, not automatic buy permission.
+    if order_block.get("zone_bias") == "DEMAND_ZONE" and str(engine.get("signal")).upper() in {"BUY", "STRONG_BUY", "WAIT"}:
+        engine["order_block_context"] = "ใกล้ Demand Zone"
+    elif order_block.get("zone_bias") == "SUPPLY_ZONE":
+        engine["order_block_context"] = "ใกล้ Supply Zone"
+
+    plan = gold_trade_plan(safe_float(thai.get("bar_sell")), int(engine.get("probability") or 50), engine.get("signal", "WAIT"))
+    entry_score = calculate_entry_score(
+        int(engine.get("probability") or 0),
+        int(engine.get("confidence") or 0),
+        float(plan.get("rr") or 0),
+        float(engine.get("trend_score") or engine.get("score") or 50),
+        str(news.get("sentiment") or "NEUTRAL"),
+    )
+    strong_buy = strong_buy_engine(engine, news, plan)
+    entry_filter = institutional_entry_filter_v424(engine, news, plan, session, econ, spread, entry_score, strong_buy, macro, order_block, liquidity)
+    trailing = smart_trailing_stop(plan, safe_float(thai.get("bar_sell")), engine.get("direction", "BUY"))
+
+    p.update({
+        "ok": bool(thai.get("ok")),
+        "version": V42_GOLD_VERSION,
+        "time_th": now_th(),
+        "thai_gold": thai,
+        "xauusd": fx,
+        "engine": engine,
+        "news": news,
+        "session_filter": session,
+        "economic_calendar_filter": econ,
+        "high_impact_news_filter": econ,  # backward-compatible key
+        "spread_filter": spread,
+        "dxy_bond_yield_filter": macro,
+        "order_block_detection": order_block,
+        "liquidity_sweep_detection": liquidity,
+        "winrate_dashboard": dashboard,
+        "self_learning": learning,
+        "trade_plan": plan,
+        "entry_score": entry_score,
+        "strong_buy": strong_buy,
+        "smart_trailing_stop": trailing,
+        "entry_filter": entry_filter,
+        "push_alert": bool(entry_filter.get("passed")),
+        "quality_rule": "V42.4: Economic Calendar + DXY/Yield + Order Block + Liquidity Sweep + Winrate Dashboard + Self Learning",
+    })
+    return p
+
+
+def build_v42_gold_high_conviction_text(payload: Optional[Dict[str, Any]] = None) -> str:
+    p = payload or build_v42_gold_payload()
+    tg = p.get("thai_gold", {})
+    eng = p.get("engine", {})
+    plan = p.get("trade_plan", {})
+    entries = plan.get("entries", [])
+    tps = plan.get("take_profits", [])
+    score = p.get("entry_score", {})
+    macro = p.get("dxy_bond_yield_filter", {})
+    ob = p.get("order_block_detection", {})
+    liq = p.get("liquidity_sweep_detection", {})
+    dash = p.get("winrate_dashboard", {})
+    lines = [
+        "🔥 V42.4 INSTITUTIONAL FUND GRADE",
+        "",
+        f"{eng.get('signal', 'WAIT')} GOLD",
+        "",
+        f"Probability : {eng.get('probability')}%",
+        f"Confidence : {eng.get('confidence')}%",
+        f"Risk : {eng.get('risk_grade')}",
+        f"RR : 1:{fmt_num(plan.get('rr'), 2)}",
+        f"Entry Score : {fmt_num(score.get('entry_score'), 2)} ({score.get('entry_grade')})",
+        "",
+        f"DXY/Yield: {macro.get('decision')} | DXY {macro.get('dxy_trend')} / Yield {macro.get('yield_trend')}",
+        f"Order Block: {ob.get('zone_bias')} | Demand {ob.get('demand_zone')} | Supply {ob.get('supply_zone')}",
+        f"Liquidity Sweep: {liq.get('type')} | Risk {liq.get('risk')}",
+        f"Winrate: {dash.get('win_rate_pct')}% | PF {dash.get('profit_factor')} | DD {dash.get('max_drawdown_pct')} | Avg RR {dash.get('average_rr')}",
+        "",
+        "เข้าไม้:",
+        " / ".join(fmt_num(x, 0) for x in entries) if entries else "N/A",
+        "",
+        "TP:",
+        " / ".join(fmt_num(x, 0) for x in tps) if tps else "N/A",
+        "",
+        f"SL: {fmt_num(plan.get('stop_loss'), 0)}",
+        "",
+        "ผ่านทุกเงื่อนไข Institutional Fund Grade" if p.get("push_alert") else "ยังไม่ผ่านทุกเงื่อนไข Institutional Fund Grade",
+        f"ราคาอ้างอิงทองแท่งขายออก: {fmt_num(tg.get('bar_sell'), 0)} บาท",
+        f"Version : {V42_GOLD_VERSION}",
+    ]
+    return "\n".join(lines)
+
+
+def build_v42_gold_dashboard_text(payload: Optional[Dict[str, Any]] = None) -> str:
+    p = payload or build_v42_gold_payload()
+    dash = p.get("winrate_dashboard", {})
+    learning = p.get("self_learning", {})
+    lines = [
+        "📊 V42.4 GOLD WINRATE DASHBOARD",
+        "",
+        f"Sample Signals: {dash.get('sample_signals')}",
+        f"Closed Trades: {dash.get('closed_trades')}",
+        f"Win Rate: {dash.get('win_rate_pct')}",
+        f"Profit Factor: {dash.get('profit_factor')}",
+        f"Max DD: {dash.get('max_drawdown_pct')}",
+        f"Average RR: {dash.get('average_rr')}",
+        "",
+        f"Self Learning: {learning.get('reason')} | Adjustment {learning.get('adjustment')}",
+        f"Version : {V42_GOLD_VERSION}",
+    ]
+    return "\n".join(lines)
