@@ -1,7 +1,7 @@
 {
-  "current_version": "V1300.1_WORLD_CLASS_FINAL",
+  "current_version": "V1300.1_WORLD_CLASS_FINAL_HARD_BLOCK_NO_FAKE_ANALYSIS",
   "base": "V1300_PHASE13_TRUE_LATEST_FULL_MAIN_PRESERVED",
-  "generated_at": "2026-06-11T06:16:28.092337+00:00",
+  "generated_at": "2026-06-11T06:49:21.179521+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -39,5 +39,7 @@
   "true_final_no_old_version": true,
   "safe_fallback_text_removed": true,
   "old_version_labels_removed": true,
-  "line_output_guard": true
+  "line_output_guard": true,
+  "hard_block_no_fake_analysis": true,
+  "behavior": "DATA_UNAVAILABLE stops AI Score/RSI/Entry/Options output"
 }

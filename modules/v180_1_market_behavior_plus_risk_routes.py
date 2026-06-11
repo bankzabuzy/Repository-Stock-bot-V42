@@ -23,7 +23,7 @@ def v180_1_forecast_json():
         save_audit(True, rc.get("collision_count", 0))
         return jsonify(forecast_decision())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V180.1_MARKET_BEHAVIOR_FORECAST_PLUS_RISK_STRESS_BASE_STABLE", "error": str(e)}), 200
+        return jsonify({"ok": False, "version": "V180_1_MARKET_BEHAVIOR_FORECAST_PLUS_RISK_STRESS_BASE_STABLE", "error": str(e)}), 200
 
 @v180_1_bp.route("/v180-1/audit", methods=["GET"])
 def v180_1_audit():

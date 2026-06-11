@@ -12,7 +12,7 @@ try:
 except Exception:  # pragma: no cover
     yf = None
 
-V35_VERSION = "V35.3_FREE_ALPHA_STACK"
+V35_VERSION = "V35_3_FREE_ALPHA_STACK"
 
 
 def _safe_float(x: Any, default: Optional[float] = None) -> Optional[float]:

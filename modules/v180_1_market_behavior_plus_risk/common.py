@@ -4,7 +4,7 @@ import os, sqlite3, json
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, Optional
 
-V180_1_VERSION = "V180.1_MARKET_BEHAVIOR_FORECAST_PLUS_RISK_STRESS_BASE_STABLE"
+V180_1_VERSION = "V180_1_MARKET_BEHAVIOR_FORECAST_PLUS_RISK_STRESS_BASE_STABLE"
 
 def now_th() -> str:
     return datetime.now(timezone(timedelta(hours=7))).strftime("%d/%m/%Y %H:%M")

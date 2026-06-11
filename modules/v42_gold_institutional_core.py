@@ -22,7 +22,7 @@ try:
 except Exception:  # pragma: no cover
     BeautifulSoup = None
 
-V1300.1_GOLD_VERSION = "V1300.1.2_GOLD_INSTITUTIONAL_ENTRY_FILTER_STABLE"
+V1300_1_GOLD_VERSION = "V1300.1.2_GOLD_INSTITUTIONAL_ENTRY_FILTER_STABLE"
 REQUEST_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -484,7 +484,7 @@ def build_v42_gold_payload() -> Dict[str, Any]:
     plan = gold_trade_plan(safe_float(thai.get("bar_sell")), int(engine.get("probability") or 50), engine.get("signal", "WAIT"))
     return {
         "ok": bool(thai.get("ok")),
-        "version": V1300.1_GOLD_VERSION,
+        "version": V1300_1_GOLD_VERSION,
         "time_th": now_th(),
         "thai_gold": thai,
         "xauusd": fx,
@@ -547,7 +547,7 @@ def build_v42_gold_text() -> str:
         "พร้อมแจ้งเตือนทันที" if p.get("push_alert") else "ยังไม่แจ้งเตือน เพราะสัญญาณยังไม่เข้มข้นพอ",
         p.get("quality_rule", ""),
         "",
-        f"Version : {V1300.1_GOLD_VERSION}",
+        f"Version : {V1300_1_GOLD_VERSION}",
     ]
     return "\n".join(lines)
 
@@ -558,7 +558,7 @@ def build_v42_gold_text() -> str:
 # High-conviction alert layer: Entry Score + Session + News + Spread
 # + Smart Trailing Stop + STRONG BUY. Existing Thai Gold fallback remains intact.
 # ============================================================
-V1300.1_GOLD_VERSION = "V1300.1.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE"
+V1300_1_GOLD_VERSION = "V1300.1.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE"
 
 
 def _env_bool(name: str, default: bool = False) -> bool:
@@ -575,13 +575,13 @@ def _env_float(name: str, default: float) -> float:
 def session_filter(now_utc: Optional[datetime] = None) -> Dict[str, Any]:
     """Allow higher-conviction alerts mainly during London/New York sessions.
     London: 07:00-16:59 UTC, New York: 12:00-21:59 UTC.
-    Can be bypassed with V1300.1_ALLOW_ALL_SESSIONS=true.
+    Can be bypassed with V1300_1_ALLOW_ALL_SESSIONS=true.
     """
     now_utc = now_utc or datetime.now(timezone.utc)
     hour = int(now_utc.hour)
     london = 7 <= hour <= 16
     new_york = 12 <= hour <= 21
-    allowed_all = _env_bool("V1300.1_ALLOW_ALL_SESSIONS", False)
+    allowed_all = _env_bool("V1300_1_ALLOW_ALL_SESSIONS", False)
     allowed = bool(allowed_all or london or new_york)
     if london and new_york:
         name = "LONDON_NEWYORK_OVERLAP"
@@ -947,7 +947,7 @@ def build_v42_gold_payload() -> Dict[str, Any]:
     trailing = smart_trailing_stop(plan, safe_float(thai.get("bar_sell")), engine.get("direction", "BUY"))
     return {
         "ok": bool(thai.get("ok")),
-        "version": V1300.1_GOLD_VERSION,
+        "version": V1300_1_GOLD_VERSION,
         "time_th": now_th(),
         "thai_gold": thai,
         "xauusd": fx,
@@ -995,7 +995,7 @@ def build_v42_gold_high_conviction_text(payload: Optional[Dict[str, Any]] = None
         "",
         "ผ่านทุกเงื่อนไข Institutional" if p.get("push_alert") else "ยังไม่ผ่านทุกเงื่อนไข Institutional",
         f"ราคาอ้างอิงทองแท่งขายออก: {fmt_num(tg.get('bar_sell'), 0)} บาท",
-        f"Version : {V1300.1_GOLD_VERSION}",
+        f"Version : {V1300_1_GOLD_VERSION}",
     ]
     return "\n".join(lines)
 
@@ -1074,7 +1074,7 @@ def build_v42_gold_text() -> str:
         "พร้อมแจ้งเตือนทันที" if p.get("push_alert") else "ยังไม่แจ้งเตือน เพราะเงื่อนไข Institutional ยังไม่ครบ",
         p.get("quality_rule", ""),
         "",
-        f"Version : {V1300.1_GOLD_VERSION}",
+        f"Version : {V1300_1_GOLD_VERSION}",
     ]
     return "\n".join(lines)
 
@@ -1086,12 +1086,12 @@ def build_v42_gold_text() -> str:
 # Winrate Dashboard + Self Learning
 # ============================================================
 
-V1300.1_GOLD_VERSION = "V1300.1.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE"
+V1300_1_GOLD_VERSION = "V1300.1.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE"
 
 try:
-    _V1300.13_BUILD_V1300.1_GOLD_PAYLOAD = build_v42_gold_payload
+    _V1300_13_BUILD_V1300_1_GOLD_PAYLOAD = build_v42_gold_payload
 except Exception:
-    _V1300.13_BUILD_V1300.1_GOLD_PAYLOAD = None
+    _V1300_13_BUILD_V1300_1_GOLD_PAYLOAD = None
 
 
 def _v424_env_float(name: str, default: float) -> float:
@@ -1129,13 +1129,13 @@ def economic_calendar_filter() -> Dict[str, Any]:
     Manual Railway env is supported:
       HIGH_IMPACT_NEWS_ACTIVE=true
       HIGH_IMPACT_NEWS_EVENT=CPI/FOMC/NFP/Powell
-      V1300.1_ECON_EVENT_TIME_UTC=2026-06-09T12:30:00+00:00
+      V1300_1_ECON_EVENT_TIME_UTC=2026-06-09T12:30:00+00:00
     If event time is within +/- window minutes, decision becomes WAIT_NEWS.
     """
     window = int(_v424_env_float("HIGH_IMPACT_NEWS_WINDOW_MIN", 30))
     active = _v424_env_bool("HIGH_IMPACT_NEWS_ACTIVE", False)
     event = os.getenv("HIGH_IMPACT_NEWS_EVENT", "CPI/FOMC/NFP/Powell Speech")
-    event_time_raw = os.getenv("V1300.1_ECON_EVENT_TIME_UTC", "").strip()
+    event_time_raw = os.getenv("V1300_1_ECON_EVENT_TIME_UTC", "").strip()
     within_window = False
     minutes_to_event = None
     if event_time_raw:
@@ -1168,15 +1168,15 @@ def dxy_bond_yield_filter(engine: Optional[Dict[str, Any]] = None) -> Dict[str, 
     If DXY and US10Y both rise, buy-side gold score is penalized.
     """
     engine = engine or {}
-    dxy = _v424_latest_close(os.getenv("V1300.1_DXY_SYMBOL", "DX-Y.NYB"), "1mo", "1d")
-    yld = _v424_latest_close(os.getenv("V1300.1_YIELD_SYMBOL", "^TNX"), "1mo", "1d")
+    dxy = _v424_latest_close(os.getenv("V1300_1_DXY_SYMBOL", "DX-Y.NYB"), "1mo", "1d")
+    yld = _v424_latest_close(os.getenv("V1300_1_YIELD_SYMBOL", "^TNX"), "1mo", "1d")
 
     # Manual override for markets where yfinance symbol is unavailable on Railway.
-    dxy_trend = os.getenv("V1300.1_DXY_TREND", dxy.get("trend", "UNKNOWN")).upper()
-    yield_trend = os.getenv("V1300.1_US10Y_TREND", yld.get("trend", "UNKNOWN")).upper()
+    dxy_trend = os.getenv("V1300_1_DXY_TREND", dxy.get("trend", "UNKNOWN")).upper()
+    yield_trend = os.getenv("V1300_1_US10Y_TREND", yld.get("trend", "UNKNOWN")).upper()
     bearish_for_gold_buy = dxy_trend == "UP" and yield_trend == "UP"
     buy_side = str(engine.get("direction") or engine.get("signal") or "").upper() in {"BUY", "STRONG_BUY", "CALL", "STRONG_CALL"}
-    penalty = int(_v424_env_float("V1300.1_MACRO_BUY_PENALTY", 8)) if bearish_for_gold_buy and buy_side else 0
+    penalty = int(_v424_env_float("V1300_1_MACRO_BUY_PENALTY", 8)) if bearish_for_gold_buy and buy_side else 0
     return {
         "ok": not bool(penalty),
         "dxy": dxy,
@@ -1332,9 +1332,9 @@ def winrate_dashboard(symbol: str = "THAI_GOLD") -> Dict[str, Any]:
 def self_learning_adjustment(engine: Dict[str, Any], dashboard: Dict[str, Any]) -> Dict[str, Any]:
     """
     Self learning layer based on real outcome statistics.
-    Conservative until at least V1300.1_SELF_LEARNING_MIN_TRADES closed trades.
+    Conservative until at least V1300_1_SELF_LEARNING_MIN_TRADES closed trades.
     """
-    min_trades = int(_v424_env_float("V1300.1_SELF_LEARNING_MIN_TRADES", 30))
+    min_trades = int(_v424_env_float("V1300_1_SELF_LEARNING_MIN_TRADES", 30))
     closed = int(dashboard.get("closed_trades") or 0)
     win_rate = safe_float(dashboard.get("win_rate_pct"))
     pf = safe_float(dashboard.get("profit_factor"))
@@ -1405,8 +1405,8 @@ def institutional_entry_filter_v424(
 
 def build_v42_gold_payload() -> Dict[str, Any]:
     # Start from the latest stable V1300.1.3 engine to preserve all previous fallback behavior.
-    if _V1300.13_BUILD_V1300.1_GOLD_PAYLOAD is not None:
-        p = _V1300.13_BUILD_V1300.1_GOLD_PAYLOAD()
+    if _V1300_13_BUILD_V1300_1_GOLD_PAYLOAD is not None:
+        p = _V1300_13_BUILD_V1300_1_GOLD_PAYLOAD()
     else:
         p = {}
 
@@ -1456,7 +1456,7 @@ def build_v42_gold_payload() -> Dict[str, Any]:
 
     p.update({
         "ok": bool(thai.get("ok")),
-        "version": V1300.1_GOLD_VERSION,
+        "version": V1300_1_GOLD_VERSION,
         "time_th": now_th(),
         "thai_gold": thai,
         "xauusd": fx,
@@ -1520,7 +1520,7 @@ def build_v42_gold_high_conviction_text(payload: Optional[Dict[str, Any]] = None
         "",
         "ผ่านทุกเงื่อนไข Institutional Fund Grade" if p.get("push_alert") else "ยังไม่ผ่านทุกเงื่อนไข Institutional Fund Grade",
         f"ราคาอ้างอิงทองแท่งขายออก: {fmt_num(tg.get('bar_sell'), 0)} บาท",
-        f"Version : {V1300.1_GOLD_VERSION}",
+        f"Version : {V1300_1_GOLD_VERSION}",
     ]
     return "\n".join(lines)
 
@@ -1540,7 +1540,7 @@ def build_v42_gold_dashboard_text(payload: Optional[Dict[str, Any]] = None) -> s
         f"Average RR: {dash.get('average_rr')}",
         "",
         f"Self Learning: {learning.get('reason')} | Adjustment {learning.get('adjustment')}",
-        f"Version : {V1300.1_GOLD_VERSION}",
+        f"Version : {V1300_1_GOLD_VERSION}",
     ]
     return "\n".join(lines)
 
@@ -1550,12 +1550,12 @@ def build_v42_gold_dashboard_text(payload: Optional[Dict[str, Any]] = None) -> s
 # Market Breadth SPY/QQQ/VIX
 # ============================================================
 
-V1300.1_GOLD_VERSION = "V1300.1_WORLD_CLASS_FINAL"
+V1300_1_GOLD_VERSION = "V1300_1_WORLD_CLASS_FINAL"
 
 try:
-    _V1300.14_BUILD_V1300.1_GOLD_PAYLOAD = build_v42_gold_payload
+    _V1300_14_BUILD_V1300_1_GOLD_PAYLOAD = build_v42_gold_payload
 except Exception:
-    _V1300.14_BUILD_V1300.1_GOLD_PAYLOAD = None
+    _V1300_14_BUILD_V1300_1_GOLD_PAYLOAD = None
 
 
 def _v425_clamp(value: Any, low: float = 0, high: float = 100) -> float:
@@ -1586,7 +1586,7 @@ def us_stock_extended_hours(symbols: Optional[List[str]] = None) -> Dict[str, An
     Uses yfinance fast_info/info where available. Fails safe when extended data is unavailable.
     Supports pre-market / after-hours tracking for US symbols.
     """
-    default_symbols = os.getenv("V1300.1_US_EXTENDED_SYMBOLS", "NVDA,AAPL,TSLA,QQQ,SPY,AMD,META")
+    default_symbols = os.getenv("V1300_1_US_EXTENDED_SYMBOLS", "NVDA,AAPL,TSLA,QQQ,SPY,AMD,META")
     symbols = symbols or [s.strip().upper() for s in default_symbols.split(",") if s.strip()]
     session = "UNKNOWN"
     now_utc = datetime.now(timezone.utc)
@@ -1748,8 +1748,8 @@ def build_v42_gold_payload() -> Dict[str, Any]:
     V1300.1.5 keeps V1300.1.4 Fund Grade logic, then adds:
     Raw/Final confidence, Explainable AI, US Extended Hours, Market Breadth.
     """
-    if _V1300.14_BUILD_V1300.1_GOLD_PAYLOAD is not None:
-        p = _V1300.14_BUILD_V1300.1_GOLD_PAYLOAD()
+    if _V1300_14_BUILD_V1300_1_GOLD_PAYLOAD is not None:
+        p = _V1300_14_BUILD_V1300_1_GOLD_PAYLOAD()
     else:
         p = {}
 
@@ -1762,7 +1762,7 @@ def build_v42_gold_payload() -> Dict[str, Any]:
 
     # Market breadth context: risk-off can mildly reduce buy-side gold only when existing macro risk is already negative.
     # Do not over-penalize by default; use as context unless env enables.
-    apply_breadth_penalty = _v424_env_bool("V1300.1_APPLY_MARKET_BREADTH_TO_GOLD", False)
+    apply_breadth_penalty = _v424_env_bool("V1300_1_APPLY_MARKET_BREADTH_TO_GOLD", False)
     if apply_breadth_penalty and breadth.get("regime") == "RISK_OFF" and str(final_engine.get("direction") or final_engine.get("signal")).upper() in {"BUY", "STRONG_BUY"}:
         old_p = int(final_engine.get("probability") or 50)
         old_c = int(final_engine.get("confidence") or 50)
@@ -1773,7 +1773,7 @@ def build_v42_gold_payload() -> Dict[str, Any]:
         explain = explainable_ai_adjustments(raw_engine, final_engine, p)
 
     p.update({
-        "version": V1300.1_GOLD_VERSION,
+        "version": V1300_1_GOLD_VERSION,
         "raw_engine": raw_engine,
         "final_engine": final_engine,
         "raw_confidence": {
@@ -1821,7 +1821,7 @@ def build_v42_gold_explainable_text(payload: Optional[Dict[str, Any]] = None) ->
         "",
         f"Market Breadth: {breadth.get('regime')} | Score {breadth.get('breadth_score')}",
         f"US Extended Session: {us_ext.get('session')}",
-        f"Version : {V1300.1_GOLD_VERSION}",
+        f"Version : {V1300_1_GOLD_VERSION}",
     ]
     return "\n".join(lines)
 
@@ -1838,7 +1838,7 @@ def build_us_extended_hours_text(symbols: Optional[List[str]] = None) -> str:
             f"{item.get('symbol')} | {item.get('active_type')}: {fmt_num(item.get('active_price'), 2)} | "
             f"Prev: {fmt_num(item.get('previous_close'), 2)} | Change: {fmt_num(item.get('active_change_pct'), 2)}%"
         )
-    lines += ["", f"Version : {V1300.1_GOLD_VERSION}"]
+    lines += ["", f"Version : {V1300_1_GOLD_VERSION}"]
     return "\n".join(lines)
 
 
@@ -1852,7 +1852,7 @@ def build_market_breadth_text() -> str:
     for key in ["SPY", "QQQ", "VIX"]:
         s = b.get(key) or {}
         lines.append(f"{key}: {fmt_num(s.get('last'), 2)} | Change: {fmt_num(s.get('change_pct'), 2)}% | Trend: {s.get('trend')}")
-    lines += ["", f"Version : {V1300.1_GOLD_VERSION}"]
+    lines += ["", f"Version : {V1300_1_GOLD_VERSION}"]
     return "\n".join(lines)
 
 # ============================================================
@@ -1860,11 +1860,11 @@ def build_market_breadth_text() -> str:
 # Premarket / After-hours current price + % change in LINE
 # ============================================================
 
-V1300.16_US_DEFAULT_SYMBOLS = ["NVDA", "AAPL", "TSLA", "META", "AMD", "QQQ", "SPY"]
+V1300_16_US_DEFAULT_SYMBOLS = ["NVDA", "AAPL", "TSLA", "META", "AMD", "QQQ", "SPY"]
 
 
 def build_us_extended_hours_line_message(symbols: Optional[List[str]] = None) -> str:
-    symbols = symbols or V1300.16_US_DEFAULT_SYMBOLS
+    symbols = symbols or V1300_16_US_DEFAULT_SYMBOLS
     payload = us_stock_extended_hours(symbols)
     session = payload.get("session", "UNKNOWN")
 
@@ -2015,7 +2015,7 @@ def build_us_extended_hours_first_line(symbol: str) -> str:
 # Position Sizing + Cooldown + Signal Grade + Options Safety
 # ============================================================
 
-V1300.17_VERSION = "V1300.1.7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_STABLE"
+V1300_17_VERSION = "V1300.1.7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_STABLE"
 
 
 def _v427_db_path() -> str:
@@ -2098,8 +2098,8 @@ def v427_signal_grade(probability: Any, confidence: Any, rr: Any, risk_grade: st
 
 
 def v427_position_sizing(account_size: Any = None, risk_pct: Any = None, entry: Any = None, stop_loss: Any = None) -> Dict[str, Any]:
-    account = safe_float(account_size, safe_float(os.getenv("V1300.17_ACCOUNT_SIZE", "100000"), 100000)) or 100000
-    risk = safe_float(risk_pct, safe_float(os.getenv("V1300.17_RISK_PCT", "1.0"), 1.0)) or 1.0
+    account = safe_float(account_size, safe_float(os.getenv("V1300_17_ACCOUNT_SIZE", "100000"), 100000)) or 100000
+    risk = safe_float(risk_pct, safe_float(os.getenv("V1300_17_RISK_PCT", "1.0"), 1.0)) or 1.0
     e = safe_float(entry)
     sl = safe_float(stop_loss)
     risk_amount = account * risk / 100.0
@@ -2122,7 +2122,7 @@ def v427_alert_cooldown(symbol: str, signal: str, grade: str, decision: str, coo
     import sqlite3
     v427_init_db()
     db = _v427_db_path()
-    cooldown = int(safe_float(cooldown_min, safe_float(os.getenv("V1300.17_ALERT_COOLDOWN_MIN", "60"), 60)) or 60)
+    cooldown = int(safe_float(cooldown_min, safe_float(os.getenv("V1300_17_ALERT_COOLDOWN_MIN", "60"), 60)) or 60)
     sym = (symbol or "UNKNOWN").upper()
     now = datetime.now(timezone.utc)
     try:
@@ -2156,10 +2156,10 @@ def v427_options_safety_filter(symbol: str, iv_rank: Any = None, spread_pct: Any
     oi = safe_float(open_interest, 0) or 0
 
     checks = {
-        "iv_not_extreme": iv <= float(os.getenv("V1300.17_MAX_IV_RANK", "80")),
-        "spread_ok": sp <= float(os.getenv("V1300.17_MAX_OPTION_SPREAD_PCT", "12")),
-        "dte_ok": days >= float(os.getenv("V1300.17_MIN_DTE", "14")),
-        "liquidity_ok": (vol >= float(os.getenv("V1300.17_MIN_OPTION_VOLUME", "50")) or oi >= float(os.getenv("V1300.17_MIN_OPTION_OI", "200"))),
+        "iv_not_extreme": iv <= float(os.getenv("V1300_17_MAX_IV_RANK", "80")),
+        "spread_ok": sp <= float(os.getenv("V1300_17_MAX_OPTION_SPREAD_PCT", "12")),
+        "dte_ok": days >= float(os.getenv("V1300_17_MIN_DTE", "14")),
+        "liquidity_ok": (vol >= float(os.getenv("V1300_17_MIN_OPTION_VOLUME", "50")) or oi >= float(os.getenv("V1300_17_MIN_OPTION_OI", "200"))),
     }
     passed = all(checks.values())
     failed = [k for k, v in checks.items() if not v]
@@ -2208,7 +2208,7 @@ def v427_record_signal(payload: Dict[str, Any], symbol: str = "THAI_GOLD", asset
             str(grade.get("grade")),
             safe_float(plan.get("rr")),
             "OPEN",
-            V1300.17_VERSION,
+            V1300_17_VERSION,
         ))
         rowid = cur.lastrowid
         conn.commit()
@@ -2333,7 +2333,7 @@ def build_v427_risk_performance_payload() -> Dict[str, Any]:
     options = v427_options_safety_filter("GC")
 
     p.update({
-        "version": V1300.17_VERSION,
+        "version": V1300_17_VERSION,
         "v427_signal_grade": grade,
         "v427_position_sizing": pos,
         "v427_performance_dashboard": perf,
@@ -2368,7 +2368,7 @@ def build_v427_dashboard_text() -> str:
         f"Expectancy (R): {perf.get('expectancy_r')}",
         f"Average RR: {perf.get('average_rr')}",
         "",
-        f"Version : {V1300.17_VERSION}",
+        f"Version : {V1300_17_VERSION}",
     ]
     return "\n".join(lines)
 
@@ -2377,7 +2377,7 @@ def build_v427_dashboard_text() -> str:
 # One-page status for Gold, Risk, US Extended, Breadth, DB, LINE
 # ============================================================
 
-V1300.18_VERSION = "V1300.1_WORLD_CLASS_FINAL"
+V1300_18_VERSION = "V1300_1_WORLD_CLASS_FINAL"
 
 
 def _v428_bool_status(value: Any) -> str:
@@ -2452,7 +2452,7 @@ def v428_health_check() -> Dict[str, Any]:
         "checks": checks,
         "errors": errors,
         "time_th": now_text() if "now_text" in globals() else datetime.now(timezone.utc).isoformat(),
-        "version": V1300.18_VERSION,
+        "version": V1300_18_VERSION,
     }
 
 
@@ -2519,7 +2519,7 @@ def build_v428_control_center_payload() -> Dict[str, Any]:
 
     return {
         "ok": True,
-        "version": V1300.18_VERSION,
+        "version": V1300_18_VERSION,
         "time_th": now_text() if "now_text" in globals() else datetime.now(timezone.utc).isoformat(),
         "health": health,
         "config_status": config,
@@ -2617,6 +2617,6 @@ def build_v428_control_center_text() -> str:
         "/v42/gold-filter | /v42/gold-fund-grade | /v42/risk-dashboard",
         "/v42/us-extended-hours-line | /v42/market-breadth",
         "",
-        f"Version : {V1300.18_VERSION}",
+        f"Version : {V1300_18_VERSION}",
     ]
     return "\n".join(lines)

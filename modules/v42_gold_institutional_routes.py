@@ -3,7 +3,7 @@
 
 from flask import Blueprint, jsonify, Response
 
-V1300.1_ROUTE_VERSION = "V1300.1_WORLD_CLASS_FINAL"
+V1300_1_ROUTE_VERSION = "V1300_1_WORLD_CLASS_FINAL"
 v42_gold_bp = Blueprint("v42_gold", __name__)
 
 
@@ -13,7 +13,7 @@ def v42_gold_json():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": V1300.1_ROUTE_VERSION, "error": str(e)}), 200
+        return jsonify({"ok": False, "version": V1300_1_ROUTE_VERSION, "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/v42/gold-text", methods=["GET"])
@@ -71,7 +71,7 @@ def v42_gold_fund_grade_json():
             "market_breadth": payload.get("market_breadth"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": V1300.1_ROUTE_VERSION, "error": str(e)}), 200
+        return jsonify({"ok": False, "version": V1300_1_ROUTE_VERSION, "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/thai-gold", methods=["GET"])
@@ -90,7 +90,7 @@ def thai_gold_json():
             "entry_filter": payload.get("entry_filter"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": V1300.1_ROUTE_VERSION, "error": str(e)}), 200
+        return jsonify({"ok": False, "version": V1300_1_ROUTE_VERSION, "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/v42/gold-filter", methods=["GET"])
@@ -119,7 +119,7 @@ def v42_gold_filter():
             "market_breadth": payload.get("market_breadth"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": V1300.1_ROUTE_VERSION, "error": str(e)}), 200
+        return jsonify({"ok": False, "version": V1300_1_ROUTE_VERSION, "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/v42/gold-explain", methods=["GET"])
@@ -211,5 +211,5 @@ def v428_control_center_json():
         from modules.v42_gold_institutional_core import build_v428_control_center_payload
         return jsonify(build_v428_control_center_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V1300.1_WORLD_CLASS_FINAL", "error": str(e)}), 200
+        return jsonify({"ok": False, "version": "V1300_1_WORLD_CLASS_FINAL", "error": str(e)}), 200
 
