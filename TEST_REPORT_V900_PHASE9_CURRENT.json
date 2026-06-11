@@ -1,0 +1,7 @@
+{
+  "compile_errors": [],
+  "smoke_returncode": 0,
+  "smoke_stdout": "{'accepted': True, 'report': {'order_id': 'PAPER-7f7daf26a86a', 'symbol': 'AAPL', 'side': 'buy', 'requested_qty': 1, 'filled_qty': 1, 'avg_price': 190.0, 'status': 'FILLED', 'broker': 'paper', 'message': 'paper fill simulated', 'ts': '2026-06-10T12:18:12.385628'}, 'intent_hash': '1566ed781935ae0c080bda5f487eee7f854ede39451d68cc41418f5fcda75b96'}\n",
+  "smoke_stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 785, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 720, in _warm_feature_flows\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 704, in _warm_collaboration_flows\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py\", line 48821, in hydrate_crdt_from_proto\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py\", line 747, in __call__\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n",
+  "passed": true
+}

@@ -2008,3 +2008,615 @@ def build_us_extended_hours_first_line(symbol: str) -> str:
         f"{label} ${fmt_num(current, 2)} | "
         f"{sign}{fmt_num(change, 2)} ({sign_pct}{fmt_num(change_pct, 2)}%)"
     )
+
+# ============================================================
+# V42.7 INSTITUTIONAL RISK & PERFORMANCE TRACKER
+# Trade Journal + Auto Result Tracker + Performance Dashboard
+# Position Sizing + Cooldown + Signal Grade + Options Safety
+# ============================================================
+
+V427_VERSION = "V42.7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_STABLE"
+
+
+def _v427_db_path() -> str:
+    return os.getenv("DB_PATH", "signals.db")
+
+
+def v427_init_db() -> Dict[str, Any]:
+    import sqlite3
+    db = _v427_db_path()
+    try:
+        conn = sqlite3.connect(db)
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS v427_trade_journal (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                asset_class TEXT,
+                signal TEXT,
+                decision TEXT,
+                entry REAL,
+                tp1 REAL,
+                tp2 REAL,
+                tp3 REAL,
+                sl REAL,
+                probability REAL,
+                confidence REAL,
+                risk_grade TEXT,
+                signal_grade TEXT,
+                rr REAL,
+                status TEXT DEFAULT 'OPEN',
+                outcome TEXT,
+                pnl_r REAL,
+                source_version TEXT
+            )
+        """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS v427_alert_cooldown (
+                symbol TEXT PRIMARY KEY,
+                last_alert_at TEXT,
+                last_signal TEXT,
+                last_grade TEXT,
+                last_decision TEXT
+            )
+        """)
+        conn.commit()
+        conn.close()
+        return {"ok": True, "db": db}
+    except Exception as e:
+        return {"ok": False, "db": db, "error": str(e)}
+
+
+def v427_signal_grade(probability: Any, confidence: Any, rr: Any, risk_grade: str = "C") -> Dict[str, Any]:
+    p = float(_v425_clamp(probability, 0, 100))
+    c = float(_v425_clamp(confidence, 0, 100))
+    r = safe_float(rr, 0) or 0
+    risk = str(risk_grade or "C").upper()
+    score = p * 0.40 + c * 0.35 + min(r / 3.0 * 100, 100) * 0.15
+    if risk == "A":
+        score += 5
+    elif risk == "B+":
+        score += 2
+    elif risk in {"C", "D"}:
+        score -= 10
+    score = round(_v425_clamp(score, 0, 100), 2)
+
+    if score >= 90 and risk in {"A", "B+"}:
+        grade = "A+"
+        action = "เข้าได้เฉพาะเมื่อราคายืนยัน"
+    elif score >= 85 and risk in {"A", "B+"}:
+        grade = "A"
+        action = "รอจังหวะเข้าแบบคุมความเสี่ยง"
+    elif score >= 80:
+        grade = "B+"
+        action = "เฝ้าดู / รอยืนยันเพิ่ม"
+    else:
+        grade = "NO_ALERT"
+        action = "ไม่แจ้งเตือน"
+    return {"score": score, "grade": grade, "action": action, "rule": "A+ ≥90, A ≥85, B+ ≥80, ต่ำกว่าไม่แจ้ง"}
+
+
+def v427_position_sizing(account_size: Any = None, risk_pct: Any = None, entry: Any = None, stop_loss: Any = None) -> Dict[str, Any]:
+    account = safe_float(account_size, safe_float(os.getenv("V427_ACCOUNT_SIZE", "100000"), 100000)) or 100000
+    risk = safe_float(risk_pct, safe_float(os.getenv("V427_RISK_PCT", "1.0"), 1.0)) or 1.0
+    e = safe_float(entry)
+    sl = safe_float(stop_loss)
+    risk_amount = account * risk / 100.0
+    per_unit_risk = abs(e - sl) if e is not None and sl is not None else None
+    units = risk_amount / per_unit_risk if per_unit_risk and per_unit_risk > 0 else None
+    return {
+        "ok": units is not None,
+        "account_size": round(account, 2),
+        "risk_pct": round(risk, 2),
+        "risk_amount": round(risk_amount, 2),
+        "entry": e,
+        "stop_loss": sl,
+        "per_unit_risk": round(per_unit_risk, 4) if per_unit_risk is not None else None,
+        "suggested_units": round(units, 4) if units is not None else None,
+        "rule": "เสี่ยงตาม % ต่อสัญญาณ ไม่ถัวเพิ่มถ้าราคาไม่ยืนยัน",
+    }
+
+
+def v427_alert_cooldown(symbol: str, signal: str, grade: str, decision: str, cooldown_min: Any = None) -> Dict[str, Any]:
+    import sqlite3
+    v427_init_db()
+    db = _v427_db_path()
+    cooldown = int(safe_float(cooldown_min, safe_float(os.getenv("V427_ALERT_COOLDOWN_MIN", "60"), 60)) or 60)
+    sym = (symbol or "UNKNOWN").upper()
+    now = datetime.now(timezone.utc)
+    try:
+        conn = sqlite3.connect(db)
+        cur = conn.cursor()
+        cur.execute("SELECT last_alert_at, last_signal, last_grade, last_decision FROM v427_alert_cooldown WHERE symbol=?", (sym,))
+        row = cur.fetchone()
+        if row and row[0]:
+            last = datetime.fromisoformat(row[0])
+            elapsed = (now - last).total_seconds() / 60
+            same = (str(row[1]) == str(signal) and str(row[2]) == str(grade) and str(row[3]) == str(decision))
+            if elapsed < cooldown and same:
+                conn.close()
+                return {"ok": False, "allowed": False, "reason": "cooldown_active_same_signal", "elapsed_min": round(elapsed, 2), "cooldown_min": cooldown}
+        cur.execute(
+            "INSERT OR REPLACE INTO v427_alert_cooldown(symbol,last_alert_at,last_signal,last_grade,last_decision) VALUES(?,?,?,?,?)",
+            (sym, now.isoformat(), str(signal), str(grade), str(decision)),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "allowed": True, "reason": "new_or_changed_signal", "cooldown_min": cooldown}
+    except Exception as e:
+        return {"ok": False, "allowed": True, "reason": "cooldown_fail_open", "error": str(e)}
+
+
+def v427_options_safety_filter(symbol: str, iv_rank: Any = None, spread_pct: Any = None, dte: Any = None, volume: Any = None, open_interest: Any = None) -> Dict[str, Any]:
+    iv = safe_float(iv_rank, 50) or 50
+    sp = safe_float(spread_pct, 5) or 5
+    days = safe_float(dte, 30) or 30
+    vol = safe_float(volume, 0) or 0
+    oi = safe_float(open_interest, 0) or 0
+
+    checks = {
+        "iv_not_extreme": iv <= float(os.getenv("V427_MAX_IV_RANK", "80")),
+        "spread_ok": sp <= float(os.getenv("V427_MAX_OPTION_SPREAD_PCT", "12")),
+        "dte_ok": days >= float(os.getenv("V427_MIN_DTE", "14")),
+        "liquidity_ok": (vol >= float(os.getenv("V427_MIN_OPTION_VOLUME", "50")) or oi >= float(os.getenv("V427_MIN_OPTION_OI", "200"))),
+    }
+    passed = all(checks.values())
+    failed = [k for k, v in checks.items() if not v]
+    return {
+        "ok": passed,
+        "symbol": (symbol or "").upper(),
+        "checks": checks,
+        "failed_checks": failed,
+        "decision": "OPTIONS_OK" if passed else "WAIT_OPTIONS",
+        "rule": "ก่อนแนะนำ option ต้องเช็ก IV, spread, DTE, volume/OI",
+    }
+
+
+def v427_record_signal(payload: Dict[str, Any], symbol: str = "THAI_GOLD", asset_class: str = "GOLD") -> Dict[str, Any]:
+    import sqlite3
+    init = v427_init_db()
+    if not init.get("ok"):
+        return init
+    try:
+        eng = payload.get("engine", {}) or {}
+        plan = payload.get("trade_plan", {}) or {}
+        filt = payload.get("entry_filter", {}) or {}
+        grade = payload.get("v427_signal_grade") or v427_signal_grade(eng.get("probability"), eng.get("confidence"), plan.get("rr"), eng.get("risk_grade"))
+        entries = plan.get("entries") or []
+        tps = plan.get("take_profits") or []
+        conn = sqlite3.connect(_v427_db_path())
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO v427_trade_journal
+            (created_at,symbol,asset_class,signal,decision,entry,tp1,tp2,tp3,sl,probability,confidence,risk_grade,signal_grade,rr,status,source_version)
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """, (
+            datetime.now(timezone.utc).isoformat(),
+            symbol.upper(),
+            asset_class,
+            str(eng.get("signal")),
+            str(filt.get("decision") or eng.get("decision")),
+            safe_float(entries[0] if entries else plan.get("entry")),
+            safe_float(tps[0] if len(tps) > 0 else None),
+            safe_float(tps[1] if len(tps) > 1 else None),
+            safe_float(tps[2] if len(tps) > 2 else None),
+            safe_float(plan.get("stop_loss")),
+            safe_float(eng.get("probability")),
+            safe_float(eng.get("confidence")),
+            str(eng.get("risk_grade")),
+            str(grade.get("grade")),
+            safe_float(plan.get("rr")),
+            "OPEN",
+            V427_VERSION,
+        ))
+        rowid = cur.lastrowid
+        conn.commit()
+        conn.close()
+        return {"ok": True, "journal_id": rowid}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+def v427_update_open_results(symbol: str = "THAI_GOLD", current_price: Any = None) -> Dict[str, Any]:
+    import sqlite3
+    v427_init_db()
+    price = safe_float(current_price)
+    if price is None:
+        try:
+            p = build_v42_gold_payload()
+            price = safe_float((p.get("thai_gold") or {}).get("bar_sell"))
+        except Exception:
+            price = None
+    if price is None:
+        return {"ok": False, "reason": "no_current_price"}
+
+    updated = 0
+    try:
+        conn = sqlite3.connect(_v427_db_path())
+        cur = conn.cursor()
+        cur.execute("SELECT id,entry,tp1,tp2,tp3,sl FROM v427_trade_journal WHERE status='OPEN' AND symbol IN (?, ?, ?)", (symbol, "GOLD", "XAUUSD"))
+        rows = cur.fetchall()
+        for row in rows:
+            rid, entry, tp1, tp2, tp3, sl = row
+            outcome = None
+            pnl_r = None
+            if sl is not None and price <= sl:
+                outcome = "SL"
+                pnl_r = -1
+            elif tp3 is not None and price >= tp3:
+                outcome = "TP3"
+                pnl_r = 3
+            elif tp2 is not None and price >= tp2:
+                outcome = "TP2"
+                pnl_r = 2
+            elif tp1 is not None and price >= tp1:
+                outcome = "TP1"
+                pnl_r = 1
+            if outcome:
+                cur.execute("UPDATE v427_trade_journal SET status='CLOSED', outcome=?, pnl_r=? WHERE id=?", (outcome, pnl_r, rid))
+                updated += 1
+        conn.commit()
+        conn.close()
+        return {"ok": True, "current_price": price, "updated": updated}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
+
+
+def v427_performance_dashboard(symbol: str = "THAI_GOLD") -> Dict[str, Any]:
+    import sqlite3
+    v427_init_db()
+    result = {
+        "ok": True,
+        "symbol": symbol,
+        "total_signals": 0,
+        "open_trades": 0,
+        "closed_trades": 0,
+        "win_rate_pct": None,
+        "profit_factor": None,
+        "max_drawdown_r": None,
+        "expectancy_r": None,
+        "average_rr": None,
+        "signals_today": 0,
+        "source": _v427_db_path(),
+    }
+    try:
+        conn = sqlite3.connect(_v427_db_path())
+        cur = conn.cursor()
+        cur.execute("SELECT status, pnl_r, rr, created_at FROM v427_trade_journal WHERE symbol IN (?, ?, ?)", (symbol, "GOLD", "XAUUSD"))
+        rows = cur.fetchall()
+        result["total_signals"] = len(rows)
+        closed = [r for r in rows if r[0] == "CLOSED" and r[1] is not None]
+        opened = [r for r in rows if r[0] == "OPEN"]
+        result["open_trades"] = len(opened)
+        result["closed_trades"] = len(closed)
+        today = datetime.now(timezone.utc).date()
+        result["signals_today"] = sum(1 for r in rows if r[3] and datetime.fromisoformat(r[3]).date() == today)
+        if closed:
+            pnls = [float(r[1]) for r in closed]
+            wins = [x for x in pnls if x > 0]
+            losses = [abs(x) for x in pnls if x < 0]
+            gross_win = sum(wins)
+            gross_loss = sum(losses)
+            equity = 0
+            peak = 0
+            max_dd = 0
+            for x in pnls:
+                equity += x
+                peak = max(peak, equity)
+                max_dd = max(max_dd, peak - equity)
+            rrs = [float(r[2]) for r in closed if r[2] is not None]
+            result.update({
+                "win_rate_pct": round(len(wins) / len(pnls) * 100, 2),
+                "profit_factor": round(gross_win / gross_loss, 2) if gross_loss else None,
+                "max_drawdown_r": round(max_dd, 2),
+                "expectancy_r": round(sum(pnls) / len(pnls), 2),
+                "average_rr": round(sum(rrs) / len(rrs), 2) if rrs else None,
+            })
+        conn.close()
+    except Exception as e:
+        result.update({"ok": False, "error": str(e)})
+    return result
+
+
+def build_v427_risk_performance_payload() -> Dict[str, Any]:
+    p = build_v42_gold_payload()
+    eng = p.get("engine", {}) or {}
+    plan = p.get("trade_plan", {}) or {}
+    entries = plan.get("entries") or []
+    entry = entries[0] if entries else plan.get("entry")
+    grade = v427_signal_grade(eng.get("probability"), eng.get("confidence"), plan.get("rr"), eng.get("risk_grade"))
+    pos = v427_position_sizing(entry=entry, stop_loss=plan.get("stop_loss"))
+    perf = v427_performance_dashboard("THAI_GOLD")
+    result_update = v427_update_open_results("THAI_GOLD", (p.get("thai_gold") or {}).get("bar_sell"))
+    cooldown = v427_alert_cooldown("THAI_GOLD", eng.get("signal"), grade.get("grade"), (p.get("entry_filter") or {}).get("decision")) if grade.get("grade") in {"A+", "A"} else {"allowed": False, "reason": "grade_not_alertable"}
+    options = v427_options_safety_filter("GC")
+
+    p.update({
+        "version": V427_VERSION,
+        "v427_signal_grade": grade,
+        "v427_position_sizing": pos,
+        "v427_performance_dashboard": perf,
+        "v427_result_tracker": result_update,
+        "v427_alert_cooldown": cooldown,
+        "v427_options_safety_filter": options,
+        "quality_rule": "V42.7: Trade Journal + Result Tracker + Performance Dashboard + Position Sizing + Cooldown + Signal Grade + Options Safety",
+    })
+    return p
+
+
+def build_v427_dashboard_text() -> str:
+    p = build_v427_risk_performance_payload()
+    perf = p.get("v427_performance_dashboard", {})
+    grade = p.get("v427_signal_grade", {})
+    pos = p.get("v427_position_sizing", {})
+    cooldown = p.get("v427_alert_cooldown", {})
+    lines = [
+        "📊 V42.7 INSTITUTIONAL RISK PERFORMANCE",
+        "",
+        f"Signal Grade: {grade.get('grade')} | Score {grade.get('score')} | {grade.get('action')}",
+        f"Position Size: risk {pos.get('risk_pct')}% = {pos.get('risk_amount')} | units {pos.get('suggested_units')}",
+        f"Cooldown: {cooldown.get('reason')} | allowed={cooldown.get('allowed')}",
+        "",
+        f"Total Signals: {perf.get('total_signals')}",
+        f"Open Trades: {perf.get('open_trades')}",
+        f"Closed Trades: {perf.get('closed_trades')}",
+        f"Signals Today: {perf.get('signals_today')}",
+        f"Win Rate: {perf.get('win_rate_pct')}",
+        f"Profit Factor: {perf.get('profit_factor')}",
+        f"Max DD (R): {perf.get('max_drawdown_r')}",
+        f"Expectancy (R): {perf.get('expectancy_r')}",
+        f"Average RR: {perf.get('average_rr')}",
+        "",
+        f"Version : {V427_VERSION}",
+    ]
+    return "\n".join(lines)
+
+# ============================================================
+# V42.8 UNIFIED CONTROL CENTER DASHBOARD
+# One-page status for Gold, Risk, US Extended, Breadth, DB, LINE
+# ============================================================
+
+V428_VERSION = "V42.8_UNIFIED_CONTROL_CENTER_DASHBOARD_STABLE"
+
+
+def _v428_bool_status(value: Any) -> str:
+    return "✅" if value else "❌"
+
+
+def v428_config_status() -> Dict[str, Any]:
+    keys = [
+        "LINE_CHANNEL_ACCESS_TOKEN",
+        "LINE_CHANNEL_SECRET",
+        "TWELVEDATA_API_KEY",
+        "FINNHUB_API_KEY",
+        "ALPHAVANTAGE_API_KEY",
+        "FMP_API_KEY",
+        "ADMIN_TOKEN",
+    ]
+    return {
+        "ok": True,
+        "items": {k: bool(os.getenv(k)) for k in keys},
+        "note": "แสดงเฉพาะว่ามี key หรือไม่ ไม่แสดงค่าจริง",
+    }
+
+
+def v428_health_check() -> Dict[str, Any]:
+    checks: Dict[str, Any] = {
+        "core_import": True,
+        "db": False,
+        "gold_payload": False,
+        "risk_performance": False,
+        "us_extended_hours": False,
+        "market_breadth": False,
+        "line_config": False,
+    }
+    errors: Dict[str, str] = {}
+
+    try:
+        db_init = v427_init_db()
+        checks["db"] = bool(db_init.get("ok"))
+        if not db_init.get("ok"):
+            errors["db"] = str(db_init.get("error"))
+    except Exception as e:
+        errors["db"] = str(e)
+
+    try:
+        p = build_v42_gold_payload()
+        checks["gold_payload"] = bool(p.get("ok", True))
+    except Exception as e:
+        errors["gold_payload"] = str(e)
+
+    try:
+        rp = build_v427_risk_performance_payload()
+        checks["risk_performance"] = bool(rp.get("ok", True))
+    except Exception as e:
+        errors["risk_performance"] = str(e)
+
+    try:
+        us = us_stock_extended_hours(["NVDA"])
+        checks["us_extended_hours"] = bool(us.get("ok"))
+    except Exception as e:
+        errors["us_extended_hours"] = str(e)
+
+    try:
+        mb = market_breadth_spy_qqq_vix()
+        checks["market_breadth"] = bool(mb.get("ok"))
+    except Exception as e:
+        errors["market_breadth"] = str(e)
+
+    checks["line_config"] = bool(os.getenv("LINE_CHANNEL_ACCESS_TOKEN") or os.getenv("LINE_CHANNEL_SECRET"))
+
+    return {
+        "ok": all(v for k, v in checks.items() if k != "line_config"),
+        "checks": checks,
+        "errors": errors,
+        "time_th": now_text() if "now_text" in globals() else datetime.now(timezone.utc).isoformat(),
+        "version": V428_VERSION,
+    }
+
+
+def v428_last_journal(limit: int = 5) -> Dict[str, Any]:
+    import sqlite3
+    v427_init_db()
+    try:
+        conn = sqlite3.connect(_v427_db_path())
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT created_at,symbol,signal,decision,entry,tp1,tp2,tp3,sl,probability,confidence,signal_grade,status,outcome,pnl_r
+            FROM v427_trade_journal
+            ORDER BY id DESC LIMIT ?
+        """, (int(limit),))
+        rows = cur.fetchall()
+        conn.close()
+        items = []
+        for r in rows:
+            items.append({
+                "created_at": r[0],
+                "symbol": r[1],
+                "signal": r[2],
+                "decision": r[3],
+                "entry": r[4],
+                "tp1": r[5],
+                "tp2": r[6],
+                "tp3": r[7],
+                "sl": r[8],
+                "probability": r[9],
+                "confidence": r[10],
+                "signal_grade": r[11],
+                "status": r[12],
+                "outcome": r[13],
+                "pnl_r": r[14],
+            })
+        return {"ok": True, "items": items}
+    except Exception as e:
+        return {"ok": False, "error": str(e), "items": []}
+
+
+def build_v428_control_center_payload() -> Dict[str, Any]:
+    health = v428_health_check()
+    config = v428_config_status()
+
+    try:
+        gold = build_v42_gold_payload()
+    except Exception as e:
+        gold = {"ok": False, "error": str(e)}
+
+    try:
+        risk = build_v427_risk_performance_payload()
+    except Exception as e:
+        risk = {"ok": False, "error": str(e)}
+
+    try:
+        us_ext = us_stock_extended_hours()
+    except Exception as e:
+        us_ext = {"ok": False, "error": str(e)}
+
+    try:
+        breadth = market_breadth_spy_qqq_vix()
+    except Exception as e:
+        breadth = {"ok": False, "error": str(e)}
+
+    return {
+        "ok": True,
+        "version": V428_VERSION,
+        "time_th": now_text() if "now_text" in globals() else datetime.now(timezone.utc).isoformat(),
+        "health": health,
+        "config_status": config,
+        "gold": {
+            "version": gold.get("version"),
+            "signal": (gold.get("engine") or {}).get("signal"),
+            "decision": (gold.get("entry_filter") or {}).get("decision"),
+            "probability": (gold.get("engine") or {}).get("probability"),
+            "confidence": (gold.get("engine") or {}).get("confidence"),
+            "risk_grade": (gold.get("engine") or {}).get("risk_grade"),
+            "thai_gold": gold.get("thai_gold"),
+            "trade_plan": gold.get("trade_plan"),
+        },
+        "risk_performance": {
+            "version": risk.get("version"),
+            "signal_grade": risk.get("v427_signal_grade"),
+            "position_sizing": risk.get("v427_position_sizing"),
+            "dashboard": risk.get("v427_performance_dashboard"),
+            "cooldown": risk.get("v427_alert_cooldown"),
+            "options_safety": risk.get("v427_options_safety_filter"),
+        },
+        "us_extended_hours": us_ext,
+        "market_breadth": breadth,
+        "journal_latest": v428_last_journal(5),
+        "links": {
+            "gold_filter": "/v42/gold-filter",
+            "gold_fund_grade": "/v42/gold-fund-grade",
+            "gold_explain": "/v42/gold-explain",
+            "us_extended_hours": "/v42/us-extended-hours-line",
+            "market_breadth": "/v42/market-breadth",
+            "risk_dashboard": "/v42/risk-dashboard",
+            "risk_performance": "/v42/risk-performance",
+            "record_signal": "/v42/record-signal",
+        },
+    }
+
+
+def build_v428_control_center_text() -> str:
+    p = build_v428_control_center_payload()
+    h = p.get("health", {})
+    checks = h.get("checks", {})
+    cfg = p.get("config_status", {}).get("items", {})
+    gold = p.get("gold", {})
+    risk = p.get("risk_performance", {})
+    perf = risk.get("dashboard") or {}
+    grade = risk.get("signal_grade") or {}
+    pos = risk.get("position_sizing") or {}
+    us = p.get("us_extended_hours", {})
+    breadth = p.get("market_breadth", {})
+    journal = p.get("journal_latest", {}).get("items", [])
+
+    lines = [
+        "🧭 V42.8 UNIFIED CONTROL CENTER",
+        f"เวลาไทย: {p.get('time_th')}",
+        "",
+        "SYSTEM HEALTH",
+        f"Core: {_v428_bool_status(checks.get('core_import'))} | DB: {_v428_bool_status(checks.get('db'))} | Gold: {_v428_bool_status(checks.get('gold_payload'))}",
+        f"Risk: {_v428_bool_status(checks.get('risk_performance'))} | US Ext: {_v428_bool_status(checks.get('us_extended_hours'))} | Breadth: {_v428_bool_status(checks.get('market_breadth'))}",
+        f"LINE Config: {_v428_bool_status(checks.get('line_config'))}",
+        "",
+        "CONFIG STATUS",
+        " | ".join([f"{k}:{_v428_bool_status(v)}" for k, v in cfg.items()]),
+        "",
+        "GOLD STATUS",
+        f"Signal: {gold.get('signal')} | Decision: {gold.get('decision')} | Prob: {gold.get('probability')}% | Conf: {gold.get('confidence')}% | Risk: {gold.get('risk_grade')}",
+        "",
+        "RISK / PERFORMANCE",
+        f"Grade: {grade.get('grade')} | Score: {grade.get('score')} | {grade.get('action')}",
+        f"Position: Risk {pos.get('risk_pct')}% = {pos.get('risk_amount')} | Units {pos.get('suggested_units')}",
+        f"Signals: {perf.get('total_signals')} | Open: {perf.get('open_trades')} | Closed: {perf.get('closed_trades')} | Today: {perf.get('signals_today')}",
+        f"Win: {perf.get('win_rate_pct')} | PF: {perf.get('profit_factor')} | DD(R): {perf.get('max_drawdown_r')} | Expectancy(R): {perf.get('expectancy_r')}",
+        "",
+        "US EXTENDED HOURS",
+        f"Session: {us.get('session')} | Items: {len(us.get('items') or [])}",
+        "",
+        "MARKET BREADTH",
+        f"Regime: {breadth.get('regime')} | Score: {breadth.get('breadth_score')}",
+        "",
+        "LATEST JOURNAL",
+    ]
+    if journal:
+        for item in journal[:5]:
+            lines.append(f"- {item.get('symbol')} | {item.get('signal')} | {item.get('signal_grade')} | {item.get('status')} | {item.get('outcome')}")
+    else:
+        lines.append("- ยังไม่มีรายการ journal")
+
+    if h.get("errors"):
+        lines += ["", "LAST ERRORS"]
+        for k, v in h.get("errors", {}).items():
+            lines.append(f"- {k}: {v}")
+
+    lines += [
+        "",
+        "Quick Links:",
+        "/v42/gold-filter | /v42/gold-fund-grade | /v42/risk-dashboard",
+        "/v42/us-extended-hours-line | /v42/market-breadth",
+        "",
+        f"Version : {V428_VERSION}",
+    ]
+    return "\n".join(lines)

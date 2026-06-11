@@ -163,3 +163,53 @@ def v42_us_extended_hours_line_text():
         return Response(build_us_extended_hours_line_message(symbols), mimetype="text/plain; charset=utf-8")
     except Exception as e:
         return Response(f"ไม่สามารถดึง US Extended Hours สำหรับ LINE ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+@v42_gold_bp.route("/v42/risk-performance", methods=["GET"])
+def v427_risk_performance_json():
+    try:
+        from modules.v42_gold_institutional_core import build_v427_risk_performance_payload
+        return jsonify(build_v427_risk_performance_payload())
+    except Exception as e:
+        return jsonify({"ok": False, "version": "V42.7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_STABLE", "error": str(e)}), 200
+
+
+@v42_gold_bp.route("/v42/risk-dashboard", methods=["GET"])
+def v427_risk_dashboard_text():
+    try:
+        from modules.v42_gold_institutional_core import build_v427_dashboard_text
+        return Response(build_v427_dashboard_text(), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง V42.7 Risk Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+@v42_gold_bp.route("/v42/record-signal", methods=["GET"])
+def v427_record_signal_route():
+    try:
+        from flask import request
+        from modules.v42_gold_institutional_core import build_v42_gold_payload, v427_record_signal
+        symbol = request.args.get("symbol", "THAI_GOLD")
+        asset_class = request.args.get("asset_class", "GOLD")
+        payload = build_v42_gold_payload()
+        return jsonify(v427_record_signal(payload, symbol=symbol, asset_class=asset_class))
+    except Exception as e:
+        return jsonify({"ok": False, "version": "V42.7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_STABLE", "error": str(e)}), 200
+
+
+@v42_gold_bp.route("/v42/control-center", methods=["GET"])
+def v428_control_center_text():
+    try:
+        from modules.v42_gold_institutional_core import build_v428_control_center_text
+        return Response(build_v428_control_center_text(), mimetype="text/plain; charset=utf-8")
+    except Exception as e:
+        return Response(f"ไม่สามารถดึง V42.8 Control Center ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+
+
+@v42_gold_bp.route("/v42/control-center-json", methods=["GET"])
+def v428_control_center_json():
+    try:
+        from modules.v42_gold_institutional_core import build_v428_control_center_payload
+        return jsonify(build_v428_control_center_payload())
+    except Exception as e:
+        return jsonify({"ok": False, "version": "V42.8_UNIFIED_CONTROL_CENTER_DASHBOARD_STABLE", "error": str(e)}), 200
+

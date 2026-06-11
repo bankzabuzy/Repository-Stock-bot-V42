@@ -1,0 +1,75 @@
+{
+  "version": "V180.1_MARKET_BEHAVIOR_FORECAST_PLUS_RISK_STRESS_BASE_STABLE",
+  "base_file": "Repository-Stock-bot_V170_ADVANCED_RISK_AND_STRESS_TESTING_STABLE.zip",
+  "compileall": true,
+  "compile_errors": [],
+  "route_count": 161,
+  "route_collision_count": 16,
+  "route_collisions": {
+    "/v42/gold-dashboard": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/gold-fund-grade": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/thai-gold": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/gold": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/gold-text": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/gold-high-conviction": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/gold-filter": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/gold-explain": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/us-extended-hours": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/market-breadth": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/us-extended-hours-line": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/risk-performance": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/risk-dashboard": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/record-signal": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/control-center": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ],
+    "/v42/control-center-json": [
+      "main.py",
+      "modules/v42_gold_institutional_routes.py"
+    ]
+  },
+  "latest_note": "Latest is V180.1. Legacy versions remain for backward compatibility."
+}

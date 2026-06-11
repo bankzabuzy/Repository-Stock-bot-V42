@@ -1,0 +1,290 @@
+{
+  "generated_at": "2026-06-10T12:18:02.842968Z",
+  "note": "Legacy README files are kept for audit/history. Current active version is V900 Phase 9.",
+  "legacy_files": [
+    {
+      "file": "README_V100_FUND_OPERATING_SYSTEM_TH.md",
+      "sha256": "fce8a515d9d2542a"
+    },
+    {
+      "file": "README_V101_PRODUCTION_HARDENING_SECURITY_TH.md",
+      "sha256": "e6a24a7acce12826"
+    },
+    {
+      "file": "README_V110_RETAIL_INSTITUTIONAL_FUND_PLATFORM_TH.md",
+      "sha256": "646061c70eaa7f2c"
+    },
+    {
+      "file": "README_V120_BROKER_LIVE_READY_SAFETY_LAYER_TH.md",
+      "sha256": "1a2d8226c4315f18"
+    },
+    {
+      "file": "README_V130_LIVE_TRADING_READINESS_AUTONOMOUS_PORTFOLIO_CONTROL_TH.md",
+      "sha256": "440b262d082cf7ba"
+    },
+    {
+      "file": "README_V140_SYSTEM_VERSION_CONSISTENCY_AUDIT_TH.md",
+      "sha256": "6a5d3fcfe58ce6f1"
+    },
+    {
+      "file": "README_V150_AUTONOMOUS_CAPITAL_ALLOCATION_TH.md",
+      "sha256": "465e8c0be15a7d6c"
+    },
+    {
+      "file": "README_V160_RESEARCH_AND_MODEL_LAB_TH.md",
+      "sha256": "c967cb29ea5219ea"
+    },
+    {
+      "file": "README_V170_ADVANCED_RISK_AND_STRESS_TESTING_TH.md",
+      "sha256": "372eeb32232602df"
+    },
+    {
+      "file": "README_V180_1_MARKET_BEHAVIOR_PLUS_RISK_STRESS_BASE_TH.md",
+      "sha256": "843b55640a6fca4d"
+    },
+    {
+      "file": "README_V190_GLOBAL_MACRO_BEHAVIOR_AND_EVENT_PREDICTION_ENGINE_TH.md",
+      "sha256": "4fcef8b3181472cd"
+    },
+    {
+      "file": "README_V200_AUTONOMOUS_RETAIL_FUND_PLATFORM_TH.md",
+      "sha256": "b50fafa1cd700229"
+    },
+    {
+      "file": "README_V210_MULTI_AGENT_FUND_INTELLIGENCE_TH.md",
+      "sha256": "77132b3e9d2a0665"
+    },
+    {
+      "file": "README_V220_BROKER_EXECUTION_NETWORK_COMPATIBILITY_TH.md",
+      "sha256": "1712bca41df0f27c"
+    },
+    {
+      "file": "README_V230_LIVE_PORTFOLIO_OS_TH.md",
+      "sha256": "07e84466fe16089c"
+    },
+    {
+      "file": "README_V240_AUTONOMOUS_FUND_MANAGER_TH.md",
+      "sha256": "63648f642077dfcc"
+    },
+    {
+      "file": "README_V24_TH.md",
+      "sha256": "02033f26ba77d8cb"
+    },
+    {
+      "file": "README_V250_GLOBAL_RETAIL_FUND_PLATFORM_TH.md",
+      "sha256": "41af764a3b18937a"
+    },
+    {
+      "file": "README_V25_1_TH.md",
+      "sha256": "1af191e0bae8422a"
+    },
+    {
+      "file": "README_V25_2_TH.md",
+      "sha256": "5b95965b1908e26f"
+    },
+    {
+      "file": "README_V25_3_TH.md",
+      "sha256": "7e1f275182e77b44"
+    },
+    {
+      "file": "README_V25_4_TH.md",
+      "sha256": "cf5f0bcb20164273"
+    },
+    {
+      "file": "README_V25_5_TH.md",
+      "sha256": "1a632db15e761d4f"
+    },
+    {
+      "file": "README_V26_6_TH.md",
+      "sha256": "fc23fe877ca46862"
+    },
+    {
+      "file": "README_V26_7_TH.md",
+      "sha256": "0e232d1f62e4296d"
+    },
+    {
+      "file": "README_V26_8_TH.md",
+      "sha256": "de22bbb28ac5c633"
+    },
+    {
+      "file": "README_V26_9_TH.md",
+      "sha256": "87afdaba4ee646ed"
+    },
+    {
+      "file": "README_V26_TH.md",
+      "sha256": "9ed468c4e447b4cc"
+    },
+    {
+      "file": "README_V27_1_INTEGRATION_PHASE_TH.md",
+      "sha256": "bfa68a5cdb22a5c6"
+    },
+    {
+      "file": "README_V27_7_FULL_INSTITUTIONAL_TH.md",
+      "sha256": "f957cec3c26caeff"
+    },
+    {
+      "file": "README_V27_STABILITY_TH.md",
+      "sha256": "aa893aa4dc51ff47"
+    },
+    {
+      "file": "README_V28_FUND_VALIDATION_CORE_TH.md",
+      "sha256": "0aa3079ac50166f7"
+    },
+    {
+      "file": "README_V29_PRODUCTION_HARDENING_TH.md",
+      "sha256": "4e24702085e0369e"
+    },
+    {
+      "file": "README_V300_INSTITUTIONAL_CONTROL_CENTER_TH.md",
+      "sha256": "5c0bd7ed3c236d3f"
+    },
+    {
+      "file": "README_V30_INSTITUTIONAL_MODEL_VALIDATION_TH.md",
+      "sha256": "910ae78e532516f8"
+    },
+    {
+      "file": "README_V31_1_ALERT_SESSION_CONTROL_TH.md",
+      "sha256": "fd57660aa79aeb50"
+    },
+    {
+      "file": "README_V31_5_DAILY_PRODUCTION_TH.md",
+      "sha256": "f4e66b2eca45e8bc"
+    },
+    {
+      "file": "README_V31_7_CONFIDENCE_OIL_GOLD_FIX_TH.md",
+      "sha256": "4435018c5ccbc4e8"
+    },
+    {
+      "file": "README_V31_ALPHA_RESEARCH_ATTRIBUTION_TH.md",
+      "sha256": "83ef8c431451a0da"
+    },
+    {
+      "file": "README_V33_INSTITUTIONAL_PORTFOLIO_TH.md",
+      "sha256": "8e639d5fcba7bc5d"
+    },
+    {
+      "file": "README_V34_FREE_PAPER_TRADING_TH.md",
+      "sha256": "4ec3424eb17554aa"
+    },
+    {
+      "file": "README_V350_PRODUCTION_PROOF_AND_GOVERNANCE_TH.md",
+      "sha256": "92defc6154f98036"
+    },
+    {
+      "file": "README_V35_1_FREE_INSTITUTIONAL_DASHBOARD_TH.md",
+      "sha256": "50cceadb1a4329a6"
+    },
+    {
+      "file": "README_V35_3_FREE_ALPHA_STACK_TH.md",
+      "sha256": "21de377c016d29eb"
+    },
+    {
+      "file": "README_V36_INSTITUTIONAL_FREE_TH.md",
+      "sha256": "45668db8f92b5d82"
+    },
+    {
+      "file": "README_V37_LIVE_SAFETY_BROKER_READY_TH.md",
+      "sha256": "a1e8a3c5ab60bb97"
+    },
+    {
+      "file": "README_V38_INSTITUTIONAL_FREE_PLUS_TH.md",
+      "sha256": "a14db412dcfc071b"
+    },
+    {
+      "file": "README_V390_PHASE1_EXECUTION_ATTRIBUTION_RISK_TH.md",
+      "sha256": "e2669f8e692fa890"
+    },
+    {
+      "file": "README_V39_VALIDATION_PAPER_BROKER_PROOF_TH.md",
+      "sha256": "f793a0b72b7f2a94"
+    },
+    {
+      "file": "README_V40_ADAPTIVE_MULTI_AGENT_INSTITUTIONAL_TH.md",
+      "sha256": "41b527393a5cc9a2"
+    },
+    {
+      "file": "README_V40_FIXED_DEPLOY_TH.md",
+      "sha256": "e6be3a4c4d3713f3"
+    },
+    {
+      "file": "README_V41_LINE_TOP5_BUY_TH.md",
+      "sha256": "057e0fa4a5622cb5"
+    },
+    {
+      "file": "README_V42_1_GOLD_INSTITUTIONAL_STABLE_TH.md",
+      "sha256": "7ca42129c1baf349"
+    },
+    {
+      "file": "README_V42_2_GOLD_INSTITUTIONAL_ENTRY_FILTER_TH.md",
+      "sha256": "ee9e98b759528dba"
+    },
+    {
+      "file": "README_V42_3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_TH.md",
+      "sha256": "0256a03c8cb34b79"
+    },
+    {
+      "file": "README_V42_4_GOLD_INSTITUTIONAL_FUND_GRADE_TH.md",
+      "sha256": "08bd02f447b2a17c"
+    },
+    {
+      "file": "README_V42_5_GOLD_US_EXTENDED_EXPLAINABLE_TH.md",
+      "sha256": "8da60cdf9e8e39e8"
+    },
+    {
+      "file": "README_V42_6_1_LINE_FULL_STOCK_EXTENDED_HOURS_TH.md",
+      "sha256": "88151ce119d92fdc"
+    },
+    {
+      "file": "README_V42_6_2_LINE_SHORT_EXTENDED_TAIL_TH.md",
+      "sha256": "1772dcd47f9b0978"
+    },
+    {
+      "file": "README_V42_6_3_LINE_EXTENDED_PRICE_FIRST_TH.md",
+      "sha256": "3c78c9661c70c122"
+    },
+    {
+      "file": "README_V42_6_LINE_US_EXTENDED_HOURS_TH.md",
+      "sha256": "f366d082f9acd2af"
+    },
+    {
+      "file": "README_V42_7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_TH.md",
+      "sha256": "2645bf8f4d4ca16c"
+    },
+    {
+      "file": "README_V42_8_UNIFIED_CONTROL_CENTER_DASHBOARD_TH.md",
+      "sha256": "8fb4266861318a27"
+    },
+    {
+      "file": "README_V430_PHASE2_MARKET_INTELLIGENCE_TH.md",
+      "sha256": "9241130aacddfde8"
+    },
+    {
+      "file": "README_V470_PHASE3_META_SELFHEAL_REPORT_DASHBOARD_TH.md",
+      "sha256": "6f85a90bde6327a1"
+    },
+    {
+      "file": "README_V500_ARFOS_AUTONOMOUS_RETAIL_FUND_OS_TH.md",
+      "sha256": "314342b0b68118ad"
+    },
+    {
+      "file": "README_V50_WORLD_CLASS_INSTITUTIONAL_STACK_TH.md",
+      "sha256": "d7b8d81d3eb76c95"
+    },
+    {
+      "file": "README_V51_INSTITUTIONAL_VALIDATION_AND_EXECUTION_PROOF_TH.md",
+      "sha256": "29724bfd52769daf"
+    },
+    {
+      "file": "README_V550_PHASE5_WEBULL_API_READY_TH.md",
+      "sha256": "ea29b0e855d899fd"
+    },
+    {
+      "file": "README_V620_PHASE6_ALPHA_DISCOVERY_ENGINE_TH.md",
+      "sha256": "7924889776d39c6e"
+    },
+    {
+      "file": "README_V700_TRUE_PHASE7_INTEGRATED_TH.md",
+      "sha256": "5823db02375770e0"
+    }
+  ]
+}
