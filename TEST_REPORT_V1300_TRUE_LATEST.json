@@ -1,0 +1,8 @@
+{
+  "compileall_ok": true,
+  "cli_returncode": 0,
+  "cli_stdout": "V13 TRUE LATEST CHECK: V1300_PHASE13_WORLD_CLASS_FUND_OS_TRUE_LATEST\nMARKET BREADTH: {'regime': 'RISK_OFF', 'score': 52.99, 'risk_on_count': 1, 'risk_off_count': 4, 'items': 8}\n1. GLD | BUY | Score=70.71 | Risk=B | Position=2.0% | OBSERVE_ONLY\n2. AMD | BUY | Score=66.62 | Risk=B | Position=2.0% | OBSERVE_ONLY\n3. META | WATCH | Score=55.62 | Risk=C | Position=0.0% | OBSERVE_ONLY\n4. SPY | WATCH | Score=51.43 | Risk=C | Position=0.0% | OBSERVE_ONLY\n5. QQQ | WATCH | Score=46.2 | Risk=C | Position=0.0% | OBSERVE_ONLY\nPORTFOLIO HEAT: {'heat': 0.07, 'max_heat': 0.12, 'status': 'OK'}\nSAFETY: {'live_trading_enabled': False, 'human_approval_required': True, 'execution_mode': 'LIVE_BLOCKED_SAFE', 'kill_switch_ready': True}\n",
+  "cli_stderr": "",
+  "file_count": 493,
+  "repository_sha256": "12e41107a4b6307c1f2c977cd2adb5c9e75e026249dd6f75704ec3e857541709"
+}
