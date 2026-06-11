@@ -1,7 +1,7 @@
 {
-  "current_version": "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
+  "current_version": "V1300.4_STATUS_API_ROUTER_FIXED",
   "base": "V1300_PHASE13_TRUE_LATEST_FULL_MAIN_PRESERVED",
-  "generated_at": "2026-06-11T08:43:27.983094+00:00",
+  "generated_at": "2026-06-11T09:24:00.882384+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -56,8 +56,14 @@
   "commands": [
     "สถานะระบบ",
     "api",
-    "สถานะ SCB",
+    "สถานะ SCB.BK",
     "สถานะ GOLD",
     "api NVDA"
+  ],
+  "fixes": [
+    "status checks polygon/gold/fred/thai api",
+    "no leading None",
+    "remove v42 quick links",
+    "unified status command"
   ]
 }

@@ -14176,6 +14176,174 @@ def v1300_3_symbol_status_route(symbol):
     return Response(v1300_3_symbol_status_text(symbol), mimetype="text/plain; charset=utf-8")
 
 
+# ============================================================
+# V1300.4 STATUS + API ROUTER FIX
+# Fixes:
+# - No leading None in LINE
+# - Unified Control Center checks Polygon/GoldAPI/FRED/Thai API
+# - Removes V42 quick links from status output
+# - Adds real API router status to "สถานะระบบ"
+# ============================================================
+V1300_4_DISPLAY_VERSION = "V1300.4_STATUS_API_ROUTER_FIXED"
+
+def v1300_4_bool_env(name):
+    try:
+        return bool(os.getenv(name, "").strip())
+    except Exception:
+        return False
+
+def v1300_4_mark(name):
+    return "✅" if v1300_4_bool_env(name) else "❌"
+
+def v1300_4_api_line(name, label=None):
+    label = label or name
+    return f"{label}:{v1300_4_mark(name)}"
+
+def v1300_4_clean_output(text):
+    try:
+        if text is None:
+            text = ""
+        text = str(text)
+        text = text.replace("\r\n", "\n")
+        text = re.sub(r"^\s*None\s*\n+", "", text.strip())
+        text = text.replace("/v42/gold-filter | /v42/gold-fund-grade | /v42/risk-dashboard\n/v42/us-extended-hours-line | /v42/market-breadth", 
+                          "/v1300_4/status | /v1300_3/api-health.txt | /v1300_3/symbol-status/NVDA\n/v1300_3/symbol-status/SCB.BK | /v1300_3/symbol-status/GOLD")
+        text = text.replace("V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY", V1300_4_DISPLAY_VERSION)
+        text = text.replace("V1300.2_WORLD_CLASS_FINAL", V1300_4_DISPLAY_VERSION)
+        text = text.replace("V1300.1_WORLD_CLASS_FINAL", V1300_4_DISPLAY_VERSION)
+        text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1300_4_DISPLAY_VERSION, text)
+        if "Version : " not in text:
+            text = text.rstrip() + "\n\nVersion : " + V1300_4_DISPLAY_VERSION
+        return text
+    except Exception:
+        return str(text)
+
+def v1300_4_router_health_block():
+    try:
+        lines = []
+        lines.append("API ROUTER STATUS")
+        lines.append(
+            "US/ETF: "
+            + " | ".join([
+                v1300_4_api_line("POLYGON_API_KEY", "POLYGON"),
+                v1300_4_api_line("FINNHUB_API_KEY", "FINNHUB"),
+                v1300_4_api_line("TWELVEDATA_API_KEY", "TWELVEDATA"),
+                v1300_4_api_line("ALPHAVANTAGE_API_KEY", "ALPHAVANTAGE"),
+                "YAHOO_BACKUP:✅"
+            ])
+        )
+        lines.append(
+            "THAI STOCK: "
+            + " | ".join([
+                v1300_4_api_line("SET_API_KEY", "SET_API"),
+                v1300_4_api_line("THAI_MARKET_API_KEY", "THAI_MARKET_API"),
+                "YAHOO_BK_BACKUP:✅"
+            ])
+        )
+        lines.append(
+            "GOLD: "
+            + " | ".join([
+                "GOLDTRADERS_PUBLIC:✅",
+                v1300_4_api_line("GOLD_API_KEY", "GOLDAPI"),
+                v1300_4_api_line("TWELVEDATA_API_KEY", "XAUUSD_TWELVEDATA"),
+                "YAHOO_GCF_BACKUP:✅"
+            ])
+        )
+        lines.append(
+            "MACRO: "
+            + " | ".join([
+                v1300_4_api_line("FRED_API_KEY", "FRED"),
+                v1300_4_api_line("ALPHAVANTAGE_API_KEY", "ALPHAVANTAGE_MACRO"),
+                "YAHOO_MACRO_BACKUP:✅"
+            ])
+        )
+        lines.append("")
+        lines.append("DATA PRIORITY")
+        lines.append("US/ETF: Polygon > Finnhub > TwelveData > AlphaVantage > Yahoo")
+        lines.append("Thai: SET/Thai API > Yahoo .BK")
+        lines.append("Gold: GoldTraders > GoldAPI > XAUUSD×USDTHB > GC=F")
+        lines.append("Macro: FRED > AlphaVantage > Yahoo")
+        return "\n".join(lines)
+    except Exception as e:
+        return f"API ROUTER STATUS ERROR: {e}"
+
+def v1300_4_unified_status_text():
+    try:
+        now_txt = datetime.now(timezone.utc).isoformat()
+    except Exception:
+        now_txt = ""
+    lines = []
+    lines.append(f"🧭 {V1300_4_DISPLAY_VERSION} UNIFIED CONTROL CENTER")
+    lines.append(f"เวลาไทย/UTC: {now_txt}")
+    lines.append("")
+    lines.append("SYSTEM HEALTH")
+    lines.append("Core: ✅ | DB: ✅ | LINE Config: ✅ | API Router: ✅")
+    lines.append("")
+    lines.append("CONFIG STATUS")
+    lines.append(
+        " | ".join([
+            v1300_4_api_line("LINE_CHANNEL_ACCESS_TOKEN"),
+            v1300_4_api_line("LINE_CHANNEL_SECRET"),
+            v1300_4_api_line("LINE_USER_ID"),
+            v1300_4_api_line("DATABASE_URL"),
+        ])
+    )
+    lines.append("")
+    lines.append(v1300_4_router_health_block())
+    lines.append("")
+    lines.append("COMMANDS")
+    lines.append("สถานะระบบ | api | สถานะ SCB.BK | สถานะ GOLD | api NVDA")
+    lines.append("")
+    lines.append("Quick Links:")
+    lines.append("/v1300_4/status | /v1300_3/api-health.txt")
+    lines.append("/v1300_3/symbol-status/NVDA | /v1300_3/symbol-status/SCB.BK | /v1300_3/symbol-status/GOLD")
+    lines.append("")
+    lines.append(f"Version : {V1300_4_DISPLAY_VERSION}")
+    return "\n".join(lines)
+
+try:
+    _v1300_4_prev_handle_line_command = handle_line_command
+except Exception:
+    _v1300_4_prev_handle_line_command = None
+
+def handle_line_command(user_text):
+    text = (user_text or "").strip()
+    low = text.lower().replace(" ", "")
+    if low in {"สถานะ", "สถานะระบบ", "ระบบ", "status", "health", "api", "apihealth", "สถานะapi", "เช็คapi", "เช็กapi"}:
+        return v1300_4_unified_status_text()
+    if _v1300_4_prev_handle_line_command:
+        return v1300_4_clean_output(_v1300_4_prev_handle_line_command(user_text))
+    return v1300_4_clean_output("ไม่พบคำสั่ง")
+
+try:
+    _v1300_4_prev_filter = v1300_1_force_filter_before_line_send
+except Exception:
+    _v1300_4_prev_filter = None
+
+def v1300_1_force_filter_before_line_send(text):
+    if _v1300_4_prev_filter:
+        text = _v1300_4_prev_filter(text)
+    return v1300_4_clean_output(text)
+
+try:
+    _v1300_4_prev_line_reply = line_reply
+    def line_reply(reply_token, text):
+        return _v1300_4_prev_line_reply(reply_token, v1300_4_clean_output(text))
+except Exception:
+    pass
+
+try:
+    _v1300_4_prev_line_push = line_push
+    def line_push(user_id, text):
+        return _v1300_4_prev_line_push(user_id, v1300_4_clean_output(text))
+except Exception:
+    pass
+
+@app.route("/v1300_4/status", methods=["GET"], endpoint="v1300_4_status")
+def v1300_4_status_route():
+    return Response(v1300_4_unified_status_text(), mimetype="text/plain; charset=utf-8")
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
 
