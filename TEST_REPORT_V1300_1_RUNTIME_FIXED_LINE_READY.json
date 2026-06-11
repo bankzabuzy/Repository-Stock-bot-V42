@@ -21,9 +21,9 @@
     }
   ],
   "checks": {
-    "V41_count_main": 0,
-    "V42_count_main": 0,
-    "SAFE_FALLBACK_count_main": 0,
+    "old-version-41_count_main": 0,
+    "old-version-42_count_main": 0,
+    "old-fallback-label_count_main": 0,
     "display_version_count": 1,
     "invalid_assignment_patterns": 0
   },

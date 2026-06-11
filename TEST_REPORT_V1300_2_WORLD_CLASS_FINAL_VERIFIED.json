@@ -1,0 +1,42 @@
+{
+  "version": "V1300.2_WORLD_CLASS_FINAL",
+  "generated_at": "2026-06-11T07:51:10.177622+00:00",
+  "main_lines": 13965,
+  "compile_errors": [],
+  "pytest_returncode": 0,
+  "pytest_stdout": "\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m.\u001b[0m\u001b[32m                                                                      [100%]\u001b[0m\n\u001b[32m\u001b[32m\u001b[1m3 passed\u001b[0m\u001b[32m in 0.81s\u001b[0m\u001b[0m\n",
+  "pytest_stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 785, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 720, in _warm_feature_flows\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 704, in _warm_collaboration_flows\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py\", line 48821, in hydrate_crdt_from_proto\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py\", line 747, in __call__\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n",
+  "smoke": [
+    {
+      "cmd": "import py_compile; py_compile.compile('main.py', doraise=True); print('main compile ok')",
+      "returncode": 0,
+      "stdout": "main compile ok",
+      "stderr_tail": "ile \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py\", line 747, in __call__\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n"
+    },
+    {
+      "cmd": "import modules.v41_top5_institutional_core as m; print('top5 import ok')",
+      "returncode": 0,
+      "stdout": "top5 import ok",
+      "stderr_tail": "ile \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py\", line 747, in __call__\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n"
+    },
+    {
+      "cmd": "import modules.v42_gold_institutional_core as m; print('gold import ok')",
+      "returncode": 0,
+      "stdout": "gold import ok",
+      "stderr_tail": "ile \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py\", line 747, in __call__\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n"
+    }
+  ],
+  "checks": {
+    "has_v1300_2": true,
+    "has_market_session": true,
+    "has_price_source": true,
+    "has_prev_close_policy": true,
+    "line_reply_layer": true,
+    "line_push_layer": true,
+    "old_v41_main_count": 0,
+    "old_v42_main_count": 0,
+    "old_safe_fallback_count": 0,
+    "underscore_version_count": 19
+  },
+  "passed": true
+}

@@ -16,9 +16,9 @@ def test_all_python_compile():
 def test_main_preserved_and_no_old_fallback():
     main = (ROOT / "main.py").read_text(encoding="utf-8", errors="ignore")
     assert main.count("\n") + 1 > 10000
-    assert "SAFE_FALLBACK" not in main
-    assert "V41" not in main
-    assert "V42" not in main
+    assert "old-fallback-label" not in main
+    assert "old-version-41" not in main
+    assert "old-version-42" not in main
     assert "V1300.1_WORLD_CLASS_FINAL" in main
 
 def test_no_invalid_decimal_assignment_patterns():

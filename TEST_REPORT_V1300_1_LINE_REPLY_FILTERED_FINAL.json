@@ -1,0 +1,36 @@
+{
+  "version": "V1300.1_WORLD_CLASS_FINAL_LINE_REPLY_FILTERED_FINAL",
+  "generated_at": "2026-06-11T07:07:15.431542+00:00",
+  "compile_errors": [],
+  "smoke": [
+    {
+      "cmd": "import py_compile; py_compile.compile('main.py', doraise=True); print('main compile ok')",
+      "returncode": 0,
+      "stdout": "main compile ok",
+      "stderr_tail": "ile \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py\", line 747, in __call__\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n"
+    },
+    {
+      "cmd": "import modules.v41_top5_institutional_core as m; print('top5 import ok')",
+      "returncode": 0,
+      "stdout": "top5 import ok",
+      "stderr_tail": "ile \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py\", line 747, in __call__\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n"
+    },
+    {
+      "cmd": "import modules.v42_gold_institutional_core as m; print('gold import ok')",
+      "returncode": 0,
+      "stdout": "gold import ok",
+      "stderr_tail": "ile \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py\", line 747, in __call__\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n"
+    }
+  ],
+  "checks": {
+    "line_reply_direct_filter": true,
+    "line_push_direct_filter": true,
+    "V41_count_main": 0,
+    "V42_count_main": 0,
+    "SAFE_FALLBACK_count_main": 0,
+    "DATA_UNAVAILABLE_count_main": 16,
+    "display_version_count": 7,
+    "main_lines": 13775
+  },
+  "passed": true
+}
