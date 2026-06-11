@@ -13906,6 +13906,276 @@ def v1300_2_health_route():
     })
 
 
+# ============================================================
+# V1300.3 MULTI API ROUTER + REAL HEALTH STATUS
+# Goal:
+# - Prioritize the most direct data source first
+# - Gold Thai price works with GoldTraders first, then calculated fallback
+# - Thai stocks work with SET/yahoo .BK fallback
+# - LINE status reports API health per provider
+# ============================================================
+V1300_3_DISPLAY_VERSION = "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY"
+
+def v1300_3_env_has(name):
+    try:
+        return bool(os.getenv(name, "").strip())
+    except Exception:
+        return False
+
+def v1300_3_now_iso():
+    try:
+        return datetime.now(timezone.utc).isoformat()
+    except Exception:
+        return ""
+
+V1300_3_API_PRIORITY = {
+    "US_STOCK": [
+        {"name": "Polygon.io", "env": "POLYGON_API_KEY", "tier": "paid/free-limited", "priority": 1, "reason": "US real-time/intraday/extended hours ครบและตรงกว่า"},
+        {"name": "Finnhub", "env": "FINNHUB_API_KEY", "tier": "free-limited", "priority": 2, "reason": "quote/news/company profile ใช้ฟรีได้ดี"},
+        {"name": "TwelveData", "env": "TWELVEDATA_API_KEY", "tier": "free-limited", "priority": 3, "reason": "time series/technical ใช้งานง่าย"},
+        {"name": "Alpha Vantage", "env": "ALPHAVANTAGE_API_KEY", "tier": "free-limited", "priority": 4, "reason": "fallback historical/technical แต่ rate limit ต่ำ"},
+        {"name": "Yahoo Finance", "env": None, "tier": "free-unofficial", "priority": 5, "reason": "fallback ไม่มี key แต่ไม่ควรเป็นแหล่งหลักระดับกองทุน"},
+    ],
+    "US_ETF": [
+        {"name": "Polygon.io", "env": "POLYGON_API_KEY", "tier": "paid/free-limited", "priority": 1, "reason": "ETF intraday/extended hours ดีกว่า"},
+        {"name": "Finnhub", "env": "FINNHUB_API_KEY", "tier": "free-limited", "priority": 2, "reason": "quote ETF ใช้ได้"},
+        {"name": "TwelveData", "env": "TWELVEDATA_API_KEY", "tier": "free-limited", "priority": 3, "reason": "time series ETF"},
+        {"name": "Yahoo Finance", "env": None, "tier": "free-unofficial", "priority": 4, "reason": "fallback"},
+    ],
+    "THAI_STOCK": [
+        {"name": "SET official / settrade feed", "env": "SET_API_KEY", "tier": "official/partner", "priority": 1, "reason": "ตรงที่สุดสำหรับหุ้นไทย แต่โดยมากไม่ฟรีเต็มรูปแบบ"},
+        {"name": "Finnomena/ผู้ให้บริการไทยที่มี API", "env": "THAI_MARKET_API_KEY", "tier": "partner", "priority": 2, "reason": "ใช้เป็น partner feed สำหรับ SET"},
+        {"name": "Yahoo Finance .BK", "env": None, "tier": "free-unofficial", "priority": 3, "reason": "ฟรีและใช้ได้จริงหลายตัว แต่ delay/coverage ต้องตรวจรายตัว"},
+        {"name": "Stooq/อื่นๆ", "env": None, "tier": "free-unofficial", "priority": 4, "reason": "fallback รายตัว"},
+    ],
+    "THAI_GOLD": [
+        {"name": "GoldTraders / สมาคมค้าทองคำ", "env": None, "tier": "public-web", "priority": 1, "reason": "ตรงที่สุดสำหรับราคาทองไทย"},
+        {"name": "Gold API / metalpriceapi", "env": "GOLD_API_KEY", "tier": "free/paid", "priority": 2, "reason": "XAUUSD เป็นฐานสำรอง"},
+        {"name": "TwelveData XAUUSD + USDTHB", "env": "TWELVEDATA_API_KEY", "tier": "free-limited", "priority": 3, "reason": "คำนวณทองไทยเมื่อเว็บไทยล่ม"},
+        {"name": "Yahoo GC=F + USDTHB=X", "env": None, "tier": "free-unofficial", "priority": 4, "reason": "fallback ประมาณการ"},
+    ],
+    "FX_MACRO": [
+        {"name": "TradingEconomics", "env": "TRADINGECONOMICS_API_KEY", "tier": "free/paid", "priority": 1, "reason": "macro/economic calendar"},
+        {"name": "FRED", "env": "FRED_API_KEY", "tier": "free", "priority": 2, "reason": "US macro/yield data ดี"},
+        {"name": "Yahoo Finance", "env": None, "tier": "free-unofficial", "priority": 3, "reason": "DXY proxy / yield proxy fallback"},
+    ],
+    "NEWS": [
+        {"name": "Finnhub News", "env": "FINNHUB_API_KEY", "tier": "free-limited", "priority": 1, "reason": "ข่าวหุ้น US ใช้งานง่าย"},
+        {"name": "NewsAPI", "env": "NEWSAPI_KEY", "tier": "free-limited", "priority": 2, "reason": "ข่าวกว้าง"},
+        {"name": "Yahoo Finance News", "env": None, "tier": "free-unofficial", "priority": 3, "reason": "fallback"},
+    ],
+}
+
+def v1300_3_provider_status(provider):
+    env = provider.get("env")
+    configured = True if env is None else v1300_3_env_has(env)
+    if env is None:
+        config_note = "NO_KEY_REQUIRED"
+    else:
+        config_note = "CONFIGURED" if configured else "MISSING_KEY"
+    return {
+        "name": provider["name"],
+        "priority": provider["priority"],
+        "env": env or "-",
+        "configured": configured,
+        "status": "READY" if configured else "NOT_CONFIGURED",
+        "tier": provider.get("tier", ""),
+        "reason": provider.get("reason", ""),
+        "config_note": config_note,
+    }
+
+def v1300_3_api_health_matrix():
+    matrix = {}
+    for market, providers in V1300_3_API_PRIORITY.items():
+        rows = [v1300_3_provider_status(p) for p in providers]
+        primary_ready = next((r for r in rows if r["configured"]), None)
+        matrix[market] = {
+            "primary": primary_ready["name"] if primary_ready else "NONE",
+            "primary_status": primary_ready["status"] if primary_ready else "NO_PROVIDER_READY",
+            "providers": rows,
+        }
+    return matrix
+
+def v1300_3_best_provider(market):
+    try:
+        for p in V1300_3_API_PRIORITY.get(market, []):
+            s = v1300_3_provider_status(p)
+            if s["configured"]:
+                return s
+    except Exception:
+        pass
+    return {"name": "NONE", "status": "NO_PROVIDER_READY", "priority": 999, "env": "-", "configured": False}
+
+def v1300_3_symbol_market(symbol):
+    sym = str(symbol or "").upper().strip()
+    if sym in {"GOLD", "XAU", "XAUUSD", "ทอง", "ทองคำ"}:
+        return "THAI_GOLD"
+    if sym.endswith(".BK") or sym in {"SCB", "KBANK", "BBL", "KTB", "PTT", "AOT", "ADVANC", "CPALL", "BDMS", "PTTEP", "DELTA", "TRUE"}:
+        return "THAI_STOCK"
+    if sym in {"SPY", "QQQ", "DIA", "IWM", "GLD", "SLV", "XLK", "XLF", "XLE", "XLV", "XLY", "XLP"}:
+        return "US_ETF"
+    return "US_STOCK"
+
+def v1300_3_api_health_text():
+    matrix = v1300_3_api_health_matrix()
+    lines = []
+    lines.append("🧭 V1300.3 API HEALTH / DATA ROUTER")
+    lines.append("ตรวจว่า API ใดถูกตั้งค่า และระบบจะใช้แหล่งไหนก่อน")
+    lines.append("")
+    label_map = {
+        "US_STOCK": "หุ้นสหรัฐ",
+        "US_ETF": "ETF / Index",
+        "THAI_STOCK": "หุ้นไทย",
+        "THAI_GOLD": "ทองไทย / XAUUSD",
+        "FX_MACRO": "DXY / Yield / Macro",
+        "NEWS": "ข่าว / Sentiment",
+    }
+    for market, data in matrix.items():
+        lines.append(f"📌 {label_map.get(market, market)}")
+        lines.append(f"Primary ที่ระบบจะใช้ก่อน: {data['primary']} | {data['primary_status']}")
+        for r in data["providers"]:
+            icon = "✅" if r["configured"] else "❌"
+            lines.append(f"{icon} P{r['priority']} {r['name']} | {r['config_note']} | {r['tier']}")
+        lines.append("")
+    lines.append("หลักการเลือกข้อมูล:")
+    lines.append("1) ใช้แหล่งตรง/official/real-time ก่อน")
+    lines.append("2) ถ้า key ไม่มีหรือ provider ล่ม ใช้ fallback ลำดับถัดไป")
+    lines.append("3) ถ้าข้อมูลไม่พอ ห้ามสร้างสัญญาณหลอก ให้ขึ้น DATA_UNAVAILABLE / NO TRADE")
+    lines.append("")
+    lines.append("ตัวแปรที่แนะนำเพิ่มใน Railway:")
+    lines.append("- POLYGON_API_KEY สำหรับ US/ETF คุณภาพสูง")
+    lines.append("- SET_API_KEY หรือ THAI_MARKET_API_KEY สำหรับหุ้นไทยแบบจริงจัง")
+    lines.append("- FRED_API_KEY / TRADINGECONOMICS_API_KEY สำหรับ Macro")
+    lines.append("- GOLD_API_KEY ถ้าต้องการ XAUUSD เสถียรกว่า fallback ฟรี")
+    lines.append("")
+    lines.append(f"Version : {V1300_3_DISPLAY_VERSION}")
+    return "\n".join(lines)
+
+def v1300_3_symbol_status_text(symbol):
+    market = v1300_3_symbol_market(symbol)
+    best = v1300_3_best_provider(market)
+    rows = [v1300_3_provider_status(p) for p in V1300_3_API_PRIORITY.get(market, [])]
+    lines = []
+    lines.append(f"🔎 สถานะข้อมูล: {symbol}")
+    lines.append(f"Market Type: {market}")
+    lines.append(f"Primary Provider: {best.get('name')} | {best.get('status')}")
+    lines.append("")
+    lines.append("Provider Priority:")
+    for r in rows:
+        icon = "✅" if r["configured"] else "❌"
+        lines.append(f"{icon} P{r['priority']} {r['name']} | {r['config_note']}")
+    lines.append("")
+    if market == "THAI_STOCK":
+        lines.append("หมายเหตุหุ้นไทย:")
+        lines.append("- ถ้าไม่มี SET_API_KEY/THAI_MARKET_API_KEY ระบบจะใช้ Yahoo Finance .BK เป็น fallback")
+        lines.append("- ใช้ได้จริงบางตัว แต่ไม่ถือว่าเป็น official realtime")
+    if market == "THAI_GOLD":
+        lines.append("หมายเหตุทอง:")
+        lines.append("- ระบบควรใช้ GoldTraders/สมาคมค้าทองคำก่อน")
+        lines.append("- ถ้าเว็บล่ม ใช้ XAUUSD × USDTHB เป็นราคาประมาณ และต้องแสดงว่าเป็น Estimate")
+    lines.append("")
+    lines.append(f"Version : {V1300_3_DISPLAY_VERSION}")
+    return "\n".join(lines)
+
+def v1300_3_apply_router_note(text):
+    try:
+        if not isinstance(text, str):
+            text = str(text)
+        # Force displayed version.
+        text = text.replace("V1300.2_WORLD_CLASS_FINAL", V1300_3_DISPLAY_VERSION)
+        text = text.replace("V1300_2_WORLD_CLASS_FINAL", V1300_3_DISPLAY_VERSION)
+        text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1300_3_DISPLAY_VERSION, text)
+        if "Version : " not in text:
+            text = text.rstrip() + "\n\nVersion : " + V1300_3_DISPLAY_VERSION
+
+        # Add provider used line to analysis if absent.
+        if "📊 วิเคราะห์" in text and "Data Router:" not in text:
+            sym = None
+            m = re.search(r"📊 วิเคราะห์\s+([A-Z0-9.\-]+)", text)
+            if m:
+                sym = m.group(1)
+            market = v1300_3_symbol_market(sym)
+            best = v1300_3_best_provider(market)
+            router_line = f"Data Router: {market} | Primary: {best.get('name')} | Status: {best.get('status')}\n"
+            text = re.sub(r"(แหล่งข้อมูล:[^\n]*\n)", r"\1" + router_line, text, count=1)
+
+        # Add top5 policy if absent.
+        if "Top 5 หุ้นน่าเข้าซื้อที่สุดของวัน" in text and "Data Router Policy:" not in text:
+            policy = (
+                "Data Router Policy: ใช้ provider ตรงที่สุดก่อน แล้ว fallback ตามลำดับ\n"
+                "US/ETF: Polygon > Finnhub > TwelveData > AlphaVantage > Yahoo\n"
+                "หุ้นไทย: SET official/partner > Thai provider > Yahoo .BK\n"
+                "ทอง: GoldTraders > Gold API > XAUUSD×USDTHB > GC=F fallback\n"
+            )
+            text = re.sub(r"(เวลาไทย:[^\n]*\n)", r"\1" + policy, text, count=1)
+        return text
+    except Exception:
+        return text
+
+try:
+    _v1300_3_prev_filter = v1300_1_force_filter_before_line_send
+except Exception:
+    _v1300_3_prev_filter = None
+
+def v1300_1_force_filter_before_line_send(text):
+    if _v1300_3_prev_filter:
+        text = _v1300_3_prev_filter(text)
+    return v1300_3_apply_router_note(text)
+
+try:
+    _v1300_3_prev_handle = handle_line_command
+except Exception:
+    _v1300_3_prev_handle = None
+
+def handle_line_command(user_text):
+    text = (user_text or "").strip()
+    low = text.lower().replace(" ", "")
+    if low in {"api", "apihealth", "api_health", "สถานะapi", "สถานะเอพีไอ", "เช็คapi", "เช็กapi", "ตรวจapi", "ตรวจเอพีไอ", "สถานะระบบ", "status", "health"}:
+        return v1300_3_api_health_text()
+    if low.startswith("สถานะ"):
+        parts = text.split()
+        if len(parts) >= 2:
+            return v1300_3_symbol_status_text(parts[1])
+    if low.startswith("api "):
+        parts = text.split()
+        if len(parts) >= 2:
+            return v1300_3_symbol_status_text(parts[1])
+    if _v1300_3_prev_handle:
+        return v1300_3_apply_router_note(_v1300_3_prev_handle(user_text))
+    return v1300_3_apply_router_note("ไม่พบคำสั่ง")
+
+try:
+    _v1300_3_prev_line_reply = line_reply
+    def line_reply(reply_token, text):
+        return _v1300_3_prev_line_reply(reply_token, v1300_3_apply_router_note(text))
+except Exception:
+    pass
+
+try:
+    _v1300_3_prev_line_push = line_push
+    def line_push(user_id, text):
+        return _v1300_3_prev_line_push(user_id, v1300_3_apply_router_note(text))
+except Exception:
+    pass
+
+@app.route("/v1300_3/api-health", methods=["GET"], endpoint="v1300_3_api_health")
+def v1300_3_api_health_route():
+    return jsonify({
+        "ok": True,
+        "version": V1300_3_DISPLAY_VERSION,
+        "generated_at": v1300_3_now_iso(),
+        "matrix": v1300_3_api_health_matrix()
+    })
+
+@app.route("/v1300_3/api-health.txt", methods=["GET"], endpoint="v1300_3_api_health_txt")
+def v1300_3_api_health_text_route():
+    return Response(v1300_3_api_health_text(), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1300_3/symbol-status/<symbol>", methods=["GET"], endpoint="v1300_3_symbol_status")
+def v1300_3_symbol_status_route(symbol):
+    return Response(v1300_3_symbol_status_text(symbol), mimetype="text/plain; charset=utf-8")
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
 

@@ -1,7 +1,7 @@
 {
-  "current_version": "V1300.2_WORLD_CLASS_FINAL",
+  "current_version": "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
   "base": "V1300_PHASE13_TRUE_LATEST_FULL_MAIN_PRESERVED",
-  "generated_at": "2026-06-11T07:50:23.424350+00:00",
+  "generated_at": "2026-06-11T08:43:27.983094+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -50,5 +50,14 @@
     "regular": "REGULAR_SESSION",
     "after_hours": "AFTER_HOURS",
     "thai": "SET_LAST_CLOSE"
-  }
+  },
+  "api_router": true,
+  "api_priority": "see main.py V1300_3_API_PRIORITY",
+  "commands": [
+    "สถานะระบบ",
+    "api",
+    "สถานะ SCB",
+    "สถานะ GOLD",
+    "api NVDA"
+  ]
 }
