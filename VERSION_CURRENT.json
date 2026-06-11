@@ -1,24 +1,14 @@
 {
-  "version": "V1300_PHASE13_WORLD_CLASS_FUND_OS_TRUE_LATEST",
-  "phase": "Phase 13",
-  "created_utc": "2026-06-11T04:15:11.197428Z",
-  "source_zips": [
-    "Repository-Stock-bot_V1000_PHASE10_AUTONOMOUS_FUND_OS_SAFE_TESTED.zip",
-    "Repository-Stock-bot_V1100_PHASE11_GLOBAL_HEDGEFUND_READY.zip",
-    "Repository-Stock-bot_V1200_PHASE12_WORLD_CLASS_INVESTMENT_OS_E2E_TESTED.zip",
-    "Repository-Stock-bot_V1200_PHASE12_WORLD_CLASS_INVESTMENT_OS_LIVEPRICE.zip",
-    "Repository-Stock-bot_V550_PHASE5_WEBULL_API_READY_SAFE_EXECUTION_STABLE(7).zip",
-    "Repository-Stock-bot_V620_PHASE6_ALPHA_DISCOVERY_ENGINE_STABLE.zip",
-    "Repository-Stock-bot_V620_PHASE6_ALPHA_DISCOVERY_WORLD_CLASS.zip",
-    "Repository-Stock-bot_V700_PHASE7_EXECUTION_EDGE_STABLE(2).zip",
-    "Repository-Stock-bot_V700_TRUE_PHASE7_MERGED_PHASE6_EXECUTION_EDGE_TESTED.zip",
-    "Repository-Stock-bot_V800_PHASE8_REAL_PERFORMANCE_TESTED.zip",
-    "Repository-Stock-bot_V900_PHASE9_LIVE_FUND_OPERATION_CURRENT_TESTED.zip"
+  "current_version": "V1300_PHASE13_TRUE_LATEST_FULL_MAIN_PRESERVED",
+  "base": "V1200_PHASE12_WORLD_CLASS_INVESTMENT_OS_LIVEPRICE",
+  "generated_at": "2026-06-11T05:19:44.825244+00:00",
+  "main_py_preserved": true,
+  "main_py_lines": 13245,
+  "main_py_size_bytes": 562822,
+  "entrypoints": [
+    "main.py",
+    "run_phase13_current.py"
   ],
-  "status": "merged_from_v900_v1000_v1100_v1200_plus_v1300_world_class_extensions",
-  "railway_start_command": "gunicorn main:app --bind 0.0.0.0:$PORT --workers 1 --threads 4",
-  "safety_defaults": {
-    "LIVE_TRADING_ENABLED": "false",
-    "HUMAN_APPROVAL_REQUIRED": "true"
-  }
+  "railway_start_command_recommended": "gunicorn main:app --bind 0.0.0.0:$PORT --workers 1 --threads 4",
+  "notes": "V13 added as additive module. Existing production main.py is preserved to avoid breaking V42/V1200 routes."
 }

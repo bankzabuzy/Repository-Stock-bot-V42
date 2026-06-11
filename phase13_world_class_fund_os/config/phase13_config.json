@@ -1,0 +1,22 @@
+{
+  "version": "V1300",
+  "base": "V1200_PHASE12_WORLD_CLASS_INVESTMENT_OS_LIVEPRICE",
+  "main_py_policy": "PRESERVE_EXISTING_FULL_MAIN_DO_NOT_REPLACE",
+  "safe_default_mode": "shadow",
+  "live_trading_blocked_by_default": true,
+  "human_approval_required": true,
+  "objectives": [
+    "preserve existing production dashboard/routes",
+    "add world-class behavioral and market decision support",
+    "avoid profit guarantees",
+    "improve risk control and forward-test discipline"
+  ],
+  "risk_limits": {
+    "max_single_trade_risk_pct": 0.01,
+    "max_position_pct_equity": 0.04,
+    "max_daily_loss_pct": 0.02,
+    "max_drawdown_pause_pct": 0.08,
+    "max_correlation_cluster_pct": 0.3,
+    "min_liquidity_score": 60
+  }
+}
