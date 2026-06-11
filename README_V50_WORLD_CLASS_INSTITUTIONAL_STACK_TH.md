@@ -1,6 +1,6 @@
 # V50 WORLD-CLASS INSTITUTIONAL STACK STABLE
 
-รวม V43-V50 ต่อจาก V42.8
+รวม V43-V50 ต่อจาก V1300.1.8
 
 ## V43 Portfolio Manager
 - Portfolio Heat

@@ -24,5 +24,5 @@
 - พฤติกรรมตลาดรวม
 
 ## หมายเหตุ
-V42-V170 ยังอยู่เพื่อ backward compatibility
+V1300.1-V170 ยังอยู่เพื่อ backward compatibility
 แต่ latest control layer สำหรับ forecast+risk คือ V180.1

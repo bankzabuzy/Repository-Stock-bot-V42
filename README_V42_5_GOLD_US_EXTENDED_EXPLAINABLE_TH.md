@@ -1,6 +1,6 @@
-# V42.5 GOLD + US EXTENDED HOURS EXPLAINABLE STABLE
+# V1300.1.5 GOLD + US EXTENDED HOURS EXPLAINABLE STABLE
 
-ต่อยอดจาก V42.4 Fund Grade
+ต่อยอดจาก V1300.1.4 Fund Grade
 
 ## เพิ่มใหม่
 - Raw Confidence / Final Confidence

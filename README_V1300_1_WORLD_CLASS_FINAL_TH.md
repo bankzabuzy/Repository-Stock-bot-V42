@@ -3,7 +3,7 @@
 ฐานเดิมล่าสุดถูกเก็บไว้ครบ `main.py` ยังมี 13408 บรรทัด
 
 ## แก้ไขแล้ว
-- SAFE_FALLBACK ไม่แสดง RSI=100 แล้ว แสดง RSI=N/A
+- DATA_UNAVAILABLE ไม่แสดง RSI=100 แล้ว แสดง RSI=N/A
 - ปิดแผนเข้าเมื่อ Probability < 50
 - ซ่อน CALL ถ้า Timeframe เป็น BEARISH ทุกตัว
 - เพิ่ม Market Breadth

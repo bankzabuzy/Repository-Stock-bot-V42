@@ -1,4 +1,4 @@
-# V42.6 LINE US EXTENDED HOURS STABLE
+# V1300.1.6 LINE US EXTENDED HOURS STABLE
 
 เพิ่มให้ LINE Bot ตอบราคาหุ้นสหรัฐก่อนตลาดเปิด / หลังตลาดปิด / ช่วงตลาดปกติ
 

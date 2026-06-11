@@ -1,6 +1,6 @@
-# V42.3 GOLD INSTITUTIONAL HIGH CONVICTION STABLE
+# V1300.1.3 GOLD INSTITUTIONAL HIGH CONVICTION STABLE
 
-ต่อยอดจาก V42.2 โดยเพิ่มโค้ดใช้งานจริง:
+ต่อยอดจาก V1300.1.2 โดยเพิ่มโค้ดใช้งานจริง:
 
 - Entry Score Engine
 - Session Filter: London / New York
@@ -14,7 +14,7 @@
 
 ## ENV เสริม
 
-- `V42_ALLOW_ALL_SESSIONS=true` ถ้าต้องการให้ทดสอบแจ้งเตือนได้ทุก session
+- `V1300.1_ALLOW_ALL_SESSIONS=true` ถ้าต้องการให้ทดสอบแจ้งเตือนได้ทุก session
 - `HIGH_IMPACT_NEWS_ACTIVE=true` เมื่อต้องการหยุดก่อนข่าวแรง
 - `HIGH_IMPACT_NEWS_EVENT=FOMC/CPI/NFP/Powell`
 - `HIGH_IMPACT_NEWS_WINDOW_MIN=30`

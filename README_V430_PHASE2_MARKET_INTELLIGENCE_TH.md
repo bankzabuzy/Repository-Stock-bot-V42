@@ -10,13 +10,13 @@
 - Spoofing Proxy
 - Order Flow Proxy
 
-## V410 Regime AI
+## V1300.10 Regime AI
 - Trending / Sideway
 - High Volatility / Panic
 - Risk-On / Risk-Off
 - Strategy Mapping
 
-## V420 Multi-Agent Debate AI
+## V1300.10 Multi-Agent Debate AI
 - Technical AI
 - Macro AI
 - Risk AI

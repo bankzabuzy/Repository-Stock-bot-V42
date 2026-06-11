@@ -1,4 +1,4 @@
-# V42.2 GOLD INSTITUTIONAL ENTRY FILTER
+# V1300.1.2 GOLD INSTITUTIONAL ENTRY FILTER
 
 เพิ่มตัวกรองแจ้งเตือนทองคำแบบเข้มข้น:
 

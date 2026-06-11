@@ -80,7 +80,7 @@ def stale_reference_report() -> Dict[str, Any]:
         "latest": EXPECTED_LATEST,
         "stale_sensitive_references": stale,
         "stale_reference_count": sum(len(v) for v in stale.values()),
-        "note": "V42-V130 references are kept for backward-compatible modules. Latest system status must show V140.",
+        "note": "V1300.1-V130 references are kept for backward-compatible modules. Latest system status must show V140.",
     }
 
 def route_registry() -> Dict[str, Any]:
@@ -108,7 +108,7 @@ def latest_status_payload() -> Dict[str, Any]:
         "version_audit": stale,
         "route_registry": {"route_count": routes.get("route_count"), "sample": routes.get("routes", [])[:30]},
         "backward_compatibility": {
-            "legacy_versions_kept": ["V42", "V50", "V51", "V100", "V110", "V120", "V130"],
+            "legacy_versions_kept": ["V1300.1", "V50", "V51", "V100", "V110", "V120", "V130"],
             "reason": "ระบบเดิมยังถูกเก็บไว้เพื่อไม่ให้ endpoint เก่าพัง แต่ V140 เป็น latest control layer",
         },
         "latest_endpoints": [
@@ -135,7 +135,7 @@ def latest_status_text() -> str:
         f"Sensitive stale refs: {audit.get('stale_reference_count')}",
         "",
         "หมายเหตุ:",
-        "ระบบยังเก็บ V42-V130 ไว้เพื่อ backward compatibility",
+        "ระบบยังเก็บ V1300.1-V130 ไว้เพื่อ backward compatibility",
         "แต่ Control Layer ล่าสุดและ route ตรวจระบบคือ V140",
         "",
         "Latest Endpoints:",

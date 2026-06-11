@@ -311,7 +311,7 @@ def v48_monte_carlo(symbol: str = "PORTFOLIO", trials: int = 2000, win_rate: flo
 # V49 Self Learning AI
 def v49_self_learning() -> Dict[str, Any]:
     rows = _latest_signals(500)
-    # Use V42.7 performance if available.
+    # Use V1300.1.7 performance if available.
     closed = 0
     wins = 0
     try:

@@ -1,4 +1,4 @@
-# V42.6.3 LINE EXTENDED PRICE FIRST STABLE
+# V1300.1.6.3 LINE EXTENDED PRICE FIRST STABLE
 
 ปรับตามที่ต้องการ:
 เมื่อพิมพ์หุ้นใน LINE เช่น `zs`, `nvda`, `tsm`

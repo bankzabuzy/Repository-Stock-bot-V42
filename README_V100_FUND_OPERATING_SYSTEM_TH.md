@@ -1,6 +1,6 @@
 # V100 FUND OPERATING SYSTEM STABLE
 
-V100 ไม่ลบระบบเดิม แต่เพิ่ม Fund Operating System Layer ครอบ V42-V51
+V100 ไม่ลบระบบเดิม แต่เพิ่ม Fund Operating System Layer ครอบ V1300.1-V51
 
 ## โครงสร้างใหม่
 - modules/v100_fund_os/config.py

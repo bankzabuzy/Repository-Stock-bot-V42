@@ -3,8 +3,8 @@
   "base_file": "Repository-Stock-bot_V390_PHASE1_EXECUTION_ATTRIBUTION_RISK_STABLE.zip",
   "includes": [
     "V400 Market Microstructure AI",
-    "V410 Regime AI",
-    "V420 Multi-Agent Debate AI",
+    "V1300.10 Regime AI",
+    "V1300.10 Multi-Agent Debate AI",
     "V430 Digital Twin Market"
   ],
   "compileall": true,

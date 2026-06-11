@@ -1,6 +1,6 @@
-# V42.6.1 LINE FULL STOCK + EXTENDED HOURS
+# V1300.1.6.1 LINE FULL STOCK + EXTENDED HOURS
 
-แก้ปัญหา V42.6 ที่คำสั่งหุ้น เช่น `TSM`, `NVDA` ตอบเฉพาะ Extended Hours แล้วทำให้:
+แก้ปัญหา V1300.1.6 ที่คำสั่งหุ้น เช่น `TSM`, `NVDA` ตอบเฉพาะ Extended Hours แล้วทำให้:
 - จุดเข้าซื้อ
 - Options
 - Dividend / Valuation

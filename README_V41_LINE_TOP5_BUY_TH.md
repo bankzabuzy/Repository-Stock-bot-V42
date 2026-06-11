@@ -1,4 +1,4 @@
-# V41 LINE Top 5 Buy Ranking
+# V1300.1 LINE Top 5 Buy Ranking
 
 เพิ่มความสามารถให้ LINE Bot ตอบคำถาม Top 5 หุ้นที่น่าเข้าซื้อมากที่สุดของวัน
 

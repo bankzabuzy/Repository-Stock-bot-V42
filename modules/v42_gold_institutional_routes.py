@@ -1,9 +1,9 @@
-# V42.5 GOLD INSTITUTIONAL HIGH CONVICTION ROUTES
+# V1300.1.5 GOLD INSTITUTIONAL HIGH CONVICTION ROUTES
 # Optional blueprint. main.py also exposes direct routes, but this file keeps the module complete.
 
 from flask import Blueprint, jsonify, Response
 
-V42_ROUTE_VERSION = "V1300.1_WORLD_CLASS_FINAL"
+V1300.1_ROUTE_VERSION = "V1300.1_WORLD_CLASS_FINAL"
 v42_gold_bp = Blueprint("v42_gold", __name__)
 
 
@@ -13,7 +13,7 @@ def v42_gold_json():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": V42_ROUTE_VERSION, "error": str(e)}), 200
+        return jsonify({"ok": False, "version": V1300.1_ROUTE_VERSION, "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/v42/gold-text", methods=["GET"])
@@ -22,7 +22,7 @@ def v42_gold_text():
         from modules.v42_gold_institutional_core import build_v42_gold_text
         return Response(build_v42_gold_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึงระบบ V42.5 GOLD ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึงระบบ V1300.1.5 GOLD ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @v42_gold_bp.route("/v42/gold-high-conviction", methods=["GET"])
@@ -31,7 +31,7 @@ def v42_gold_high_conviction_text():
         from modules.v42_gold_institutional_core import build_v42_gold_high_conviction_text
         return Response(build_v42_gold_high_conviction_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.5 High Conviction ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V1300.1.5 High Conviction ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 
@@ -41,7 +41,7 @@ def v42_gold_dashboard_text():
         from modules.v42_gold_institutional_core import build_v42_gold_dashboard_text
         return Response(build_v42_gold_dashboard_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.5 Gold Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V1300.1.5 Gold Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @v42_gold_bp.route("/v42/gold-fund-grade", methods=["GET"])
@@ -71,7 +71,7 @@ def v42_gold_fund_grade_json():
             "market_breadth": payload.get("market_breadth"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": V42_ROUTE_VERSION, "error": str(e)}), 200
+        return jsonify({"ok": False, "version": V1300.1_ROUTE_VERSION, "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/thai-gold", methods=["GET"])
@@ -90,7 +90,7 @@ def thai_gold_json():
             "entry_filter": payload.get("entry_filter"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": V42_ROUTE_VERSION, "error": str(e)}), 200
+        return jsonify({"ok": False, "version": V1300.1_ROUTE_VERSION, "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/v42/gold-filter", methods=["GET"])
@@ -119,7 +119,7 @@ def v42_gold_filter():
             "market_breadth": payload.get("market_breadth"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": V42_ROUTE_VERSION, "error": str(e)}), 200
+        return jsonify({"ok": False, "version": V1300.1_ROUTE_VERSION, "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/v42/gold-explain", methods=["GET"])
@@ -128,7 +128,7 @@ def v42_gold_explain_text():
         from modules.v42_gold_institutional_core import build_v42_gold_explainable_text
         return Response(build_v42_gold_explainable_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.5 Explainable AI ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V1300.1.5 Explainable AI ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @v42_gold_bp.route("/v42/us-extended-hours", methods=["GET"])
@@ -171,7 +171,7 @@ def v427_risk_performance_json():
         from modules.v42_gold_institutional_core import build_v427_risk_performance_payload
         return jsonify(build_v427_risk_performance_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_STABLE", "error": str(e)}), 200
+        return jsonify({"ok": False, "version": "V1300.1.7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_STABLE", "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/v42/risk-dashboard", methods=["GET"])
@@ -180,7 +180,7 @@ def v427_risk_dashboard_text():
         from modules.v42_gold_institutional_core import build_v427_dashboard_text
         return Response(build_v427_dashboard_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.7 Risk Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V1300.1.7 Risk Dashboard ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @v42_gold_bp.route("/v42/record-signal", methods=["GET"])
@@ -193,7 +193,7 @@ def v427_record_signal_route():
         payload = build_v42_gold_payload()
         return jsonify(v427_record_signal(payload, symbol=symbol, asset_class=asset_class))
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_STABLE", "error": str(e)}), 200
+        return jsonify({"ok": False, "version": "V1300.1.7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_STABLE", "error": str(e)}), 200
 
 
 @v42_gold_bp.route("/v42/control-center", methods=["GET"])
@@ -202,7 +202,7 @@ def v428_control_center_text():
         from modules.v42_gold_institutional_core import build_v428_control_center_text
         return Response(build_v428_control_center_text(), mimetype="text/plain; charset=utf-8")
     except Exception as e:
-        return Response(f"ไม่สามารถดึง V42.8 Control Center ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
+        return Response(f"ไม่สามารถดึง V1300.1.8 Control Center ได้ในขณะนี้: {e}", mimetype="text/plain; charset=utf-8")
 
 
 @v42_gold_bp.route("/v42/control-center-json", methods=["GET"])

@@ -1,6 +1,6 @@
 # V1300.1 UNIFIED CONTROL CENTER DASHBOARD STABLE
 
-ต่อจาก V42.7
+ต่อจาก V1300.1.7
 
 ## เพิ่มใหม่
 หน้าเดียวเช็กทุกระบบ:

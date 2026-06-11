@@ -1,8 +1,8 @@
-V41_VERSION = "V41_TOP5_INSTITUTIONAL_COMPAT"
+V1300.1_VERSION = "V1300.1_TOP5_INSTITUTIONAL_COMPAT"
 
 
 def build_top5():
-    """Compatibility placeholder. The production V41 latest-data engine lives in main.py.
+    """Compatibility placeholder. The production V1300.1 latest-data engine lives in main.py.
     This module exists so older imports do not crash Railway.
     """
     return [

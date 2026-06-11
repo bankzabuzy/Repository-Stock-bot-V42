@@ -1,6 +1,6 @@
-# V42.1 GOLD INSTITUTIONAL STABLE
+# V1300.1.1 GOLD INSTITUTIONAL STABLE
 
-ปรับปรุงจาก V42 เพื่อให้ Deploy บน Railway ได้เสถียรขึ้นและแก้ปัญหา `No module named modules.v42_gold_institutional_core` โดยจัดโครงสร้าง ZIP ให้ `main.py` และ `modules/` อยู่ที่ root ของโปรเจกต์โดยตรง
+ปรับปรุงจาก V1300.1 เพื่อให้ Deploy บน Railway ได้เสถียรขึ้นและแก้ปัญหา `No module named modules.v42_gold_institutional_core` โดยจัดโครงสร้าง ZIP ให้ `main.py` และ `modules/` อยู่ที่ root ของโปรเจกต์โดยตรง
 
 ## Endpoint สำคัญ
 - `/health`

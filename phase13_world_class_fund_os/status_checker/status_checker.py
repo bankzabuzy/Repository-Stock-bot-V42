@@ -60,7 +60,7 @@ HUMAN_APPROVAL_REQUIRED:{'✅ TRUE' if c['human_approval_required'] else '❌ FA
 Safe Mode: {'✅ ON' if p['safe_mode'] else '⚠️ CHECK REQUIRED'}
 
 V1300.1 FIXES
-✅ SAFE_FALLBACK RSI=100 ถูกปิด
+✅ DATA_UNAVAILABLE RSI=100 ถูกปิด
 ✅ Probability < 50 ปิด Entry อัตโนมัติ
 ✅ Bearish ทุก TF ซ่อน CALL
 ✅ Market Breadth
