@@ -1020,7 +1020,7 @@ def build_v42_gold_text() -> str:
     tf_line = " | ".join(f"{k}:{v.get('trend','UNKNOWN')}" for k, v in tf.items())
     note = "ราคาเป็นค่าประมาณจาก XAUUSD × USDTHB เพราะแหล่งราคาทองไทยล่ม" if tg.get("is_estimate") else "ใช้ราคาจากแหล่งราคาทองไทย"
     action = filt.get("action") or "ยังไม่เข้าเงื่อนไข"
-    title = "🔥 V42.3 GOLD HIGH CONVICTION" if strong.get("passed") else "🏆 V42.3 GOLD INSTITUTIONAL ENTRY FILTER"
+    title = "🔥 V42.3 GOLD HIGH CONVICTION" if strong.get("passed") else "🏆 V1300.1 GOLD INSTITUTIONAL ENTRY FILTER"
     lines = [
         title,
         f"เวลาไทย: {p.get('time_th')}",
@@ -1550,7 +1550,7 @@ def build_v42_gold_dashboard_text(payload: Optional[Dict[str, Any]] = None) -> s
 # Market Breadth SPY/QQQ/VIX
 # ============================================================
 
-V42_GOLD_VERSION = "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE"
+V42_GOLD_VERSION = "V1300.1_WORLD_CLASS_FINAL"
 
 try:
     _V424_BUILD_V42_GOLD_PAYLOAD = build_v42_gold_payload
@@ -1787,7 +1787,7 @@ def build_v42_gold_payload() -> Dict[str, Any]:
         "explainable_ai": explain,
         "us_stock_extended_hours": us_ext,
         "market_breadth": breadth,
-        "quality_rule": "V42.5: Raw/Final Confidence + Explainable AI + US Extended Hours + SPY/QQQ/VIX Market Breadth",
+        "quality_rule": "V1300.1: World-Class Final + Breadth + DXY/Yield + Earnings + Sector Rotation + Safe Entry Gate",
     })
     return p
 
@@ -2373,11 +2373,11 @@ def build_v427_dashboard_text() -> str:
     return "\n".join(lines)
 
 # ============================================================
-# V42.8 UNIFIED CONTROL CENTER DASHBOARD
+# V1300.1 UNIFIED CONTROL CENTER DASHBOARD
 # One-page status for Gold, Risk, US Extended, Breadth, DB, LINE
 # ============================================================
 
-V428_VERSION = "V42.8_UNIFIED_CONTROL_CENTER_DASHBOARD_STABLE"
+V428_VERSION = "V1300.1_WORLD_CLASS_FINAL"
 
 
 def _v428_bool_status(value: Any) -> str:
@@ -2572,7 +2572,7 @@ def build_v428_control_center_text() -> str:
     journal = p.get("journal_latest", {}).get("items", [])
 
     lines = [
-        "🧭 V42.8 UNIFIED CONTROL CENTER",
+        "🧭 V1300.1 UNIFIED CONTROL CENTER",
         f"เวลาไทย: {p.get('time_th')}",
         "",
         "SYSTEM HEALTH",

@@ -1,0 +1,16 @@
+{
+  "version": "V1300.1_WORLD_CLASS_FINAL_STATUS_FIXED",
+  "main_lines": 13475,
+  "main_preserved_ok": true,
+  "compile_errors": [],
+  "smoke_returncode": 0,
+  "smoke_stdout": "🧭 V1300.1 WORLD CLASS FINAL STATUS\nเวลาไทย: TEST_TIME\n\nSYSTEM HEALTH\nCore: ✅ | Version Guard: ✅ | Status Checker: ✅\nMain Preserved: ✅ | World-Class Patch: ✅\n\nCONFIG STATUS\nLINE_CHANNEL_ACCESS_TOKEN:❌\nLINE_CHANNEL_SECRET:❌\nLINE_USER_ID:❌\nTWELVEDATA_API_KEY:❌\nFINNHUB_API_KEY:❌\nALPHAVANTAGE_API_KEY:❌\nFMP_API_KEY:❌\nADMIN_TOKEN:❌\n\nSAFETY STATUS\nLIVE_TRADING_ENABLED:✅ FALSE / SAFE\nHUMAN_APPROVAL_REQUIRED:✅ TRUE\nSafe Mode: ✅ ON\n\nV1300.1 FIXES\n✅ SAFE_FALLBACK RSI=100 ถูกปิด\n✅ Probability < 50 ปิด Entry อัตโนมัติ\n✅ Bearish ทุก TF ซ่อน CALL\n✅ Market Breadth\n✅ DXY + Yield\n✅ Earnings Calendar\n✅ Sector Rotation\n✅ Ticker Mapping Guard\n✅ Unified Version Label\n\nQuick Test:\n- พิมพ์: version\n- พิมพ์: สัญญาณ NVDA\n- พิมพ์: top5\n- พิมพ์: ทอง\n\nVersion : V1300.1_WORLD_CLASS_FINAL_STATUS_FIXED\n",
+  "smoke_stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 785, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 720, in _warm_feature_flows\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 704, in _warm_collaboration_flows\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py\", line 48821, in hydrate_crdt_from_proto\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py\", line 747, in __call__\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n",
+  "checks": {
+    "status_override_exists": true,
+    "status_route_exists": true,
+    "health_json_patched": true,
+    "old_status_command_intercepted": true
+  },
+  "passed": true
+}

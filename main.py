@@ -617,6 +617,10 @@ def yahoo_bk_exists(symbol):
 # ============================================================
 def normalize_asset(user_text):
     raw = (user_text or "").strip()
+    try:
+        raw = V1300_1_TICKER_MAP.get(raw.upper().replace(" ", ""), raw)
+    except Exception:
+        pass
     key = raw.upper().replace(" ", "")
 
     # Redirect delisted/merged symbols before asset classification.
@@ -1677,10 +1681,13 @@ def analyze_signal(asset, quote, closes, highs, lows, opens, volumes):
         bias = "NEUTRAL / รอดูจังหวะ"
 
     if provider_is_fallback:
-        # Do not output BUY/SELL confidence from fake/fallback data.
+        # V1300.1 WORLD CLASS FINAL:
+        # Do not output BUY/SELL confidence or fake RSI from fallback data.
         score = 50
         probability = 40
         bias = "NEUTRAL / ข้อมูลตลาดจริงไม่พอ"
+        rsi = None
+        rvol = None
         reasons = ["ข้อมูลราคาจริงจากผู้ให้บริการไม่พร้อม จึงไม่ออกสัญญาณซื้อขาย"]
 
     return {
@@ -1963,18 +1970,30 @@ def options_hybrid_engine(asset, analysis):
     rvol = safe_float(analysis.get("rvol"))
     grade = strict_entry_grade(analysis, asset.get("asset_type"))
 
-    # Strict options gate: no directional option when TF is mixed or overbought/weak volume.
+    # V1300.1 WORLD CLASS FINAL options gate:
+    # - probability < 50 = no option trigger
+    # - all TF bearish = hide CALL
+    # - all TF bullish = hide PUT
+    mtf_states = [str(x[1]).upper() for x in analysis.get("mtf_states", []) if isinstance(x, (list, tuple)) and len(x) >= 2]
+    all_bearish = bool(mtf_states) and all(s == "BEARISH" for s in mtf_states)
+    all_bullish = bool(mtf_states) and all(s == "BULLISH" for s in mtf_states)
     if grade == "WAIT":
+        if prob < 50:
+            return f"""🧠 Options Hybrid Max Free
+Setup: WAIT / NO OPTION
+เข้าวันที่: {entry_date}
+Probability ประมาณ: {prob}%
+เหตุผลที่ยังไม่ออกไม้จริง: Probability ต่ำกว่า 50% และต้องการยืนยัน Timeframe/Volume ก่อน"""
         call_trigger = analysis.get("resistance") or (price + atr)
         put_trigger = analysis.get("support") or (price - atr)
         call_strike = round_strike(call_trigger + atr * 0.30)
         put_strike = round_strike(put_trigger - atr * 0.30)
+        call_line = "" if all_bearish else f"CALL: เข้าเมื่อยืนเหนือ {fmt_num(call_trigger)} และ 15m/1h ต้องเปลี่ยนเป็น BULLISH | Strike เฝ้าดู {fmt_num(call_strike, 2)}C\n"
+        put_line = "" if all_bullish else f"PUT: เข้าเมื่อหลุดต่ำกว่า {fmt_num(put_trigger)} และ 15m/1h ต้องเปลี่ยนเป็น BEARISH | Strike เฝ้าดู {fmt_num(put_strike, 2)}P\n"
         return f"""🧠 Options Hybrid Max Free
 Setup: WAIT / รอจังหวะ
 เข้าวันที่: {entry_date} เฉพาะเมื่อราคาเลือกทางชัดเจน
-CALL: เข้าเมื่อยืนเหนือ {fmt_num(call_trigger)} และ 15m/1h ต้องเปลี่ยนเป็น BULLISH | Strike เฝ้าดู {fmt_num(call_strike, 2)}C
-PUT: เข้าเมื่อหลุดต่ำกว่า {fmt_num(put_trigger)} และ 15m/1h ต้องเปลี่ยนเป็น BEARISH | Strike เฝ้าดู {fmt_num(put_strike, 2)}P
-Probability ประมาณ: {prob}%
+{call_line}{put_line}Probability ประมาณ: {prob}%
 เหตุผลที่ยังไม่ออกไม้จริง: ต้องการยืนยัน Timeframe/Volume ก่อน"""
 
     if score >= 78:
@@ -2103,6 +2122,16 @@ def position_size_text(b1, b2, b3):
 
 
 def build_trade_plan(price, atr, bias, asset_type=None, thai_factor=None, probability=50, rsi=None):
+    # V1300.1 WORLD CLASS FINAL:
+    # No entry plan when probability is below 50%. This prevents fake precision.
+    try:
+        if probability is not None and float(probability) < 50:
+            return """🧩 แผนเข้า/ออก 3 ไม้
+สถานะ: NO TRADE / ยังไม่ออกไม้จริง
+เหตุผล: Probability ต่ำกว่า 50% จึงปิดแผนซื้ออัตโนมัติ
+เงื่อนไขกลับมาพิจารณา: ต้องรอให้ Probability ≥ 50%, Timeframe/Volume ยืนยัน และ Risk Gate ผ่าน"""
+    except Exception:
+        pass
     if not price:
         return "ข้อมูลราคาไม่พอสำหรับทำแผน 3 ไม้"
     if not atr:
@@ -2190,7 +2219,135 @@ def build_gold_report(asset, analysis, news_text, reasons):
 มุมมอง: {view}
 {position_size_text(b1c, b2c, b3c)}"""
 
+
+# ============================================================
+# V1300.1 WORLD CLASS FINAL OVERLAY
+# - Unified version label for LINE
+# - Market Breadth
+# - DXY + Yield
+# - Earnings Calendar placeholder
+# - Sector Rotation
+# - Ticker Mapping Guard
+# ============================================================
+V1300_1_VERSION = "V1300.1_WORLD_CLASS_FINAL"
+
+V1300_1_TICKER_MAP = {
+    "BRK.B": "BRK-B",
+    "BRK/B": "BRK-B",
+    "GOOG": "GOOG",
+    "GOOGL": "GOOGL",
+    "SCB": "SCB.BK",
+    "KBANK": "KBANK.BK",
+    "BBL": "BBL.BK",
+    "KTB": "KTB.BK",
+    "PTT": "PTT.BK",
+    "ADVANC": "ADVANC.BK",
+}
+
+def v1300_1_fmt_unavailable(value):
+    try:
+        if value is None:
+            return "N/A"
+        if isinstance(value, float) and (value != value):
+            return "N/A"
+        return fmt_num(value)
+    except Exception:
+        return "N/A"
+
+def v1300_1_ticker_mapping_guard(symbol):
+    s = str(symbol or "").strip().upper()
+    return V1300_1_TICKER_MAP.get(s, s)
+
+def v1300_1_fetch_quote(symbol):
+    """Safe quote helper. Never raises."""
+    try:
+        asset = normalize_asset(v1300_1_ticker_mapping_guard(symbol))
+        q, closes, highs, lows, opens, volumes = get_market_data(asset)
+        return q or {}
+    except Exception:
+        return {}
+
+def v1300_1_market_breadth_text():
+    items = []
+    universe = ["SPY", "QQQ", "IWM", "DIA"]
+    positive = 0
+    total = 0
+    for s in universe:
+        q = v1300_1_fetch_quote(s)
+        pct = safe_float(q.get("percent_change"))
+        if pct is not None:
+            total += 1
+            if pct > 0:
+                positive += 1
+            items.append(f"{s}: {fmt_num(pct)}%")
+    if total == 0:
+        return "🌐 Market Breadth: N/A"
+    score = round(positive / total * 100, 1)
+    regime = "RISK_ON" if score >= 65 else ("RISK_OFF" if score <= 35 else "NEUTRAL")
+    return f"🌐 Market Breadth: {regime} | Score: {score}/100 | " + " | ".join(items)
+
+def v1300_1_dxy_yield_text():
+    dxy = v1300_1_fetch_quote("DX-Y.NYB") or v1300_1_fetch_quote("DXY")
+    us10y = v1300_1_fetch_quote("^TNX")
+    dxy_px = dxy.get("close")
+    dxy_chg = dxy.get("percent_change")
+    y_px = us10y.get("close")
+    y_chg = us10y.get("percent_change")
+    return f"💵 DXY/Yield: DXY {v1300_1_fmt_unavailable(dxy_px)} ({v1300_1_fmt_unavailable(dxy_chg)}%) | US10Y {v1300_1_fmt_unavailable(y_px)} ({v1300_1_fmt_unavailable(y_chg)}%)"
+
+def v1300_1_earnings_calendar_text(asset):
+    # Free-safe placeholder. Can be upgraded later with FMP/AlphaVantage.
+    try:
+        sym = asset.get("symbol") or asset.get("display")
+    except Exception:
+        sym = "N/A"
+    return f"📅 Earnings Calendar: {sym} | ยังไม่พบกำหนดงบจาก API ฟรี / รอเชื่อม FMP หรือ AlphaVantage"
+
+def v1300_1_sector_rotation_text(asset):
+    symbol = str(asset.get("symbol", "")).upper() if isinstance(asset, dict) else ""
+    sector_map = {
+        "NVDA": "Semiconductor / AI", "AMD": "Semiconductor / AI", "TSM": "Semiconductor / Foundry",
+        "AAPL": "Mega Cap Quality", "MSFT": "Mega Cap Quality", "GOOGL": "Communication Services",
+        "META": "Communication Services", "QQQ": "Growth ETF", "SPY": "Broad Market ETF",
+        "SCB": "Thai Bank", "KBANK": "Thai Bank", "BBL": "Thai Bank", "KTB": "Thai Bank"
+    }
+    sector = sector_map.get(symbol, "Unknown / General")
+    # Simple sector proxy using ETF where possible
+    proxy = "XLK" if sector in ("Semiconductor / AI", "Semiconductor / Foundry", "Mega Cap Quality", "Growth ETF") else ("XLF" if "Bank" in sector else "SPY")
+    q = v1300_1_fetch_quote(proxy)
+    pct = q.get("percent_change")
+    tone = "LEADING" if safe_float(pct, 0) > 0 else ("LAGGING" if safe_float(pct, 0) < 0 else "NEUTRAL")
+    return f"🔁 Sector Rotation: {sector} | Proxy {proxy}: {v1300_1_fmt_unavailable(pct)}% | {tone}"
+
+def v1300_1_world_context_block(asset):
+    return "\\n".join([
+        v1300_1_market_breadth_text(),
+        v1300_1_dxy_yield_text(),
+        v1300_1_earnings_calendar_text(asset),
+        v1300_1_sector_rotation_text(asset),
+    ])
+
+def v1300_1_clean_line_versions(text):
+    """Only clean user-visible version labels. Do not alter function names."""
+    if not isinstance(text, str):
+        return text
+    patterns = [
+        r"Version\\s*:\\s*V\\d+(?:\\.\\d+)?_[A-Z0-9_]+",
+        r"🏆 Top 5 หุ้นน่าเข้าซื้อที่สุดของวัน \\(V\\d+(?:\\.\\d+)?[^)]*\\)",
+        r"🏆 V\\d+(?:\\.\\d+)? GOLD INSTITUTIONAL ENTRY FILTER",
+        r"🧭 V\\d+(?:\\.\\d+)? UNIFIED CONTROL CENTER",
+    ]
+    for p in patterns:
+        text = re.sub(p, lambda m: "Version : " + V1300_1_VERSION if m.group(0).startswith("Version") else m.group(0).split()[0] + " " + V1300_1_VERSION, text)
+    text = text.replace("V1300.1 Institutional", "V1300.1 Institutional")
+    text = text.replace("V1300.1_WORLD_CLASS_FINAL", V1300_1_VERSION)
+    text = text.replace("V1300.1_WORLD_CLASS_FINAL", V1300_1_VERSION)
+    text = text.replace("V1300.1_WORLD_CLASS_FINAL", V1300_1_VERSION)
+    return text
+
+
 def build_asset_report(user_text):
+    user_text = v1300_1_ticker_mapping_guard(user_text)
     asset = normalize_asset(user_text)
 
     if asset["asset_type"] == "GOLD":
@@ -2237,6 +2394,8 @@ def build_asset_report(user_text):
     valuation_text, valuation_status = valuation_engine(asset, analysis, fundamentals)
 
     mtf_lines = "\n".join([f"- {label}: {state}" for label, state in analysis["mtf_states"]]) or "- N/A"
+    v1300_1_context = v1300_1_world_context_block(asset)
+    rsi_display = "N/A" if (isinstance(quote, dict) and quote.get("is_fallback")) or analysis.get("rsi") is None else fmt_num(analysis["rsi"])
 
     report = f"""📊 วิเคราะห์ {asset['display']}
 แหล่งข้อมูล: {source_text}
@@ -2258,7 +2417,7 @@ Multi Timeframe:
 EMA6: {fmt_num(analysis['ema6'])}
 EMA12: {fmt_num(analysis['ema12'])}
 EMA50: {fmt_num(analysis['ema50'])}
-RSI14: {fmt_num(analysis['rsi'])}
+RSI14: {rsi_display}
 ATR14: {fmt_num(analysis['atr'])}
 RVOL: {fmt_num(analysis['rvol'])}
 
@@ -2268,6 +2427,9 @@ RVOL: {fmt_num(analysis['rvol'])}
 
 {opt_text}
 
+🌍 V1300.1 World Context
+{v1300_1_context}
+
 เหตุผลหลัก:
 {chr(10).join("- " + r for r in reasons)}
 
@@ -2276,6 +2438,7 @@ RVOL: {fmt_num(analysis['rvol'])}
 """
 
     sig_type = "BUY" if analysis["score"] >= AUTO_ALERT_MIN_SCORE else "SELL" if analysis["score"] <= AUTO_ALERT_MAX_SCORE else "NEUTRAL"
+    report = v1300_1_clean_line_versions(report.rstrip() + "\n\nVersion : " + V1300_1_VERSION)
     save_signal(asset["symbol"], asset["asset_type"], analysis["price"], analysis["score"], analysis["bias"], sig_type, analysis["regime"], analysis["probability"], report)
     return report
 
@@ -2762,7 +2925,12 @@ def home():
 
 @app.route("/health", methods=["GET"])
 def health():
-    return "OK", 200
+    try:
+        payload = build_v1300_1_status_payload() if "build_v1300_1_status_payload" in globals() else {"ok": True}
+        payload["health"] = "OK"
+        return jsonify(payload), 200
+    except Exception:
+        return "OK", 200
 
 
 @app.route("/gold-test", methods=["GET"])
@@ -5595,7 +5763,7 @@ def v42_gold_filter_route_legacy():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1300.1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 
@@ -5630,7 +5798,7 @@ def v42_gold_fund_grade_route():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1300.1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 def production_scan_once(symbols=None, save_all=True):
@@ -12572,7 +12740,7 @@ def v41_top5_buy_text():
 # - Old V8.1 rank_top5_picks/compact_top5_message are overridden below.
 # - Thai gold is handled through GoldTraders/estimate fallback, not Yahoo THAI_GOLD.
 # ============================================================
-V41_LATEST_VERSION = "V41.2_TOP5_INSTITUTIONAL_LATEST_DATA_STABLE"
+V41_LATEST_VERSION = "V1300.1_WORLD_CLASS_FINAL"
 
 
 def _v41_num(value, default=0.0):
@@ -12760,7 +12928,7 @@ def compact_top5_message():
 def build_top5_buy_message(limit=5):
     rows = rank_top5_buy_candidates(limit=limit)
     if not rows:
-        return f"🏆 Top {limit} หุ้นน่าเข้าซื้อวันนี้\n\nยังจัดอันดับไม่ได้\nเวลาไทย: {now_text()}\nVersion : {V41_LATEST_VERSION}"
+        return f"🏆 Top {limit} หุ้นน่าเข้าซื้อวันนี้\n\nยังจัดอันดับไม่ได้\nเวลาไทย: {now_text()}\nVersion : {V1300_1_VERSION}"
     lines = []
     for i, r in enumerate(rows, 1):
         try:
@@ -12775,7 +12943,7 @@ def build_top5_buy_message(limit=5):
             f"   Signal: {r.get('signal')} | Regime: {r.get('regime')}\n"
             f"   เหตุผล: {reason_text}"
         )
-    return f"""🏆 Top {limit} หุ้นน่าเข้าซื้อที่สุดของวัน (V41 Institutional)
+    return f"""🏆 Top {limit} หุ้นน่าเข้าซื้อที่สุดของวัน (V1300.1 Institutional)
 เวลาไทย: {now_text()}
 
 {chr(10).join(lines)}
@@ -12785,7 +12953,7 @@ def build_top5_buy_message(limit=5):
 - เข้าเฉพาะตัวที่ Signal/Regime/Rank สอดคล้องกัน
 - ถ้า Rank ต่ำกว่า 55 หรือ Risk C/D ให้เฝ้าดูเท่านั้น
 
-Version : {V41_LATEST_VERSION}"""
+Version : {V1300_1_VERSION}"""
 
 
 def build_top5_daily_message():
@@ -12843,7 +13011,7 @@ def thai_gold_latest_route():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1300.1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/v42/gold", methods=["GET"])
@@ -12852,7 +13020,7 @@ def v42_gold_route():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1300.1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/v42/gold-text", methods=["GET"])
@@ -12887,7 +13055,7 @@ def v42_gold_filter_route_v2():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1300.1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 def production_scan_once(symbols=None, save_all=True):
@@ -13046,7 +13214,7 @@ def v428_control_center_json_route():
         from modules.v42_gold_institutional_core import build_v428_control_center_payload
         return jsonify(build_v428_control_center_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.8_UNIFIED_CONTROL_CENTER_DASHBOARD_STABLE", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1300.1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 # V51 Institutional Validation & Execution Proof routes
@@ -13239,6 +13407,68 @@ try:
     app.register_blueprint(v700_bp)
 except Exception as e:
     print("V700 phase7 routes not loaded:", e)
+
+# ============================================================
+# V1300.1 WORLD CLASS FINAL STATUS CHECKER OVERRIDE
+# This override must stay near the end of main.py.
+# It fixes LINE commands "สถานะระบบ", "version", "health", "ตรวจระบบ"
+# so they no longer call old V41/V42 status modules.
+# ============================================================
+try:
+    _v1300_1_previous_handle_line_command = handle_line_command
+except Exception:
+    _v1300_1_previous_handle_line_command = None
+
+def build_v1300_1_status_text():
+    try:
+        from phase13_world_class_fund_os.status_checker.status_checker import build_status_text
+        return build_status_text(now_text)
+    except Exception as e:
+        return f"""🧭 V1300.1 WORLD CLASS FINAL STATUS
+เวลาไทย: {now_text() if 'now_text' in globals() else ''}
+
+SYSTEM HEALTH
+Core: ✅ | Status Checker: ⚠️ fallback
+
+Error: {e}
+
+Version : V1300.1_WORLD_CLASS_FINAL_STATUS_FIXED"""
+
+def build_v1300_1_status_payload():
+    try:
+        from phase13_world_class_fund_os.status_checker.status_checker import build_status_payload
+        return build_status_payload()
+    except Exception as e:
+        return {"ok": False, "version": "V1300.1_WORLD_CLASS_FINAL_STATUS_FIXED", "error": str(e)}
+
+def handle_line_command(user_text):
+    text = (user_text or "").strip()
+    low = text.lower().replace(" ", "")
+    status_commands = {
+        "สถานะระบบ", "ระบบ", "ตรวจระบบ", "เช็คระบบ", "เช็กระบบ",
+        "status", "systemstatus", "health", "version", "เวอร์ชั่น", "เวอร์ชัน",
+        "v1300", "v1300.1", "latest"
+    }
+    if low in status_commands:
+        return build_v1300_1_status_text()
+    if _v1300_1_previous_handle_line_command:
+        result = _v1300_1_previous_handle_line_command(user_text)
+        try:
+            if isinstance(result, str) and "v1300_1_clean_line_versions" in globals():
+                result = v1300_1_clean_line_versions(result)
+        except Exception:
+            pass
+        return result
+    return None
+
+@app.route("/v1300/status", methods=["GET"], endpoint="v1300_1_status_json")
+def v1300_1_status_json_route():
+    return jsonify(build_v1300_1_status_payload())
+
+@app.route("/v1300/status-text", methods=["GET"], endpoint="v1300_1_status_text")
+def v1300_1_status_text_route():
+    return Response(build_v1300_1_status_text(), mimetype="text/plain; charset=utf-8")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)

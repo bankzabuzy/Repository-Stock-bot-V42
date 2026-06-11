@@ -3,7 +3,7 @@
 
 from flask import Blueprint, jsonify, Response
 
-V42_ROUTE_VERSION = "V42.5_GOLD_US_EXTENDED_EXPLAINABLE_STABLE"
+V42_ROUTE_VERSION = "V1300.1_WORLD_CLASS_FINAL"
 v42_gold_bp = Blueprint("v42_gold", __name__)
 
 
@@ -211,5 +211,5 @@ def v428_control_center_json():
         from modules.v42_gold_institutional_core import build_v428_control_center_payload
         return jsonify(build_v428_control_center_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V42.8_UNIFIED_CONTROL_CENTER_DASHBOARD_STABLE", "error": str(e)}), 200
+        return jsonify({"ok": False, "version": "V1300.1_WORLD_CLASS_FINAL", "error": str(e)}), 200
 

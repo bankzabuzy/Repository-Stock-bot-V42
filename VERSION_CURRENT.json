@@ -1,7 +1,7 @@
 {
-  "current_version": "V1300_PHASE13_TRUE_LATEST_FULL_MAIN_PRESERVED",
-  "base": "V1200_PHASE12_WORLD_CLASS_INVESTMENT_OS_LIVEPRICE",
-  "generated_at": "2026-06-11T05:19:44.825244+00:00",
+  "current_version": "V1300.1_WORLD_CLASS_FINAL_STATUS_FIXED",
+  "base": "V1300_PHASE13_TRUE_LATEST_FULL_MAIN_PRESERVED",
+  "generated_at": "2026-06-11T06:01:53.345353+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -10,5 +10,30 @@
     "run_phase13_current.py"
   ],
   "railway_start_command_recommended": "gunicorn main:app --bind 0.0.0.0:$PORT --workers 1 --threads 4",
-  "notes": "V13 added as additive module. Existing production main.py is preserved to avoid breaking V42/V1200 routes."
+  "notes": "V13 added as additive module. Existing production main.py is preserved to avoid breaking V42/V1200 routes.",
+  "patches": [
+    "SAFE_FALLBACK_RSI_NA",
+    "NO_ENTRY_IF_PROBABILITY_LT_50",
+    "HIDE_CALL_WHEN_ALL_TF_BEARISH",
+    "MARKET_BREADTH",
+    "DXY_YIELD",
+    "EARNINGS_CALENDAR_PLACEHOLDER",
+    "SECTOR_ROTATION",
+    "TICKER_MAPPING_GUARD",
+    "UNIFIED_LINE_VERSION_LABEL"
+  ],
+  "status_checker_fixed": true,
+  "status_commands": [
+    "สถานะระบบ",
+    "ตรวจระบบ",
+    "status",
+    "health",
+    "version",
+    "v1300.1"
+  ],
+  "new_routes": [
+    "/v1300/status",
+    "/v1300/status-text",
+    "/health"
+  ]
 }

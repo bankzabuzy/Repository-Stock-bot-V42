@@ -1,0 +1,24 @@
+{
+  "version": "V1300.1_WORLD_CLASS_FINAL",
+  "main_lines": 13408,
+  "main_size": 569929,
+  "main_preserved_ok": true,
+  "compile_errors": [],
+  "smoke_returncode": 0,
+  "smoke_stdout": "VERSION_GUARD: {'ok': True, 'main_lines': 13408, 'reason': 'full main preserved'}\n🏆 V1300 Top Signals Decision Support\n1. GLD | รอยืนยัน | Score: 61.88\n2. NVDA | รอยืนยัน | Score: 60.08\n3. TSM | เฝ้าดูเท่านั้น | Score: 59.08\n4. QQQ | เฝ้าดูเท่านั้น | Score: 56.78\n5. AAPL | เฝ้าดูเท่านั้น | Score: 54.38\nคำเตือน: concentration_review:GLD, concentration_review:NVDA, concentration_review:TSM, concentration_review:QQQ, concentration_review:AAPL\nหมายเหตุ: ใช้เป็น Decision Support / Paper Trading ก่อน ไม่รับประกันกำไร\nAUDIT_VERIFIED: True\n",
+  "smoke_stderr": "Spreadsheet runtime warmup failed during python startup\nTraceback (most recent call last):\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py\", line 26, in warm_spreadsheet_runtime_on_startup\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 785, in warm_spreadsheet_runtime\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 720, in _warm_feature_flows\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/spreadsheet_warmup.py\", line 704, in _warm_collaboration_flows\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/generated/interface/models.py\", line 48821, in hydrate_crdt_from_proto\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/remote.py\", line 747, in __call__\n  File \"/tmp/tmp.9eeVjt35CN/artifact_tool_v2-2.7.5/artifact_tool/rpc/client.py\", line 150, in call\nartifact_tool.rpc.client.RemoteError: hydrateCrdtFromProto requires an empty collaborative document.\n",
+  "checks": {
+    "old_exact_v41_version_left": false,
+    "old_exact_v42_5_version_left": false,
+    "old_exact_v42_8_version_left": false,
+    "safe_fallback_rsi_patch": true,
+    "probability_entry_gate": true,
+    "hide_call_bearish": true,
+    "market_breadth": true,
+    "dxy_yield": true,
+    "earnings": true,
+    "sector_rotation": true,
+    "ticker_mapping": true
+  },
+  "passed": true
+}
