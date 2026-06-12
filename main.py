@@ -13723,6 +13723,139 @@ def v1410_early_symbol_route(symbol):
     return Response(v1410_early_text(symbol), mimetype="text/plain; charset=utf-8")
 
 
+
+
+# ============================================================
+# V1410 SAFE BACKWARD COMPATIBILITY PATCH
+# Prevent NameError from older filters if old base references v1300_4_prev_filter.
+# ============================================================
+try:
+    v1300_4_prev_filter
+except NameError:
+    v1300_4_prev_filter = None
+
+# ============================================================
+# V1410 FULL READY LINE COMMANDS FIXED
+# Full production overlay for LINE commands and API priority.
+# Fixes missing previous-filter variable issues by not relying on v1300_4_prev_filter.
+# ============================================================
+V1410_FULL_READY_VERSION = "V1410_FULL_READY_LINE_COMMANDS_FIXED"
+
+def v1410_full_clean(text):
+    try:
+        if text is None:
+            return "ไม่พบข้อมูล\n\nVersion : " + V1410_FULL_READY_VERSION
+        text = str(text).strip()
+        text = text.replace("V1410_MASTER_OS_ENHANCED", V1410_FULL_READY_VERSION)
+        text = text.replace("V1400_MASTER_OS_HEDGEFUND_READY", V1410_FULL_READY_VERSION)
+        text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1410_FULL_READY_VERSION, text)
+        if "Version : " not in text:
+            text += "\n\nVersion : " + V1410_FULL_READY_VERSION
+        return text
+    except Exception:
+        return str(text)
+
+def v1410_full_top5(kind):
+    try:
+        from v1410_full_ready.commands.full_commands import top5
+        return top5(kind)
+    except Exception as e:
+        return f"Top5 error: {e}\n\nVersion : {V1410_FULL_READY_VERSION}"
+
+def v1410_full_api(symbol=None):
+    try:
+        from v1410_full_ready.api_router.full_router import status_text
+        return status_text(symbol)
+    except Exception as e:
+        return f"API error: {e}\n\nVersion : {V1410_FULL_READY_VERSION}"
+
+def v1410_full_early(symbol="NVDA"):
+    try:
+        from v1410_full_ready.commands.full_commands import early
+        return early(symbol)
+    except Exception as e:
+        return f"Early error: {e}\n\nVersion : {V1410_FULL_READY_VERSION}"
+
+def v1410_full_help():
+    try:
+        from v1410_full_ready.commands.full_commands import help_text
+        return help_text()
+    except Exception:
+        return "Commands: top5 us/call/put/th/etf/gold, api nvda, early nvda\n\nVersion : " + V1410_FULL_READY_VERSION
+
+try:
+    _v1410_full_prev_handle_line_command = handle_line_command
+except Exception:
+    _v1410_full_prev_handle_line_command = None
+
+def handle_line_command(user_text):
+    text = (user_text or "").strip()
+    low = text.lower().strip()
+    compact = low.replace(" ", "")
+
+    if compact in {"v1410", "help", "help1410", "commands", "คำสั่ง", "เมนู"}:
+        return v1410_full_help()
+
+    if compact in {"top5", "top5us", "topus"}:
+        return v1410_full_top5("US")
+    if compact in {"top5call", "topcall", "call"}:
+        return v1410_full_top5("CALL")
+    if compact in {"top5put", "topput", "put"}:
+        return v1410_full_top5("PUT")
+    if compact in {"top5th", "topthai", "top5thai"}:
+        return v1410_full_top5("TH")
+    if compact in {"top5etf", "topetf"}:
+        return v1410_full_top5("ETF")
+    if compact in {"top5gold", "topgold", "goldtop"}:
+        return v1410_full_top5("GOLD")
+
+    if low.startswith("api "):
+        parts = text.split()
+        return v1410_full_api(parts[1] if len(parts) > 1 else None)
+    if compact in {"api", "apihealth", "สถานะapi", "เช็คapi", "เช็กapi"}:
+        return v1410_full_api(None)
+
+    if low.startswith("early "):
+        parts = text.split()
+        return v1410_full_early(parts[1] if len(parts) > 1 else "NVDA")
+    if compact in {"early", "earlyentry", "setup"}:
+        return v1410_full_early("NVDA")
+
+    if _v1410_full_prev_handle_line_command:
+        return v1410_full_clean(_v1410_full_prev_handle_line_command(user_text))
+    return v1410_full_clean(None)
+
+try:
+    _v1410_full_prev_line_reply = line_reply
+    def line_reply(reply_token, text):
+        return _v1410_full_prev_line_reply(reply_token, v1410_full_clean(text))
+except Exception:
+    pass
+
+try:
+    _v1410_full_prev_line_push = line_push
+    def line_push(user_id, text):
+        return _v1410_full_prev_line_push(user_id, v1410_full_clean(text))
+except Exception:
+    pass
+
+@app.route("/v1410/full/top5/<kind>", methods=["GET"], endpoint="v1410_full_top5")
+def v1410_full_top5_route(kind):
+    return Response(v1410_full_top5(kind), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1410/full/api", methods=["GET"], endpoint="v1410_full_api")
+def v1410_full_api_route():
+    return Response(v1410_full_api(None), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1410/full/api/<symbol>", methods=["GET"], endpoint="v1410_full_api_symbol")
+def v1410_full_api_symbol_route(symbol):
+    return Response(v1410_full_api(symbol), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1410/full/early/<symbol>", methods=["GET"], endpoint="v1410_full_early_symbol")
+def v1410_full_early_symbol_route(symbol):
+    return Response(v1410_full_early(symbol), mimetype="text/plain; charset=utf-8")
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
 

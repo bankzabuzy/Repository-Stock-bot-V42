@@ -1,0 +1,27 @@
+{
+  "version": "V1410_FULL_READY_LINE_COMMANDS_FIXED",
+  "generated_at": "2026-06-12T03:05:52.482640+00:00",
+  "main_lines": 13915,
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "top5_call": "🏆 TOP5 CALL\nใช้เป็น Decision Support / Paper Trading ก่อน\nราคาอ้างอิง: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. NVDA | CALL | Score 88/100 | Prob 82% | Conf 86% | Risk A\n   Entry ",
+    "top5_put": "🏆 TOP5 PUT\nใช้เป็น Decision Support / Paper Trading ก่อน\nราคาอ้างอิง: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. QQQ | PUT | Score 70/100 | Prob 61% | Conf 65% | Risk B\n   Entry Pla",
+    "top5_us": "🏆 TOP5 US\nใช้เป็น Decision Support / Paper Trading ก่อน\nราคาอ้างอิง: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. NVDA | CALL | Score 88/100 | Prob 82% | Conf 86% | Risk A\n   Entry Pl",
+    "top5_th": "🏆 TOP5 THAI\nใช้เป็น Decision Support / Paper Trading ก่อน\nราคาอ้างอิง: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. SCB.BK | BUY | Score 78/100 | Prob 60% | Conf 64% | Risk B\n   Entry",
+    "api_nvda": "🔎 API STATUS NVDA\nMarket: US\nCurrent Source: YAHOO\nReliability: 47/100\n\n❌ WEBULL | env=WEBULL_API_KEY\n❌ POLYGON | env=POLYGON_API_KEY\n❌ FINNHUB | env=FINNHUB_API_KEY\n❌ TWELVEDATA | env=TWELVEDATA_API_",
+    "early_nvda": "⚠ EARLY ENTRY WATCH: NVDA\n\nสถานะ: กำลังเข้า Setup แต่ยังไม่ใช่ BUY/SELL เต็มระบบ\nProbability: 72%\nConfidence: 68%\nRisk Gate: WAIT_CONFIRMATION\n\nต้องผ่าน:\n✅ API source พร้อม\n✅ Volume ยืนยัน\n✅ Breadth ไ"
+  },
+  "checks": {
+    "top5_us_command": true,
+    "top5_call_command": true,
+    "top5_put_command": true,
+    "top5_th_command": true,
+    "api_symbol_command": true,
+    "early_command": true,
+    "safe_backward_patch": true,
+    "routes": true,
+    "version_current": true
+  },
+  "passed": true
+}
