@@ -1,5 +1,51 @@
-from v1413_worldclass_line_os.api.priority_router import VERSION, normalize_symbol, market_of, primary_source, reliability, time_th, session_of, api_health
+from v1413_worldclass_line_os.api.priority_router import normalize_symbol, market_of, primary_source, reliability, time_th, session_of, api_health
+from v1414_realtime_price_router.api.realtime_price_router import PriceRouter, VERSION
 from v1413_worldclass_line_os.core.market_brain import get_snapshot, expected_move, trade_plan, risk_sentence, entry_score, THAI_GOLD
+
+_RT_ROUTER = PriceRouter()
+
+def apply_realtime_quote(s):
+    """Update snapshot object with freshest runtime price without crashing."""
+    try:
+        q = _RT_ROUTER.quote(s.symbol)
+        if q:
+            selected = q.get("selected_price")
+            if selected:
+                s.price = float(selected)
+            if q.get("prev_close"):
+                s.prev_close = float(q["prev_close"])
+            if q.get("premarket") is not None:
+                s.premarket = q.get("premarket")
+            if q.get("regular") is not None:
+                s.regular = q.get("regular")
+            if q.get("afterhours") is not None:
+                s.afterhours = q.get("afterhours")
+            s._price_source = q.get("source", "UNKNOWN")
+            s._price_mode = q.get("price_mode", "LATEST")
+            s._price_timestamp = q.get("timestamp", time_th())
+            s._price_stale = bool(q.get("stale", False))
+            s._price_note = q.get("note", "")
+            # gold extra fields
+            for k in ["bar_buy","bar_sell","orn_buy","orn_sell","spread","xauusd","usdthb"]:
+                if k in q:
+                    setattr(s, "_" + k, q[k])
+    except Exception as e:
+        s._price_source = "PRICE_ROUTER_ERROR"
+        s._price_mode = "FALLBACK"
+        s._price_timestamp = time_th()
+        s._price_stale = True
+        s._price_note = str(e)
+    return s
+
+def quote_source_line(s, m):
+    src = getattr(s, "_price_source", primary_source(m))
+    mode = getattr(s, "_price_mode", "LATEST")
+    ts = getattr(s, "_price_timestamp", time_th())
+    stale = getattr(s, "_price_stale", False)
+    note = getattr(s, "_price_note", "")
+    warn = " ⚠️ ข้อมูลอาจล่าช้า" if stale else ""
+    return f"Price: {mode} | Source: {src} | อัปเดต {ts}{warn}" + (f"\nหมายเหตุ: {note}" if note else "")
+
 
 def money(v, market="US"):
     if v is None:
@@ -26,19 +72,20 @@ def icon_for_view(view):
 
 def build_gold():
     g = THAI_GOLD
-    s = get_snapshot("GOLD")
+    s = apply_realtime_quote(get_snapshot("GOLD"))
     em = expected_move(s)
     plan = trade_plan(s)
     return f"""🏆 GOLD | ทองคำไทย
 เวลา: {time_th()}
 Source: สมาคมค้าทองคำ | {reliability('GOLD')}/100
+{quote_source_line(s, 'GOLD')}
 
 ราคาทองสมาคม:
-รับซื้อทองแท่ง: {g['bar_buy']:,.0f}
-ขายออกทองแท่ง: {g['bar_sell']:,.0f}
-รับซื้อรูปพรรณ: {g['orn_buy']:,.0f}
-ขายออกรูปพรรณ: {g['orn_sell']:,.0f}
-Spread: {g['spread']} บาท
+รับซื้อทองแท่ง: {getattr(s, '_bar_buy', g['bar_buy']):,.0f}
+ขายออกทองแท่ง: {getattr(s, '_bar_sell', g['bar_sell']):,.0f}
+รับซื้อรูปพรรณ: {getattr(s, '_orn_buy', g['orn_buy']):,.0f}
+ขายออกรูปพรรณ: {getattr(s, '_orn_sell', g['orn_sell']):,.0f}
+Spread: {getattr(s, '_spread', g['spread']):,.0f} บาท
 
 มุมมอง: 🟡 WAIT | Prob ขึ้น {s.prob_up}% | Conf {s.confidence}%
 Risk: {s.risk_grade} | {risk_sentence(s)}
@@ -63,7 +110,7 @@ Version : {VERSION}"""
 
 def build_stock(symbol):
     sym = normalize_symbol(symbol)
-    s = get_snapshot(sym)
+    s = apply_realtime_quote(get_snapshot(sym))
     m = market_of(sym)
     sess, note = session_of(m)
     em = expected_move(s)
@@ -103,6 +150,7 @@ def build_stock(symbol):
 เวลา: {time_th()}
 Source: {source} | Session: {sess} | {reliability(m)}/100
 {note}
+{quote_source_line(s, m)}
 
 {cur_line}
 {price_line}
@@ -150,7 +198,7 @@ def build_top5(kind="US"):
         return build_gold()
     lines = [f"🏆 Top5 {k} | มือใหม่อ่านง่าย", f"เวลา: {time_th()}", "กฎ: ไม่ไล่ราคา / รอ Trigger / คุม SL", ""]
     for i, sym in enumerate(universe, 1):
-        s = get_snapshot(sym)
+        s = apply_realtime_quote(get_snapshot(sym))
         m = market_of(sym)
         lines.append(f"{i}. {s.symbol} | {money(s.price,m)} | {s.view} | Prob {s.prob_up}% | Risk {s.risk_grade}")
         lines.append(f"   แผน: {'รอ' if s.prob_up<50 else 'รอเข้าใกล้ไม้1'} | เหตุผล: {s.key_reason[:42]}")

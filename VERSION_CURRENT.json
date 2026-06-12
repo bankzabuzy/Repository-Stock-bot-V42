@@ -1,7 +1,7 @@
 {
-  "current_version": "V1413_WORLDCLASS_LINE_OS_FINAL",
-  "base": "V1412_1_CLEAN_LINE_GOLDTRADERS_FINAL",
-  "generated_at": "2026-06-12T08:08:17.287129+00:00",
+  "current_version": "V1414_REALTIME_PRICE_ROUTER_FINAL",
+  "base": "V1413_WORLDCLASS_LINE_OS_FINAL",
+  "generated_at": "2026-06-12T08:31:56.499935+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -65,8 +65,6 @@
     "gold",
     "top5 us",
     "top5 th",
-    "top5 call",
-    "top5 put",
     "api"
   ],
   "fixes": [
@@ -85,9 +83,9 @@
     "Paper Trade Engine"
   ],
   "routes": [
-    "/v1400/status",
-    "/v1400/montecarlo",
-    "/v1400/portfolio"
+    "/v1414/full/NVDA",
+    "/v1414/price/NVDA",
+    "/v1414/health"
   ],
   "added": [
     "top5 us",
@@ -133,5 +131,26 @@
     "Thai gold association primary source",
     "API priority router and version cleaner",
     "LINE 429 safe handling"
-  ]
+  ],
+  "major_fix": "ระบบเลือกราคาปัจจุบันที่สุดก่อนเสมอ พร้อม source/timestamp/mode/stale warning",
+  "price_priority": {
+    "US_ETF": [
+      "Polygon snapshot/last trade",
+      "Finnhub quote",
+      "TwelveData quote",
+      "Yahoo chart includePrePost",
+      "static fallback"
+    ],
+    "TH": [
+      "Yahoo .BK chart",
+      "static fallback"
+    ],
+    "GOLD": [
+      "GoldTraders public Thai association",
+      "GoldAPI",
+      "TwelveData XAUUSD",
+      "Yahoo GC=F",
+      "static fallback"
+    ]
+  }
 }

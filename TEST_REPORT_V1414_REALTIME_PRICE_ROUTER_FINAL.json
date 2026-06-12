@@ -1,0 +1,21 @@
+{
+  "version": "V1414_REALTIME_PRICE_ROUTER_FINAL",
+  "generated_at": "2026-06-12T08:32:01.771160+00:00",
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "quote_has_selected_price": "PREMARKET",
+    "msg_has_price_mode": true,
+    "msg_has_forecast": true,
+    "msg_has_version": true,
+    "no_old_version": true,
+    "gold_assoc": true
+  },
+  "checks": {
+    "compile_ok": true,
+    "smoke_ok": true,
+    "overlay": true,
+    "metadata": true
+  },
+  "passed": true
+}
