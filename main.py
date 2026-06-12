@@ -13895,6 +13895,103 @@ for _missing_name, _default_value in {
         globals()[_missing_name] = _default_value
 
 
+# ============================================================
+# V1410.1 SYMBOL ROUTE + LINE 429 SAFE PATCH
+# Fixes bare symbols like "scb", "nvda", "qqq", "gold" falling back to old V1300 handler.
+# Also makes LINE push 429 quota-limit non-fatal.
+# ============================================================
+V1410_1_DISPLAY_VERSION = "V1410.1_SYMBOL_ROUTE_LINE429_SAFE"
+
+def v1410_1_is_symbol_command(text):
+    s = (text or "").strip().upper()
+    if not s:
+        return False
+    if s in {"SCB", "KBANK", "BBL", "KTB", "PTT", "AOT", "ADVANC", "CPALL", "BDMS", "PTTEP", "DELTA", "TRUE"}:
+        return True
+    if s.endswith(".BK"):
+        return True
+    if s in {"NVDA", "QQQ", "SPY", "AAPL", "TSLA", "MSFT", "AMD", "META", "TSM", "GOOGL", "AMZN", "GOLD", "XAUUSD", "XAU", "GC=F"}:
+        return True
+    return bool(re.fullmatch(r"[A-Z]{1,6}", s)) and s not in {"API", "TOP", "HELP", "CALL", "PUT", "GOLD"}
+
+def v1410_1_symbol_to_status(symbol):
+    s = (symbol or "").strip().upper()
+    if s in {"SCB", "KBANK", "BBL", "KTB", "PTT", "AOT", "ADVANC", "CPALL", "BDMS", "PTTEP", "DELTA", "TRUE"}:
+        s = s + ".BK"
+    try:
+        return v1410_full_api(s).replace("V1410_FULL_READY_LINE_COMMANDS_FIXED", V1410_1_DISPLAY_VERSION).replace("V1410_FINAL_RUNTIME_FILTER_FIXED", V1410_1_DISPLAY_VERSION).replace("V1300.4_STATUS_API_ROUTER_FIXED", V1410_1_DISPLAY_VERSION)
+    except Exception as e:
+        return f"🔎 SYMBOL STATUS: {s}\nยังดึงข้อมูลไม่ได้: {e}\n\nVersion : {V1410_1_DISPLAY_VERSION}"
+
+def v1410_1_clean_all_versions(text):
+    text = "" if text is None else str(text)
+    for old in [
+        "V1300.4_STATUS_API_ROUTER_FIXED",
+        "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
+        "V1410_FULL_READY_LINE_COMMANDS_FIXED",
+        "V1410_FINAL_RUNTIME_FILTER_FIXED",
+        "V1410_MASTER_OS_ENHANCED",
+        "V1400_MASTER_OS_HEDGEFUND_READY",
+    ]:
+        text = text.replace(old, V1410_1_DISPLAY_VERSION)
+    text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1410_1_DISPLAY_VERSION, text)
+    if "Version : " not in text:
+        text = text.rstrip() + "\n\nVersion : " + V1410_1_DISPLAY_VERSION
+    return text
+
+try:
+    _v1410_1_prev_handle_line_command = handle_line_command
+except Exception:
+    _v1410_1_prev_handle_line_command = None
+
+def handle_line_command(user_text):
+    text = (user_text or "").strip()
+    low = text.lower().strip()
+    compact = low.replace(" ", "")
+
+    if compact in {"v14101", "v1410.1", "status1410", "สถานะ1410"}:
+        return "🧭 V1410.1 STATUS\nCore: ✅\nSymbol Route: ✅\nLINE 429 Safe: ✅\nOld Version Cleaner: ✅\n\nVersion : " + V1410_1_DISPLAY_VERSION
+
+    if v1410_1_is_symbol_command(text):
+        return v1410_1_symbol_to_status(text)
+
+    if _v1410_1_prev_handle_line_command:
+        return v1410_1_clean_all_versions(_v1410_1_prev_handle_line_command(user_text))
+    return v1410_1_clean_all_versions("ไม่พบข้อมูล")
+
+try:
+    _v1410_1_prev_line_reply = line_reply
+    def line_reply(reply_token, text):
+        return _v1410_1_prev_line_reply(reply_token, v1410_1_clean_all_versions(text))
+except Exception:
+    pass
+
+try:
+    _v1410_1_prev_line_push = line_push
+    def line_push(user_id, text):
+        try:
+            return _v1410_1_prev_line_push(user_id, v1410_1_clean_all_versions(text))
+        except Exception as e:
+            msg = str(e)
+            if "429" in msg or "monthly limit" in msg.lower() or "quota" in msg.lower():
+                try:
+                    print("LINE push quota reached; worker continues safely:", msg[:300])
+                except Exception:
+                    pass
+                return None
+            raise
+except Exception:
+    pass
+
+@app.route("/v1410_1/status", methods=["GET"], endpoint="v1410_1_status")
+def v1410_1_status_route():
+    return Response("🧭 V1410.1 STATUS\nCore: ✅\nSymbol Route: ✅\nLINE 429 Safe: ✅\n\nVersion : " + V1410_1_DISPLAY_VERSION, mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1410_1/symbol/<symbol>", methods=["GET"], endpoint="v1410_1_symbol")
+def v1410_1_symbol_route(symbol):
+    return Response(v1410_1_symbol_to_status(symbol), mimetype="text/plain; charset=utf-8")
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
 

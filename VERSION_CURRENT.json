@@ -1,6 +1,6 @@
 {
-  "current_version": "V1410_FINAL_RUNTIME_FILTER_FIXED",
-  "base": "V1410_FULL_READY_LINE_COMMANDS_FIXED",
+  "current_version": "V1410.1_SYMBOL_ROUTE_LINE429_SAFE",
+  "base": "V1410_FINAL_RUNTIME_FILTER_FIXED",
   "generated_at": "2026-06-12T03:05:16.423588+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
@@ -59,20 +59,21 @@
     "MACRO": "FRED > AlphaVantage > Yahoo"
   },
   "commands": [
+    "scb",
+    "scb.bk",
+    "nvda",
+    "qqq",
+    "gold",
     "top5 us",
     "top5 call",
-    "top5 put",
-    "top5 th",
-    "top5 etf",
-    "top5 gold",
     "api nvda",
-    "early nvda"
+    "v1410.1"
   ],
   "fixes": [
-    "no reliance on v1300_4_prev_filter",
-    "full line commands",
-    "webull ready priority",
-    "jsonl signal store"
+    "bare symbol commands route to V1410 API status",
+    "scb auto maps to SCB.BK",
+    "old version label cleaner",
+    "LINE push 429 quota error is non-fatal"
   ],
   "modules_added": [
     "Journal AI",
@@ -99,5 +100,5 @@
     "webull-ready priority"
   ],
   "critical_fix": "_v1300_4_prev_filter defined before first runtime use",
-  "fixed_at": "2026-06-12T03:24:30.080620+00:00"
+  "fixed_at": "2026-06-12T03:51:08.711419+00:00"
 }

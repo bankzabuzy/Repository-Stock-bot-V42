@@ -1,0 +1,23 @@
+{
+  "version": "V1410.1_SYMBOL_ROUTE_LINE429_SAFE",
+  "generated_at": "2026-06-12T03:52:07.745429+00:00",
+  "main_lines": 14051,
+  "compile_errors": [],
+  "checks": {
+    "v1410_1_patch_present": true,
+    "bare_symbol_route": true,
+    "scb_map_to_bk": true,
+    "line429_safe": true,
+    "old_version_cleaner": true,
+    "routes": true,
+    "version_current": true
+  },
+  "smoke": {
+    "ok": true,
+    "top5": "🏆 TOP5 US\nใช้เป็น Decision Support / Paper Trading ก่อน\nราคาอ้างอิง: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. NVDA | CALL | Score",
+    "api_scb": "🔎 API STATUS SCB.BK\nMarket: TH\nCurrent Source: YAHOO_BK\nReliability: 72/100\n\n❌ SET_API | env=SET_API_KEY\n❌ THAI_MARKET_API | env=THAI_MARKET_API_KEY\n✅",
+    "api_nvda": "🔎 API STATUS NVDA\nMarket: US\nCurrent Source: YAHOO\nReliability: 47/100\n\n❌ WEBULL | env=WEBULL_API_KEY\n❌ POLYGON | env=POLYGON_API_KEY\n❌ FINNHUB | env="
+  },
+  "important_note": "LINE 429 monthly limit cannot be fixed by code; this patch prevents it from crashing/logging as fatal. Upgrade/wait reset to send pushes.",
+  "passed": true
+}
