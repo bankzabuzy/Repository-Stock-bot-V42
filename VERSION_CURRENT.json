@@ -1,7 +1,7 @@
 {
-  "current_version": "V1412_RESTORE_FULL_ANALYSIS_FINAL",
-  "base": "V1412_WORLD_CLASS_FINAL",
-  "generated_at": "2026-06-12T06:40:25.431812+00:00",
+  "current_version": "V1412.1_CLEAN_LINE_GOLDTRADERS_FINAL",
+  "base": "V1412_RESTORE_FULL_ANALYSIS_FINAL",
+  "generated_at": "2026-06-12T06:57:15.985582+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -59,21 +59,21 @@
     "MACRO": "FRED > AlphaVantage > Yahoo"
   },
   "commands": [
+    "gold",
     "nvda",
     "qqq",
     "scb",
-    "gold",
     "top5 us",
-    "top5 call",
-    "top5 put",
     "top5 th",
-    "api nvda"
+    "top5 gold",
+    "api"
   ],
   "fixes": [
-    "bare symbol commands route to V1410 API status",
-    "scb auto maps to SCB.BK",
-    "old version label cleaner",
-    "LINE push 429 quota error is non-fatal"
+    "Gold uses Thai Gold Traders public price as primary",
+    "Short beginner-friendly LINE output",
+    "Version cleaner forced to latest",
+    "Top5 no longer repeats QQQ price for Thai names",
+    "Thai currency output fixed"
   ],
   "modules_added": [
     "Journal AI",

@@ -1,0 +1,20 @@
+{
+  "version": "V1412.1_CLEAN_LINE_GOLDTRADERS_FINAL",
+  "generated_at": "2026-06-12T06:57:16.187721+00:00",
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "gold_uses_thai_assoc": true,
+    "shorter_nvda": true,
+    "version_ok": true,
+    "top5_th_prices_not_qqq": true,
+    "scb_currency_baht": true
+  },
+  "checks": {
+    "compile_ok": true,
+    "smoke_ok": true,
+    "overlay": true,
+    "version_current": true
+  },
+  "passed": true
+}
