@@ -1,0 +1,24 @@
+{
+  "version": "V1413_WORLDCLASS_LINE_OS_FINAL",
+  "generated_at": "2026-06-12T08:08:40.093463+00:00",
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "nvda_forecast": true,
+    "nvda_entry": true,
+    "nvda_options": true,
+    "nvda_volume": true,
+    "nvda_beginner": true,
+    "scb_baht": true,
+    "gold_assoc": true,
+    "top5_th_not_qqq_price": true,
+    "status_version": true,
+    "no_old_version": true
+  },
+  "checks": {
+    "compile_ok": true,
+    "smoke_ok": true,
+    "overlay": true
+  },
+  "passed": true
+}

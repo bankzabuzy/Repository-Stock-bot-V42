@@ -1,12 +1,20 @@
+from v1413_worldclass_line_os.commands.worldclass_line_builder import dispatch, build_stock, build_gold, build_top5
+
 class LineMessageBuilder:
     def build(self, signal_report):
-        lines = ["📊 Phase 12 Trade Intelligence"]
-        lines.append("สถานะความเสี่ยง: " + ("ผ่าน" if signal_report.get("risk_allowed") else "ถูกบล็อก"))
-        for s in signal_report.get("signals", []):
-            lines.append(f"{s['symbol']} | {s['action']} | Score {s['score']}")
-        if signal_report.get("risk_blocks"):
-            lines.append("บล็อก: " + ", ".join(signal_report["risk_blocks"]))
-        if signal_report.get("summary"):
-            lines.append("เหตุผล: " + signal_report["summary"])
-        lines.append("หมายเหตุ: ไม่รับประกันกำไร ใช้เพื่อช่วยตัดสินใจและควบคุมความเสี่ยง")
-        return "\n".join(lines)
+        symbol = None
+        if isinstance(signal_report, dict):
+            symbol = signal_report.get("symbol") or signal_report.get("ticker") or signal_report.get("asset")
+        symbol = symbol or "NVDA"
+        return dispatch(str(symbol))
+
+    def build_stock_message(self, data):
+        if isinstance(data, dict):
+            return dispatch(str(data.get("symbol") or data.get("ticker") or "NVDA"))
+        return dispatch(str(data))
+
+    def build_gold_message(self, data=None):
+        return build_gold()
+
+    def build_top5_message(self, kind="US"):
+        return build_top5(kind)

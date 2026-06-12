@@ -1,7 +1,7 @@
 {
-  "current_version": "V1412.1_CLEAN_LINE_GOLDTRADERS_FINAL",
-  "base": "V1412_RESTORE_FULL_ANALYSIS_FINAL",
-  "generated_at": "2026-06-12T06:57:15.985582+00:00",
+  "current_version": "V1413_WORLDCLASS_LINE_OS_FINAL",
+  "base": "V1412_1_CLEAN_LINE_GOLDTRADERS_FINAL",
+  "generated_at": "2026-06-12T08:08:17.287129+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -59,13 +59,14 @@
     "MACRO": "FRED > AlphaVantage > Yahoo"
   },
   "commands": [
-    "gold",
     "nvda",
     "qqq",
     "scb",
+    "gold",
     "top5 us",
     "top5 th",
-    "top5 gold",
+    "top5 call",
+    "top5 put",
     "api"
   ],
   "fixes": [
@@ -118,5 +119,19 @@
     "Options Hybrid CALL PUT DTE",
     "Market Breadth DXY Yield Sector Rotation News",
     "single latest version label"
+  ],
+  "purpose": "World-class beginner-friendly LINE alert OS",
+  "upgrades": [
+    "full project overlay not image",
+    "LINE formatter replaced in phase12/phase13 builder if present",
+    "forecast 1-3 days with probability and high/low",
+    "risk grade and entry score",
+    "buy/sell volume readout",
+    "holding/no-position advice",
+    "3 entry plan with capital allocation",
+    "options CALL/PUT DTE",
+    "Thai gold association primary source",
+    "API priority router and version cleaner",
+    "LINE 429 safe handling"
   ]
 }
