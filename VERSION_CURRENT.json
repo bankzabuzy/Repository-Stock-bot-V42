@@ -1,7 +1,7 @@
 {
-  "current_version": "V1414_REALTIME_PRICE_ROUTER_FINAL",
-  "base": "V1413_WORLDCLASS_LINE_OS_FINAL",
-  "generated_at": "2026-06-12T08:31:56.499935+00:00",
+  "current_version": "V1414.1_UNIFIED_STATUS_CONTROL_FINAL",
+  "base": "V1414_REALTIME_PRICE_ROUTER_FINAL",
+  "generated_at": "2026-06-12T09:06:45.480424+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -68,11 +68,10 @@
     "api"
   ],
   "fixes": [
-    "Gold uses Thai Gold Traders public price as primary",
-    "Short beginner-friendly LINE output",
-    "Version cleaner forced to latest",
-    "Top5 no longer repeats QQQ price for Thai names",
-    "Thai currency output fixed"
+    "api/status/dashboard now returns full UNIFIED CONTROL CENTER",
+    "api NVDA returns symbol provider status",
+    "keeps V1414 realtime price router for stock/gold analysis",
+    "version cleaner updated to V1414.1"
   ],
   "modules_added": [
     "Journal AI",

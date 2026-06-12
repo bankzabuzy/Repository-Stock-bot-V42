@@ -1,0 +1,20 @@
+{
+  "version": "V1414.1_UNIFIED_STATUS_CONTROL_FINAL",
+  "generated_at": "2026-06-12T09:06:45.730082+00:00",
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "status_full": true,
+    "api_full": true,
+    "api_symbol": true,
+    "nvda_still_analysis": true,
+    "version_ok": true,
+    "no_old_version": true
+  },
+  "checks": {
+    "compile_ok": true,
+    "smoke_ok": true,
+    "overlay": true
+  },
+  "passed": true
+}

@@ -1,5 +1,6 @@
 from v1413_worldclass_line_os.api.priority_router import normalize_symbol, market_of, primary_source, reliability, time_th, session_of, api_health
-from v1414_realtime_price_router.api.realtime_price_router import PriceRouter, VERSION
+from v1414_realtime_price_router.api.realtime_price_router import PriceRouter
+from v1414_unified_status_control.commands.unified_status import VERSION, unified_control_center, symbol_api_status
 from v1413_worldclass_line_os.core.market_brain import get_snapshot, expected_move, trade_plan, risk_sentence, entry_score, THAI_GOLD
 
 _RT_ROUTER = PriceRouter()
@@ -210,10 +211,10 @@ def dispatch(text):
     t = (text or "").strip()
     low = t.lower()
     compact = low.replace(" ","")
-    if compact in {"api","status","สถานะระบบ","health"}:
-        return api_health(None)
+    if compact in {"api","status","สถานะ","สถานะระบบ","health","dashboard","control","ศูนย์ควบคุม"}:
+        return unified_control_center()
     if low.startswith("api "):
-        return api_health(t.split()[1])
+        return symbol_api_status(t.split()[1])
     if compact in {"gold","ทอง","ทองคำ","top5gold"}:
         return build_gold()
     if compact in {"top5","top5us"}:
