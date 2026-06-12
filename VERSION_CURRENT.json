@@ -1,7 +1,7 @@
 {
-  "current_version": "V1410.1_SYMBOL_ROUTE_LINE429_SAFE",
-  "base": "V1410_FINAL_RUNTIME_FILTER_FIXED",
-  "generated_at": "2026-06-12T03:05:16.423588+00:00",
+  "current_version": "V1411_STABLE_WORLD_CLASS_FINAL",
+  "base": "V1410_1_SYMBOL_ROUTE_LINE429_SAFE",
+  "generated_at": "2026-06-12T04:26:51.538817+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -59,15 +59,20 @@
     "MACRO": "FRED > AlphaVantage > Yahoo"
   },
   "commands": [
-    "scb",
-    "scb.bk",
+    "สถานะระบบ",
+    "api",
+    "api nvda",
     "nvda",
-    "qqq",
+    "scb",
     "gold",
+    "entry nvda",
     "top5 us",
     "top5 call",
-    "api nvda",
-    "v1410.1"
+    "top5 put",
+    "top5 th",
+    "top5 etf",
+    "top5 gold",
+    "queue"
   ],
   "fixes": [
     "bare symbol commands route to V1410 API status",
@@ -100,5 +105,13 @@
     "webull-ready priority"
   ],
   "critical_fix": "_v1300_4_prev_filter defined before first runtime use",
-  "fixed_at": "2026-06-12T03:51:08.711419+00:00"
+  "fixed_at": "2026-06-12T03:51:08.711419+00:00",
+  "final_goals": [
+    "single latest version label",
+    "all line commands route to stable V1411",
+    "api priority and fallback",
+    "symbol command routing",
+    "line 429 queue",
+    "no fake signal principle"
+  ]
 }

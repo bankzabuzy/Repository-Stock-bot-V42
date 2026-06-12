@@ -1,0 +1,35 @@
+{
+  "version": "V1411_STABLE_WORLD_CLASS_FINAL",
+  "generated_at": "2026-06-12T04:27:18.805354+00:00",
+  "main_lines": 14178,
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "status": "🧭 V1411 API HEALTH\nUS: YAHOO | Reliability 42/100\nETF: YAHOO | Reliability 42/100\nCALL: YAHOO | Reliability 62/100\nPUT: YAHOO | Reliability 62/100\nTH: YAHOO_BK | Reliability 72/100\nGOLD: GOLDTRADERS | Reliability 100/100\nMACRO: YAHOO | Reliability 72",
+    "api_nvda": "🔎 DATA STATUS: NVDA\nMarket: US\nCurrent Source: YAHOO\nReliability: 42/100\nSession: AUTO_SESSION: Prev Close / Pre-market / Regular / After-hours\n\n❌ WEBULL | env=WEBULL_API_KEY\n❌ POLYGON | env=POLYGON_API_KEY\n❌ FINNHUB | env=FINNHUB_API_KEY\n❌ TWELVEDAT",
+    "symbol_scb": "📊 SCB.BK\nMarket: TH\nSource: YAHOO_BK | Reliability 72/100\nSession: SET_LAST_CLOSE / Yahoo .BK fallback\n\nสถานะ: READY_FOR_ANALYSIS\nหมายเหตุ: ถ้า API หลักล่ม ระบบใช้ fallback ตามลำดับ และห้ามสร้าง fake signal\n\nคำสั่งต่อไป: entry SCB.BK / api SCB.BK\nVer",
+    "entry_nvda": "⚠ ENTRY WATCH: NVDA\nSource: YAHOO | Reliability 42/100\nProbability: 55%\nStatus: WAIT_CONFIRMATION\n\nต้องผ่าน:\n✅ API พร้อม\n✅ Volume ยืนยัน\n✅ Breadth ไม่ RISK_OFF\n❌ Breakout/VWAP ต้องรอยืนยัน\n\nAction: ยังไม่ไล่ราคา รอ trigger\nVersion : V1411_STABLE_WORL",
+    "top5_us": "🏆 TOP5 US\nDecision Support / Paper Trading ก่อน\nราคาที่ใช้: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. NVDA | CALL | Score 88/100 | Prob 82% | Conf 86% | Risk A\n   Entry: รอทะลุ pre-market high / volume ยืนยัน\n   Source: YAHOO | Re",
+    "top5_call": "🏆 TOP5 CALL\nDecision Support / Paper Trading ก่อน\nราคาที่ใช้: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. NVDA | CALL | Score 88/100 | Prob 82% | Conf 86% | Risk A\n   Entry: Early long setup\n   Source: YAHOO | Reliability 42/100 | A",
+    "top5_put": "🏆 TOP5 PUT\nDecision Support / Paper Trading ก่อน\nราคาที่ใช้: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. QQQ | PUT | Score 70/100 | Prob 61% | Conf 65% | Risk B\n   Entry: หลุด VWAP + Breadth risk-off\n   Source: YAHOO | Reliability 4",
+    "top5_th": "🏆 TOP5 THAI\nDecision Support / Paper Trading ก่อน\nราคาที่ใช้: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. SCB.BK | BUY | Score 78/100 | Prob 60% | Conf 64% | Risk B\n   Entry: ปันผลสูง + valuation ไม่แพง\n   Source: YAHOO_BK | Reliabi",
+    "top5_gold": "🏆 TOP5 GOLD\nDecision Support / Paper Trading ก่อน\nราคาที่ใช้: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. GOLD | WAIT | Score 70/100 | Prob 62% | Conf 66% | Risk B\n   Entry: รอ London/NY session\n   Source: GOLDTRADERS | Reliability ",
+    "queue": "📬 ALERT QUEUE\nยังไม่มีรายการค้างส่ง\n\nVersion : V1411_STABLE_WORLD_CLASS_FINAL",
+    "help": "🧭 V1411 COMMANDS\nสถานะระบบ / api\napi nvda / api scb / api gold\nnvda / qqq / scb / gold\nentry nvda / entry scb\ntop5 us / top5 th / top5 etf / top5 gold\ntop5 call / top5 put\njournal / montecarlo / portfolio / risk1400\nqueue\n\nVersion : V1411_STABLE_WORL"
+  },
+  "checks": {
+    "v1411_overlay": true,
+    "line429_queue": true,
+    "symbol_route": true,
+    "api_priority": true,
+    "commands": true,
+    "routes": true,
+    "version_current": true
+  },
+  "notes": [
+    "LINE 429 monthly limit cannot be bypassed by code; alerts are queued instead.",
+    "Live API calls depend on Railway Variables being set and provider quota availability.",
+    "No fake signal principle: if data source not available, system should show unavailable/no trade."
+  ],
+  "passed": true
+}

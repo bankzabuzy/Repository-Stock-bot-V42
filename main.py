@@ -13992,6 +13992,133 @@ def v1410_1_symbol_route(symbol):
     return Response(v1410_1_symbol_to_status(symbol), mimetype="text/plain; charset=utf-8")
 
 
+# ============================================================
+# V1411 STABLE WORLD CLASS FINAL OVERLAY
+# Final command router + version cleaner + LINE 429 queue + no fake signal guard.
+# ============================================================
+V1411_VERSION = "V1411_STABLE_WORLD_CLASS_FINAL"
+
+def v1411_clean(text):
+    try:
+        text = "" if text is None else str(text)
+        for old in [
+            "V1300.4_STATUS_API_ROUTER_FIXED",
+            "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
+            "V1410_FULL_READY_LINE_COMMANDS_FIXED",
+            "V1410_FINAL_RUNTIME_FILTER_FIXED",
+            "V1410.1_SYMBOL_ROUTE_LINE429_SAFE",
+            "V1410_MASTER_OS_ENHANCED",
+            "V1400_MASTER_OS_HEDGEFUND_READY",
+        ]:
+            text = text.replace(old, V1411_VERSION)
+        text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1411_VERSION, text)
+        if "Version : " not in text:
+            text = text.rstrip() + "\n\nVersion : " + V1411_VERSION
+        return text.strip()
+    except Exception:
+        return str(text)
+
+def v1411_is_symbol(text):
+    s = (text or "").strip().upper()
+    if not s or " " in s:
+        return False
+    if s in {"API","TOP5","CALL","PUT","HELP","QUEUE","JOURNAL","PORTFOLIO"}:
+        return False
+    return bool(re.fullmatch(r"[A-Z0-9.=]{2,10}", s)) or s in {"ทอง","ทองคำ"}
+
+def v1411_dispatch(user_text):
+    text = (user_text or "").strip()
+    low = text.lower().strip()
+    compact = low.replace(" ", "")
+    try:
+        from v1411_stable_world_class.commands.line_commands import top5, symbol, entry, queue_status, help_text
+        from v1411_stable_world_class.api.router import status
+    except Exception as e:
+        return f"V1411 import error: {e}\n\nVersion : {V1411_VERSION}"
+
+    if compact in {"v1411","help","commands","คำสั่ง","เมนู"}:
+        return help_text()
+    if compact in {"สถานะระบบ","status","health","api","apihealth","สถานะapi"}:
+        return status(None)
+    if low.startswith("api "):
+        parts = text.split()
+        return status(parts[1] if len(parts) > 1 else None)
+    if low.startswith("entry "):
+        parts = text.split()
+        return entry(parts[1] if len(parts) > 1 else "NVDA")
+    if compact in {"top5","top5us","topus"}:
+        return top5("US")
+    if compact in {"top5call","topcall","call"}:
+        return top5("CALL")
+    if compact in {"top5put","topput","put"}:
+        return top5("PUT")
+    if compact in {"top5th","topthai","top5thai"}:
+        return top5("TH")
+    if compact in {"top5etf","topetf"}:
+        return top5("ETF")
+    if compact in {"top5gold","topgold","goldtop"}:
+        return top5("GOLD")
+    if compact in {"queue","alertqueue","คิว"}:
+        return queue_status()
+    if v1411_is_symbol(text):
+        return symbol(text)
+    return None
+
+try:
+    _v1411_prev_handle_line_command = handle_line_command
+except Exception:
+    _v1411_prev_handle_line_command = None
+
+def handle_line_command(user_text):
+    out = v1411_dispatch(user_text)
+    if out is not None:
+        return v1411_clean(out)
+    if _v1411_prev_handle_line_command:
+        return v1411_clean(_v1411_prev_handle_line_command(user_text))
+    return v1411_clean("ไม่พบข้อมูล")
+
+try:
+    _v1411_prev_line_reply = line_reply
+    def line_reply(reply_token, text):
+        return _v1411_prev_line_reply(reply_token, v1411_clean(text))
+except Exception:
+    pass
+
+try:
+    _v1411_prev_line_push = line_push
+    def line_push(user_id, text):
+        try:
+            return _v1411_prev_line_push(user_id, v1411_clean(text))
+        except Exception as e:
+            msg = str(e)
+            if "429" in msg or "monthly limit" in msg.lower() or "quota" in msg.lower():
+                try:
+                    from v1411_stable_world_class.storage.queue import AlertQueue
+                    AlertQueue().add({"reason": "LINE_429_QUOTA", "text": v1411_clean(text), "user_id": user_id})
+                    print("LINE 429 quota reached. Alert queued. Core continues.")
+                except Exception as qe:
+                    print("LINE 429 quota reached. Queue failed:", qe)
+                return None
+            raise
+except Exception:
+    pass
+
+@app.route("/v1411/status", methods=["GET"], endpoint="v1411_status")
+def v1411_status_route():
+    from v1411_stable_world_class.api.router import status
+    return Response(status(None), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1411/top5/<kind>", methods=["GET"], endpoint="v1411_top5")
+def v1411_top5_route(kind):
+    from v1411_stable_world_class.commands.line_commands import top5
+    return Response(top5(kind), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1411/symbol/<symbol_text>", methods=["GET"], endpoint="v1411_symbol")
+def v1411_symbol_route(symbol_text):
+    from v1411_stable_world_class.commands.line_commands import symbol
+    return Response(symbol(symbol_text), mimetype="text/plain; charset=utf-8")
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
 
