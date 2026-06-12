@@ -1,7 +1,7 @@
 {
-  "current_version": "V1411_STABLE_WORLD_CLASS_FINAL",
-  "base": "V1410_1_SYMBOL_ROUTE_LINE429_SAFE",
-  "generated_at": "2026-06-12T04:26:51.538817+00:00",
+  "current_version": "V1412_RESTORE_FULL_ANALYSIS_FINAL",
+  "base": "V1412_WORLD_CLASS_FINAL",
+  "generated_at": "2026-06-12T06:40:25.431812+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -59,20 +59,15 @@
     "MACRO": "FRED > AlphaVantage > Yahoo"
   },
   "commands": [
-    "สถานะระบบ",
-    "api",
-    "api nvda",
     "nvda",
+    "qqq",
     "scb",
     "gold",
-    "entry nvda",
     "top5 us",
     "top5 call",
     "top5 put",
     "top5 th",
-    "top5 etf",
-    "top5 gold",
-    "queue"
+    "api nvda"
   ],
   "fixes": [
     "bare symbol commands route to V1410 API status",
@@ -113,5 +108,15 @@
     "symbol command routing",
     "line 429 queue",
     "no fake signal principle"
+  ],
+  "restored": [
+    "price current/prev/pre/after",
+    "AI Score Probability Confidence",
+    "EMA RSI ATR RVOL",
+    "Dividend Valuation",
+    "3 entry plan TP SL position sizing text",
+    "Options Hybrid CALL PUT DTE",
+    "Market Breadth DXY Yield Sector Rotation News",
+    "single latest version label"
   ]
 }

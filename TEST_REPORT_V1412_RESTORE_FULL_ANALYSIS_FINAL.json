@@ -1,0 +1,27 @@
+{
+  "version": "V1412_RESTORE_FULL_ANALYSIS_FINAL",
+  "generated_at": "2026-06-12T06:40:25.626538+00:00",
+  "base_zip": "Repository-Stock-bot_V1412_WORLD_CLASS_FINAL.zip",
+  "main_lines": 14259,
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "nvda_has_price": true,
+    "nvda_has_3_entries": true,
+    "nvda_has_options": true,
+    "qqq_has_extended": true,
+    "scb_has_dividend": true,
+    "gold_has_gold": true,
+    "top5_ok": true,
+    "dispatch_ok": true,
+    "version_ok": true
+  },
+  "checks": {
+    "overlay": true,
+    "routes": true,
+    "version_current": true,
+    "compile_ok": true,
+    "smoke_ok": true
+  },
+  "passed": true
+}

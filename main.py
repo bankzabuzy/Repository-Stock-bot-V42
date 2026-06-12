@@ -14119,6 +14119,87 @@ def v1411_symbol_route(symbol_text):
     return Response(symbol(symbol_text), mimetype="text/plain; charset=utf-8")
 
 
+# ============================================================
+# V1412 RESTORE FULL ANALYSIS FINAL OVERLAY
+# Restores rich LINE output: price, pre-market, dividend, 3 entries, TP, SL, options, technicals, breadth.
+# ============================================================
+V1412_RESTORE_VERSION = "V1412_RESTORE_FULL_ANALYSIS_FINAL"
+
+def v1412_restore_clean(text):
+    text = "" if text is None else str(text)
+    for old in [
+        "V1300.4_STATUS_API_ROUTER_FIXED",
+        "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
+        "V1410_FULL_READY_LINE_COMMANDS_FIXED",
+        "V1410_FINAL_RUNTIME_FILTER_FIXED",
+        "V1410.1_SYMBOL_ROUTE_LINE429_SAFE",
+        "V1411_STABLE_WORLD_CLASS_FINAL",
+        "V1410_MASTER_OS_ENHANCED",
+        "V1400_MASTER_OS_HEDGEFUND_READY",
+    ]:
+        text = text.replace(old, V1412_RESTORE_VERSION)
+    text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1412_RESTORE_VERSION, text)
+    if "Version : " not in text:
+        text = text.rstrip() + "\n\nVersion : " + V1412_RESTORE_VERSION
+    return text.strip()
+
+def v1412_restore_dispatch(user_text):
+    try:
+        from v1412_restore_full_analysis.commands.full_formatter import dispatch
+        return dispatch(user_text)
+    except Exception as e:
+        return f"V1412 restore error: {e}\n\nVersion : {V1412_RESTORE_VERSION}"
+
+try:
+    _v1412_restore_prev_handle_line_command = handle_line_command
+except Exception:
+    _v1412_restore_prev_handle_line_command = None
+
+def handle_line_command(user_text):
+    out = v1412_restore_dispatch(user_text)
+    if out:
+        return v1412_restore_clean(out)
+    if _v1412_restore_prev_handle_line_command:
+        return v1412_restore_clean(_v1412_restore_prev_handle_line_command(user_text))
+    return v1412_restore_clean("ไม่พบข้อมูล")
+
+try:
+    _v1412_restore_prev_line_reply = line_reply
+    def line_reply(reply_token, text):
+        return _v1412_restore_prev_line_reply(reply_token, v1412_restore_clean(text))
+except Exception:
+    pass
+
+try:
+    _v1412_restore_prev_line_push = line_push
+    def line_push(user_id, text):
+        try:
+            return _v1412_restore_prev_line_push(user_id, v1412_restore_clean(text))
+        except Exception as e:
+            msg = str(e)
+            if "429" in msg or "monthly limit" in msg.lower() or "quota" in msg.lower():
+                print("LINE 429 quota reached. Core continues safely.")
+                return None
+            raise
+except Exception:
+    pass
+
+@app.route("/v1412/full/<symbol_text>", methods=["GET"], endpoint="v1412_full_symbol")
+def v1412_full_symbol_route(symbol_text):
+    from v1412_restore_full_analysis.commands.full_formatter import analysis
+    return Response(analysis(symbol_text), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1412/top5/<kind>", methods=["GET"], endpoint="v1412_top5_kind")
+def v1412_top5_kind_route(kind):
+    from v1412_restore_full_analysis.commands.full_formatter import top5
+    return Response(top5(kind), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1412/health", methods=["GET"], endpoint="v1412_health")
+def v1412_health_route():
+    from v1412_restore_full_analysis.api.router import health_text
+    return Response(health_text(None), mimetype="text/plain; charset=utf-8")
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=PORT)
 
