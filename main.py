@@ -13470,14 +13470,38 @@ def v1300_4_unified_status_text():
     lines.append(f"Version : {V1300_4_DISPLAY_VERSION}")
     return "\n".join(lines)
 
+
+# ============================================================
+# V1410 FINAL RUNTIME FILTER FIX
+# Must be defined BEFORE V1300.4 line_send wrapper uses it.
+# This prevents Railway runtime error:
+# NameError: name '_v1300_4_prev_filter' is not defined
+# ============================================================
+def _v1410_identity_filter(text):
+    return text
+
+try:
+    _v1300_4_prev_filter
+except NameError:
+    _v1300_4_prev_filter = _v1410_identity_filter
+
+try:
+    v1300_4_prev_filter
+except NameError:
+    v1300_4_prev_filter = _v1410_identity_filter
+
 try:
     _v1300_4_prev_handle_line_command = handle_line_command
 except Exception:
     _v1300_4_prev_handle_line_command = None
 
 def v1300_1_force_filter_before_line_send(text):
-    if _v1300_4_prev_filter:
-        text = _v1300_4_prev_filter(text)
+    try:
+        _prev = globals().get("_v1300_4_prev_filter", None) or globals().get("v1300_4_prev_filter", None)
+        if callable(_prev):
+            text = _prev(text)
+    except Exception:
+        pass
     return v1300_4_clean_output(text)
 
 try:
@@ -13730,9 +13754,13 @@ def v1410_early_symbol_route(symbol):
 # Prevent NameError from older filters if old base references v1300_4_prev_filter.
 # ============================================================
 try:
+    _v1300_4_prev_filter
+except NameError:
+    _v1300_4_prev_filter = _v1410_identity_filter if "_v1410_identity_filter" in globals() else (lambda text: text)
+try:
     v1300_4_prev_filter
 except NameError:
-    v1300_4_prev_filter = None
+    v1300_4_prev_filter = _v1300_4_prev_filter
 
 # ============================================================
 # V1410 FULL READY LINE COMMANDS FIXED
@@ -13854,6 +13882,17 @@ def v1410_full_api_symbol_route(symbol):
 @app.route("/v1410/full/early/<symbol>", methods=["GET"], endpoint="v1410_full_early_symbol")
 def v1410_full_early_symbol_route(symbol):
     return Response(v1410_full_early(symbol), mimetype="text/plain; charset=utf-8")
+
+# ============================================================
+# V1410 AUTO SCAN SAFE DEFAULTS
+# Keep worker alive if older auto-scan modules reference deprecated names.
+# ============================================================
+for _missing_name, _default_value in {
+    "_v1300_4_prev_filter": _v1410_identity_filter,
+    "v1300_4_prev_filter": _v1410_identity_filter,
+}.items():
+    if _missing_name not in globals():
+        globals()[_missing_name] = _default_value
 
 
 if __name__ == "__main__":

@@ -1,0 +1,94 @@
+{
+  "version": "V1410_FINAL_RUNTIME_FILTER_FIXED",
+  "generated_at": "2026-06-12T03:24:30.571596+00:00",
+  "main_lines": 13954,
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "top5_us": "🏆 TOP5 US\nใช้เป็น Decision Support / Paper Trading ก่อน\nราคาอ้างอิง: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. NVDA | CALL | Score 88/100 | Prob 82% | Conf 86% | Risk A\n   Entry Pl",
+    "top5_call": "🏆 TOP5 CALL\nใช้เป็น Decision Support / Paper Trading ก่อน\nราคาอ้างอิง: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. NVDA | CALL | Score 88/100 | Prob 82% | Conf 86% | Risk A\n   Entry ",
+    "api_nvda": "🔎 API STATUS NVDA\nMarket: US\nCurrent Source: YAHOO\nReliability: 47/100\n\n❌ WEBULL | env=WEBULL_API_KEY\n❌ POLYGON | env=POLYGON_API_KEY\n❌ FINNHUB | env=FINNHUB_API_KEY\n❌ TWELVEDATA | env=TWELVEDATA_API_",
+    "early_nvda": "⚠ EARLY ENTRY WATCH: NVDA\n\nสถานะ: กำลังเข้า Setup แต่ยังไม่ใช่ BUY/SELL เต็มระบบ\nProbability: 72%\nConfidence: 68%\nRisk Gate: WAIT_CONFIRMATION\n\nต้องผ่าน:\n✅ API source พร้อม\n✅ Volume ยืนยัน\n✅ Breadth ไ"
+  },
+  "old_filter_references": [
+    {
+      "file": "main.py",
+      "line": 13478,
+      "text": "# NameError: name '_v1300_4_prev_filter' is not defined"
+    },
+    {
+      "file": "main.py",
+      "line": 13484,
+      "text": "_v1300_4_prev_filter"
+    },
+    {
+      "file": "main.py",
+      "line": 13486,
+      "text": "_v1300_4_prev_filter = _v1410_identity_filter"
+    },
+    {
+      "file": "main.py",
+      "line": 13489,
+      "text": "v1300_4_prev_filter"
+    },
+    {
+      "file": "main.py",
+      "line": 13491,
+      "text": "v1300_4_prev_filter = _v1410_identity_filter"
+    },
+    {
+      "file": "main.py",
+      "line": 13500,
+      "text": "_prev = globals().get(\"_v1300_4_prev_filter\", None) or globals().get(\"v1300_4_prev_filter\", None)"
+    },
+    {
+      "file": "main.py",
+      "line": 13754,
+      "text": "# Prevent NameError from older filters if old base references v1300_4_prev_filter."
+    },
+    {
+      "file": "main.py",
+      "line": 13757,
+      "text": "_v1300_4_prev_filter"
+    },
+    {
+      "file": "main.py",
+      "line": 13759,
+      "text": "_v1300_4_prev_filter = _v1410_identity_filter if \"_v1410_identity_filter\" in globals() else (lambda text: text)"
+    },
+    {
+      "file": "main.py",
+      "line": 13761,
+      "text": "v1300_4_prev_filter"
+    },
+    {
+      "file": "main.py",
+      "line": 13763,
+      "text": "v1300_4_prev_filter = _v1300_4_prev_filter"
+    },
+    {
+      "file": "main.py",
+      "line": 13768,
+      "text": "# Fixes missing previous-filter variable issues by not relying on v1300_4_prev_filter."
+    },
+    {
+      "file": "main.py",
+      "line": 13891,
+      "text": "\"_v1300_4_prev_filter\": _v1410_identity_filter,"
+    },
+    {
+      "file": "main.py",
+      "line": 13892,
+      "text": "\"v1300_4_prev_filter\": _v1410_identity_filter,"
+    }
+  ],
+  "checks": {
+    "definitive_patch_present": true,
+    "underscore_filter_defined_before_use": true,
+    "safe_wrapper_replaced": true,
+    "auto_scan_safe_defaults": true,
+    "top5_commands_present": true,
+    "version_current": true
+  },
+  "passed": true
+}

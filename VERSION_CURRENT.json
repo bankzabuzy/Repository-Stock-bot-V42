@@ -1,6 +1,6 @@
 {
-  "current_version": "V1410_FULL_READY_LINE_COMMANDS_FIXED",
-  "base": "V1410_MASTER_OS_ENHANCED",
+  "current_version": "V1410_FINAL_RUNTIME_FILTER_FIXED",
+  "base": "V1410_FULL_READY_LINE_COMMANDS_FIXED",
   "generated_at": "2026-06-12T03:05:16.423588+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
@@ -97,5 +97,7 @@
     "api symbol status",
     "early entry watch",
     "webull-ready priority"
-  ]
+  ],
+  "critical_fix": "_v1300_4_prev_filter defined before first runtime use",
+  "fixed_at": "2026-06-12T03:24:30.080620+00:00"
 }
