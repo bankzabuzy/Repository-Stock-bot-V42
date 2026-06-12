@@ -579,42 +579,6 @@ def yahoo_bk_exists(symbol):
 # ============================================================
 # DYNAMIC THAI STOCK DETECTION V7.5
 # ============================================================
-def looks_like_stock_symbol(key):
-    return bool(re.fullmatch(r"[A-Z0-9]{1,12}", key))
-
-
-def yahoo_bk_exists(symbol):
-    """Detect Thai stocks dynamically using Yahoo Finance SYMBOL.BK.
-    This supports BEAUTY, HANA, DOHOME and future Thai tickers without manual THAI_SYMBOLS edits.
-    """
-    if not looks_like_stock_symbol(symbol):
-        return False
-
-    known_us = {
-        "NVDA", "AAPL", "TSLA", "MSFT", "META", "GOOGL", "GOOG", "AMZN",
-        "NFLX", "AMD", "INTC", "QQQ", "SPY", "IWM", "DIA", "TQQQ", "SQQQ",
-        "SOXL", "SOXS", "PLTR", "COIN", "MSTR", "AVGO", "SMCI", "MU"
-    }
-    if symbol in known_us:
-        return False
-
-    cache_key = f"YF_BK_EXISTS:{symbol}"
-    cached = cache_get(cache_key)
-    if cached is not None:
-        return bool(cached)
-
-    try:
-        data = yf.Ticker(f"{symbol}.BK").history(period="10d", interval="1d", auto_adjust=False)
-        exists = data is not None and not data.empty and "Close" in data.columns
-        cache_set(cache_key, exists)
-        return bool(exists)
-    except Exception:
-        cache_set(cache_key, False)
-        return False
-
-# ============================================================
-# ASSET NORMALIZATION
-# ============================================================
 def normalize_asset(user_text):
     raw = (user_text or "").strip()
     try:
@@ -2815,58 +2779,6 @@ def build_oil_report():
 # This helper is called inside line_reply() and line_push() directly.
 # It blocks fake analysis even if older command handlers return old text.
 # ============================================================
-def v1300_1_force_filter_before_line_send(text):
-    try:
-        if not isinstance(text, str):
-            text = str(text)
-        text = text.replace("SAFE" + "_FALLBACK", "DATA_UNAVAILABLE")
-        text = re.sub(r"V" + "41" + r"(?:\.\d+)?[A-Z0-9_\.]*", "V1300.1_WORLD_CLASS_FINAL", text)
-        text = re.sub(r"V" + "42" + r"(?:\.\d+)?[A-Z0-9_\.]*", "V1300.1_WORLD_CLASS_FINAL", text)
-        text = text.replace("V1300_1_WORLD_CLASS_FINAL", "V1300.1_WORLD_CLASS_FINAL")
-
-        if "DATA_UNAVAILABLE" in text and "📊 วิเคราะห์" in text:
-            sym_match = re.search(r"📊 วิเคราะห์\s+([^\n]+)", text)
-            sym = sym_match.group(1).strip() if sym_match else "UNKNOWN"
-            return f"""📊 วิเคราะห์ {sym}
-แหล่งข้อมูล: DATA_UNAVAILABLE / งดออกสัญญาณ
-
-สถานะ: NO ANALYSIS / NO TRADE
-เหตุผล: ข้อมูลราคาจริงจากผู้ให้บริการไม่พร้อม หรือ Symbol/API ไม่ถูกต้อง
-ระบบจึงไม่คำนวณ AI Score, Probability, RSI, EMA, Entry, TP, SL หรือ Options เพื่อป้องกันสัญญาณหลอก
-
-วิธีแก้:
-1) ตรวจ Symbol ให้ถูกต้อง เช่น NVDA, AAPL, SCB.BK
-2) ตรวจ Railway Variables: TWELVEDATA_API_KEY / FINNHUB_API_KEY / ALPHAVANTAGE_API_KEY / FMP_API_KEY
-3) หลังแก้ Variables ให้ Redeploy ใหม่
-
-Version : V1300.1_WORLD_CLASS_FINAL"""
-
-        # Probability below 50 must not show entry plan
-        m = re.search(r"Probability(?:\s*ประมาณ)?\s*:\s*(\d+(?:\.\d+)?)%", text)
-        if m:
-            try:
-                if float(m.group(1)) < 50:
-                    text = re.sub(
-                        r"🧩 แผนเข้า/ออก 3 ไม้.*?(?=\n\n🧠|\n\nเหตุผลหลัก:|\n\n📰|\n\nVersion\s*:|\Z)",
-                        "🧩 แผนเข้า/ออก 3 ไม้\nสถานะ: NO TRADE\nเหตุผล: Probability ต่ำกว่า 50% ระบบปิดแผนเข้าอัตโนมัติ",
-                        text,
-                        flags=re.S
-                    )
-                    text = re.sub(r"ซื้อไม้\s*\d+:[^\n]*\n?", "", text)
-                    text = re.sub(r"ขาย/ทำกำไร\s*\d+:[^\n]*\n?", "", text)
-            except Exception:
-                pass
-
-        text = re.sub(r"Version\s*:\s*[^\n]+", "Version : V1300.1_WORLD_CLASS_FINAL", text)
-        if "Version : " not in text:
-            text = text.rstrip() + "\n\nVersion : V1300.1_WORLD_CLASS_FINAL"
-        return text
-    except Exception:
-        return text
-
-# ============================================================
-# LINE
-# ============================================================
 def line_reply(reply_token, text):
     text = v1300_1_force_filter_before_line_send(text)
     if not LINE_CHANNEL_ACCESS_TOKEN:
@@ -3190,276 +3102,6 @@ TwelveData: {'OK' if TWELVEDATA_API_KEY else 'Missing'}
 Finnhub: {'OK' if FINNHUB_API_KEY else 'Missing'}
 FMP: {'OK' if FMP_API_KEY else 'Missing'}
 Alpha Vantage: {'OK' if ALPHAVANTAGE_API_KEY else 'Missing'}"""
-
-
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower()
-
-    
-
-    
-
-    
-
-    
-
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    # V620/V700 LINE PHASE6+PHASE7 COMMANDS
-    if low in ("v620", "phase6", "alpha discovery", "alpha factory", "factor engine", "alpha decay", "research notebook", "ค้นหา alpha", "วิจัยกลยุทธ์"):
-        from modules.v620_phase6_alpha_discovery_engine.engine import center_text
-        return center_text("SPY", "MIXED")
-
-    if low in ("v700", "phase7", "execution edge", "position sizing", "kelly", "portfolio heat", "exposure matrix", "คุมความเสี่ยงพอร์ต", "ขนาดไม้"):
-        from modules.v700_phase7_execution_edge.core import dashboard_text
-        return dashboard_text("SPY")
-# V550 LINE PHASE5 COMMAND
-    if low in ("v550", "phase5", "webull api", "webull ready", "api health", "human approval", "dry run", "เชื่อม webull", "ตรวจ api"):
-        from modules.v550_phase5_webull_api_ready.dashboard import phase5_text
-        return phase5_text("SPY")
-# V500 LINE ARFOS COMMAND
-    if low in ("v500", "arfos", "autonomous fund os", "shadow real money", "governance", "ระบบกองทุน", "กองทุนอัตโนมัติเต็มระบบ"):
-        from modules.v500_arfos_autonomous_retail_fund_os.dashboard import phase4_text
-        return phase4_text("SPY")
-# V470 LINE PHASE3 COMMAND
-    if low in ("v470", "phase3", "meta learning", "self healing", "investor dashboard", "fund report", "รายงานกองทุน", "แดชบอร์ดนักลงทุน"):
-        from modules.v470_phase3_meta_selfheal_dashboard.dashboard import phase3_text
-        return phase3_text("SPY")
-# V430 LINE PHASE2 COMMAND
-    if low in ("v430", "phase2", "market intelligence", "microstructure", "regime ai", "digital twin", "พฤติกรรมตลาด", "ตลาดจำลอง"):
-        from modules.v430_phase2_market_intelligence.dashboard import phase2_text
-        return phase2_text("SPY")
-# V390 LINE PHASE1 COMMAND
-    if low in ("v390", "phase1", "execution verification", "attribution", "position sizing", "capital protection", "ตรวจ execution", "คุมทุน"):
-        from modules.v390_phase1_execution_attribution_risk.dashboard import phase1_text
-        return phase1_text("SPY")
-# V350 LINE PRODUCTION PROOF COMMAND
-    if low in ("v350", "production proof", "forward test", "performance proof", "line governance", "พิสูจน์ระบบ", "ตรวจผลจริง"):
-        from modules.v350_production_proof_governance.production_control import production_center_text
-        return production_center_text()
-# V300 LINE INSTITUTIONAL CONTROL CENTER COMMAND
-    if low in ("v300", "control center", "institutional control", "feature store", "model registry", "ศูนย์ควบคุม", "ระบบกองทุนเต็ม"):
-        from modules.v300_institutional_control_center.control_center import control_center_text
-        return control_center_text("SPY")
-# V240 LINE AUTONOMOUS FUND MANAGER COMMAND
-    if low in ("v240", "autonomous fund manager", "fund health", "investment committee", "ผู้จัดการกองทุน", "สุขภาพกองทุน"):
-        from modules.v240_autonomous_fund_manager.dashboard import build_v240_text
-        return build_v240_text("SPY")
-# V230 LINE PORTFOLIO OS COMMAND
-    if low in ("v230", "portfolio os", "live portfolio", "portfolio ops", "พอร์ต", "ระบบพอร์ต"):
-        from modules.v230_live_portfolio_os.dashboard import build_v230_text
-        return build_v230_text()
-# V220 LINE BROKER NETWORK COMMAND
-    if low in ("v220", "broker network", "execution network", "route test", "เครือข่ายโบรกเกอร์", "ส่งคำสั่งจำลอง"):
-        from modules.v220_broker_execution_network.dashboard import build_v220_text
-        return build_v220_text("SPY")
-# V210 LINE MULTI AGENT COMMAND
-    if low in ("v210", "multi agent", "agent center", "committee", "ai committee", "ทีม ai", "คณะกรรมการ ai"):
-        from modules.v210_multi_agent_fund_intelligence.dashboard import build_v210_text
-        return build_v210_text("SPY")
-# V200 LINE AUTONOMOUS FUND COMMAND
-    if low in ("v200", "fund manager", "autonomous fund", "retail fund", "กองทุนอัตโนมัติ", "ผู้จัดการกองทุน"):
-        from modules.v200_autonomous_retail_fund.dashboard import build_v200_text
-        return build_v200_text("SPY")
-# V190 LINE GLOBAL MACRO COMMAND
-    if low in ("v190", "macro", "global macro", "event prediction", "human behavior", "macro center", "เศรษฐกิจโลก", "พฤติกรรมมนุษย์", "คาดการณ์เหตุการณ์"):
-        from modules.v190_global_macro_behavior.dashboard import build_v190_text
-        return build_v190_text()
-# V180.1 LINE FORECAST RISK COMMAND
-    if low in ("v180.1", "v180-1", "forecast risk", "risk forecast", "คาดการณ์ความเสี่ยง", "พฤติกรรมตลาดรวม"):
-        from modules.v180_1_market_behavior_plus_risk.forecast_plus_risk import forecast_text
-        return forecast_text()
-# V170 LINE RISK STRESS COMMAND
-    if low in ("v170", "stress", "risk stress", "stress test", "var", "cvar", "ทดสอบความเสี่ยง", "ความเสี่ยงขั้นสูง"):
-        from modules.v170_advanced_risk_stress.risk_dashboard import build_v170_text
-        return build_v170_text()
-# V140 LINE SYSTEM VERSION COMMAND
-    if low in ("v140", "latest", "version", "system center", "ตรวจเวอร์ชั่น", "เวอร์ชั่นล่าสุด"):
-        from modules.v140_system_version_audit.version_registry import latest_status_text
-        return latest_status_text()
-# V130 LINE GOVERNANCE COMMAND
-    if low in ("v130", "governance", "readiness", "allocation", "autonomous", "บริหารพอร์ต", "พร้อมใช้งานจริง"):
-        from modules.v130_live_readiness_autonomous.governance_report import build_v130_text
-        return build_v130_text()
-# V120 LINE BROKER COMMAND
-    if low in ("v120", "broker", "broker center", "execution", "โบรกเกอร์", "ระบบส่งคำสั่ง"):
-        from modules.v120_broker_live_ready.broker_dashboard import build_v120_text
-        return build_v120_text()
-# V110 LINE FUND COMMAND
-    if low in ("fund", "v110", "daily fund report", "รายงานกองทุน", "ระบบกองทุน", "กองทุน"):
-        from modules.v110_retail_institutional_fund.master_dashboard import build_master_text
-        return build_master_text()
-
-    if low in ("daily report", "daily fund", "สรุปรายวัน"):
-        from modules.v110_retail_institutional_fund.daily_report import build_daily_report_text
-        return build_daily_report_text()
-# V101 LINE PRODUCTION COMMAND
-    if low in ("v101", "production", "production center", "hardening", "security", "ระบบปลอดภัย", "สถานะความปลอดภัย"):
-        from modules.v101_production_hardening.monitoring import build_v101_text
-        return build_v101_text()
-
-    if low in ("last error", "errors", "error ล่าสุด"):
-        from modules.v101_production_hardening.state import last_errors
-        data = last_errors(5)
-        items = data.get("items", [])
-        if not items:
-            return "ไม่พบ error ล่าสุด"
-        return "\n".join([f"- {e.get('component')} | {e.get('severity')} | {e.get('message')}" for e in items])
-
-    if low in ("pause alerts", "หยุดแจ้งเตือน"):
-        from modules.v101_production_hardening.state import set_state
-        set_state("maintenance_mode", "true")
-        return "หยุดแจ้งเตือนแล้ว: maintenance_mode=true"
-
-    if low in ("resume alerts", "เปิดแจ้งเตือน"):
-        from modules.v101_production_hardening.state import set_state
-        set_state("maintenance_mode", "false")
-        return "เปิดแจ้งเตือนแล้ว: maintenance_mode=false"
-# V100 LINE FUND OS COMMAND
-    if low in ("v100", "fund os", "fund dashboard", "operating system", "ระบบกองทุน", "กองทุนเต็มระบบ"):
-        from modules.v100_fund_os.fund_os import build_fund_dashboard_text
-        return build_fund_dashboard_text("SPY")
-# V51 LINE VALIDATION COMMAND
-    if low in ("v51", "validation", "backtest", "walk forward", "paper broker", "พิสูจน์ระบบ", "ทดสอบระบบ"):
-        from modules.v51_institutional_validation_execution import build_v51_dashboard_text
-        return build_v51_dashboard_text("SPY")
-# V50 LINE WORLD CLASS COMMAND
-    if low in ("v50", "world class", "fund", "portfolio", "optimizer", "กองทุน", "พอร์ต"):
-        from modules.v50_world_class_institutional_stack import build_v50_world_class_dashboard_text
-        return build_v50_world_class_dashboard_text()
-# V1300.1.8 LINE CONTROL CENTER COMMAND
-    if low in ("dashboard", "control", "control center", "status all", "ระบบ", "แดชบอร์ด", "สถานะระบบ"):
-        from modules.v42_gold_institutional_core import build_v428_control_center_text
-        return build_v428_control_center_text()
-# V1300.1.7 LINE RISK DASHBOARD COMMAND
-    if low in ("risk", "risk dashboard", "performance", "journal", "ผลงาน", "สถิติ", "ความเสี่ยง"):
-        from modules.v42_gold_institutional_core import build_v427_dashboard_text
-        return build_v427_dashboard_text()
-# V1300.1.6.1 LINE US STOCK FULL REPORT + EXTENDED HOURS
-    us_symbols_v426 = {"NVDA", "AAPL", "TSLA", "META", "AMD", "QQQ", "SPY", "MSFT", "GOOGL", "AMZN", "TSM", "WDC", "AAOI", "ZS"}
-    if low in ("premarket", "pre-market", "afterhours", "after-hours", "extended", "หุ้นสหรัฐ", "ราคาหุ้นสหรัฐ", "ก่อนตลาดเปิด", "หลังตลาดปิด"):
-        from modules.v42_gold_institutional_core import build_us_extended_hours_line_message
-        return build_us_extended_hours_line_message()
-
-    if low.upper() in us_symbols_v426:
-        symbol = low.upper()
-        from modules.v42_gold_institutional_core import build_single_us_symbol_line_message
-        extended_text = build_single_us_symbol_line_message(symbol)
-
-        try:
-            if "build_asset_report" in globals():
-                full_report = build_asset_report(symbol)
-            elif "handle_message" in globals():
-                full_report = handle_message("", symbol)
-            else:
-                full_report = ""
-        except Exception as e:
-            full_report = f"ไม่สามารถดึงรายงานหุ้นตัวเต็มได้: {e}"
-
-        if full_report:
-            try:
-                from modules.v42_gold_institutional_core import build_us_extended_hours_first_line, build_us_extended_hours_short_tail
-                first_line = build_us_extended_hours_first_line(symbol)
-                short_tail = build_us_extended_hours_short_tail(symbol)
-            except Exception:
-                first_line = ""
-                short_tail = extended_text
-            if first_line:
-                return f"{first_line}\n\n{full_report}\n\n{short_tail}"
-            return f"{full_report}\n\n{short_tail}"
-        return extended_text
-
-    if low.startswith("us "):
-        from modules.v42_gold_institutional_core import build_us_extended_hours_line_message
-        parts = [p.strip().upper() for p in low[3:].replace(",", " ").split() if p.strip()]
-        return build_us_extended_hours_line_message(parts or None)
-    if low in {"/health", "health"}:
-        return "OK"
-
-    if low in {"/oil", "oil", "oli", "น้ำมัน", "ราคาน้ำมัน"}:
-        return build_oil_report()
-
-    if low in {"/gold", "gold", "ทอง", "ทองคำ", "xauusd"}:
-        try:
-            return build_asset_report("GOLD")
-        except Exception:
-            return handle_message("", "GOLD") if "handle_message" in globals() else "ไม่สามารถดึงข้อมูลทองคำได้"
-
-    if low in {"/signal-status", "signal-status", "status", "/status"}:
-        return build_signal_status_text()
-
-    if low in {"/watchlist-status", "watchlist-status", "/watchlist"}:
-        return json.dumps(v8_watchlist_status_dict(), ensure_ascii=False, indent=2)
-
-    if low in {"/top5", "top5"}:
-        return build_top5_daily_message()
-
-    if low in {"/premarket", "premarket"}:
-        return build_premarket_reminder()
-
-    if low.startswith("/strict-check"):
-        parts = text.split()
-        sym = parts[1] if len(parts) > 1 else "NVDA"
-        try:
-            asset = normalize_asset(sym)
-            quote, closes, highs, lows, opens, volumes = get_market_data(asset)
-            analysis = analyze_signal(asset, quote, closes, highs, lows, opens, volumes)
-            raw_sig = signal_type_from_analysis(asset, analysis)
-            if raw_sig != "NONE" and "strict_alert_gate" in globals():
-                ok, reason = strict_alert_gate(sym.upper(), asset, analysis, raw_sig)
-            else:
-                ok, reason = False, "No raw signal"
-            return f"""🧪 Strict Check {sym.upper()}
-
-Raw Signal: {raw_sig}
-Allowed: {ok}
-Reason: {reason}
-Score: {analysis.get('score')}
-Regime: {analysis.get('regime')}
-เวลาไทย: {now_text()}"""
-        except Exception as e:
-            return f"Strict Check Error: {e}"
-
-    if low.startswith("/"):
-        return "ไม่รู้จักคำสั่งนี้ครับ\nลองใช้ /gold, /oil, /signal-status, /top5, /premarket หรือพิมพ์ชื่อหุ้น เช่น NVDA, AAPL, SCB"
-
-    return None
 
 
 @app.route("/watchlist-status", methods=["GET"])
@@ -4167,27 +3809,6 @@ def build_premarket_reminder():
 หมายเหตุ: ข้อมูล premarket ฟรีอาจไม่ครบทุกตัว"""
 
 
-def rank_top5_picks():
-    picks = []
-    for s in TOP5_UNIVERSE:
-        try:
-            asset = normalize_asset(s)
-            quote, closes, highs, lows, opens, volumes = get_market_data(asset)
-            analysis = analyze_signal(asset, quote, closes, highs, lows, opens, volumes)
-            picks.append((s, asset, analysis))
-            time.sleep(0.5)
-        except Exception as e:
-            print("top5 scan error:", s, e)
-
-    picks = sorted(picks, key=lambda x: x[2].get("score", 0), reverse=True)
-    return picks[:5]
-
-
-def build_top5_daily_message():
-    return compact_top5_message()
-
-
-
 def maybe_send_premarket_and_top5():
     if not (ENABLE_AUTO_ALERTS and ALERT_USER_IDS):
         return
@@ -4397,26 +4018,6 @@ Risk: {risk}
 Reward: {reward}
 
 หมายเหตุ: เป็น Options Hybrid จากราคา/ATR/AI Score ไม่ใช่ option chain จริง"""
-
-
-def compact_top5_message():
-    picks = rank_top5_picks()
-    if not picks:
-        return f"""🏆 Top 5 Today
-
-ยังจัดอันดับไม่ได้
-เวลาไทย: {now_text()}"""
-
-    lines = []
-    for i, (s, asset, a) in enumerate(picks, 1):
-        lines.append(f"{i}. {s} {a.get('score')}/100")
-
-    return f"""🏆 Top 5 Today
-
-{chr(10).join(lines)}
-
-เวลาไทย: {now_text()}
-หมายเหตุ: คัดจาก TOP5_UNIVERSE / WATCHLIST"""
 
 
 def professional_alert_message(symbol, asset, analysis):
@@ -5164,49 +4765,6 @@ def strict_signal_type_from_analysis(asset, analysis):
 _LAST_TOP5_SENT_DATE = None
 
 
-def rank_top5_picks():
-    symbols = globals().get("TOP5_UNIVERSE", WATCHLIST)
-    picks = []
-    for sym in symbols:
-        try:
-            asset = normalize_asset(sym)
-            quote, closes, highs, lows, opens, volumes = get_market_data(asset)
-            analysis = analyze_signal(asset, quote, closes, highs, lows, opens, volumes)
-            score = int(analysis.get("score", 50))
-            confidence = calculate_signal_confidence(analysis) if "calculate_signal_confidence" in globals() else abs(score - 50) + 50
-            trend = trend_strength_score(analysis) if "trend_strength_score" in globals() else 5
-            rank_score = score * 0.50 + confidence * 0.30 + trend * 2.0
-            if asset.get("asset_type") == "GOLD":
-                rank_score -= 5
-            picks.append((rank_score, sym, asset, analysis))
-        except Exception as e:
-            print(f"Top5 skip {sym}: {e}")
-    picks.sort(key=lambda x: x[0], reverse=True)
-    return [(sym, asset, analysis) for _, sym, asset, analysis in picks[:5]]
-
-
-def build_top5_daily_message():
-    picks = rank_top5_picks()
-    if not picks:
-        return f"""🏆 Top 5 Daily Picks
-
-ยังจัดอันดับไม่ได้
-เวลาไทย: {now_text()}"""
-
-    lines = []
-    for i, (sym, asset, analysis) in enumerate(picks, 1):
-        lines.append(
-            f"{i}. {sym} {analysis.get('score')}/100 | {analysis.get('bias')} | {analysis.get('regime')}"
-        )
-
-    return f"""🏆 Top 5 Daily Picks
-
-{chr(10).join(lines)}
-
-เวลาไทย: {now_text()}
-หมายเหตุ: คัดจาก TOP5_UNIVERSE ด้วยระบบ V8.1"""
-
-
 def should_send_top5_now():
     global _LAST_TOP5_SENT_DATE
     if not globals().get("ENABLE_TOP5_DAILY", True):
@@ -5427,11 +4985,6 @@ def append_final_blocks_to_message(msg, asset, analysis, side):
 # ============================================================
 def th_now_dt():
     return datetime.now(timezone.utc) + timedelta(hours=7)
-
-
-def parse_hhmm(value):
-    h, m = str(value).split(":")
-    return int(h), int(m)
 
 
 def minutes_now_th():
@@ -5856,82 +5409,6 @@ def v42_gold_fund_grade_route():
         })
     except Exception as e:
         return jsonify({"ok": False, "version": "V1300_1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
-
-
-def production_scan_once(symbols=None, save_all=True):
-    """Run one safe scan and save rows to signals.
-
-    This is designed for Railway production: every symbol is isolated so
-    one provider/network failure cannot crash the whole worker.
-    """
-    init_db()
-    symbols = symbols or AUTO_SIGNAL_SCAN_SYMBOLS or WATCHLIST
-    symbols = [str(x).strip().upper() for x in symbols if str(x).strip()]
-    results = []
-    print(f"AUTO_SCAN start count={len(symbols[:AUTO_SIGNAL_SCAN_LIMIT])} symbols={symbols[:AUTO_SIGNAL_SCAN_LIMIT]}")
-    for symbol in symbols[:AUTO_SIGNAL_SCAN_LIMIT]:
-        try:
-            if v8_skip_symbol(symbol):
-                results.append({"symbol": symbol, "ok": False, "skipped": True, "reason": "v8_skip_symbol"})
-                continue
-            asset = normalize_asset(symbol)
-            if asset.get("asset_type") == "THAI_STOCK" and not AUTO_SCAN_INCLUDE_THAI:
-                results.append({"symbol": symbol, "ok": True, "skipped": True, "reason": "thai_auto_scan_disabled"})
-                print(f"AUTO_SCAN skipped Thai symbol={symbol} reason=thai_auto_scan_disabled")
-                continue
-            if asset.get("asset_type") == "GOLD" and not AUTO_SCAN_INCLUDE_GOLD:
-                results.append({"symbol": symbol, "ok": True, "skipped": True, "reason": "gold_auto_scan_disabled"})
-                print(f"AUTO_SCAN skipped gold symbol={symbol} reason=gold_auto_scan_disabled")
-                continue
-            quote, closes, highs, lows, opens, volumes = get_market_data(asset)
-            analysis = analyze_signal(asset, quote, closes, highs, lows, opens, volumes)
-
-            save_symbol = asset.get("symbol", symbol)
-            save_asset_type = asset.get("asset_type")
-            save_price = analysis.get("price")
-            save_provider = quote.get("source") if isinstance(quote, dict) else None
-
-            if asset.get("asset_type") == "GOLD":
-                try:
-                    usdthb = get_usd_thb_rate()
-                    thai_gold = get_thai_gold_price_or_estimate(analysis.get("price"), usdthb)
-                    if thai_gold and thai_gold.get("bar_sell"):
-                        save_symbol = "THAI_GOLD"
-                        save_asset_type = "THAI_GOLD"
-                        save_price = thai_gold.get("bar_sell")
-                        save_provider = thai_gold.get("source")
-                except Exception as gold_err:
-                    print("AUTO_SCAN thai gold save error:", gold_err)
-
-            sig = _production_signal_type(analysis.get("score"))
-            report = _production_build_scan_report(symbol, asset, analysis, quote)
-            if save_all or sig not in {"NEUTRAL"}:
-                save_signal(
-                    save_symbol,
-                    save_asset_type,
-                    save_price,
-                    analysis.get("score"),
-                    analysis.get("bias"),
-                    sig,
-                    analysis.get("regime"),
-                    analysis.get("probability"),
-                    report,
-                )
-            results.append({
-                "symbol": save_symbol,
-                "asset_type": save_asset_type,
-                "ok": True,
-                "price": save_price,
-                "score": analysis.get("score"),
-                "signal": sig,
-                "probability": analysis.get("probability"),
-                "provider": save_provider,
-            })
-            print(f"AUTO_SCAN saved symbol={symbol} signal={sig} score={analysis.get('score')}")
-        except Exception as e:
-            print(f"AUTO_SCAN error symbol={symbol}: {e}")
-            results.append({"symbol": symbol, "ok": False, "error": str(e)})
-    return results
 
 
 @app.route("/status", methods=["GET"])
@@ -9196,10 +8673,6 @@ def v25_2_earnings_lookup(symbol):
 
 
 # Override V25.1 earnings context so Market Context AI uses the stronger V25.2 engine.
-def v25_earnings_context(symbol):
-    return v25_2_earnings_lookup(symbol)
-
-
 def v25_2_adjust_for_earnings(symbol, base_score, side="CALL"):
     base = int(v25_safe_float(base_score, 50) or 50)
     e = v25_2_earnings_lookup(symbol)
@@ -12688,65 +12161,6 @@ def _v41_rank_one_symbol(sym):
     }
 
 
-def rank_top5_buy_candidates(limit=5, symbols=None):
-    universe = symbols or globals().get('TOP5_UNIVERSE', None) or globals().get('WATCHLIST', [])
-    rows = []
-    for sym in list(universe):
-        sym = str(sym).strip().upper()
-        if not sym:
-            continue
-        try:
-            row = _v41_rank_one_symbol(sym)
-            # Top buy list should focus on buy/watch-buy/constructive names.
-            # If the market is weak, neutral names can still appear, but sells are penalized heavily.
-            rows.append(row)
-            time.sleep(0.15)
-        except Exception as e:
-            print('V1300.1 top5 skip', sym, e)
-    rows.sort(key=lambda r: (r.get('rank_score', 0), r.get('confidence', 0), r.get('score', 0)), reverse=True)
-    return rows[:int(limit)]
-
-
-def build_top5_buy_message(limit=5):
-    rows = rank_top5_buy_candidates(limit=limit)
-    if not rows:
-        return f"🏆 Top {limit} หุ้นน่าเข้าซื้อวันนี้\n\nยังจัดอันดับไม่ได้\nเวลาไทย: {now_text()}"
-
-    lines = []
-    for i, r in enumerate(rows, 1):
-        price = fmt_num(r.get('price')) if 'fmt_num' in globals() else r.get('price')
-        final_word = 'น่าเข้า' if r.get('signal') in {'BUY', 'STRONG_CALL'} else 'รอจังหวะ'
-        if r.get('rank_score', 0) < 55:
-            final_word = 'เฝ้าดูเท่านั้น'
-        lines.append(
-            f"{i}. {r['symbol']} | {final_word}\n"
-            f"   ราคา: {price} | ความมั่นใจ: {r.get('confidence')}% | Rank: {r.get('rank_score')}/100\n"
-            f"   Signal: {r.get('signal')} | Score: {r.get('score')}/100 | Prob: {r.get('probability')}%\n"
-            f"   Regime: {r.get('regime')} | Bias: {r.get('bias')}"
-        )
-
-    return f"""🏆 Top {limit} หุ้นน่าเข้าซื้อที่สุดของวัน
-เวลาไทย: {now_text()}
-
-{chr(10).join(lines)}
-
-กฎใช้งาน:
-- เข้าเฉพาะตัวที่ Signal เป็น BUY / WATCH_BUY และราคาไม่ไล่สูงเกินไป
-- ถ้า CRO หรือ V40 บอก BLOCK ให้รอ ไม่ฝืนเข้า
-- ใช้เป็น Paper/Decision Support ไม่ใช่คำสั่งซื้ออัตโนมัติ"""
-
-
-# Override the older daily Top 5 message so /top5 and scheduled Top5 use V1300.1 ranking.
-def build_top5_daily_message():
-    return build_top5_buy_message(5)
-
-
-try:
-    _v41_previous_handle_line_command = handle_line_command
-except Exception:
-    _v41_previous_handle_line_command = None
-
-
 def _v41_is_top5_buy_command(text):
     low = (text or '').strip().lower().replace(' ', '')
     thai = (text or '').strip()
@@ -12759,15 +12173,6 @@ def _v41_is_top5_buy_command(text):
         'จัดอันดับหุ้น', 'หุ้นทำกำไร', 'โอกาสทำกำไร', 'อันดับหุ้น',
     ]
     return any(k.replace(' ', '') in low or k in thai for k in keywords)
-
-
-def handle_line_command(user_text):
-    text = (user_text or '').strip()
-    if _v41_is_top5_buy_command(text):
-        return build_top5_buy_message(5)
-    if _v41_previous_handle_line_command:
-        return _v41_previous_handle_line_command(user_text)
-    return None
 
 
 @app.route('/api/top5-buy', methods=['GET'])
@@ -13031,22 +12436,6 @@ try:
     _v41_previous_handle_line_command_final = handle_line_command
 except Exception:
     _v41_previous_handle_line_command_final = None
-
-
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower()
-    if _v41_is_top5_command(text):
-        return build_top5_buy_message(5)
-    if low in {"/gold", "gold", "ทอง", "ทองคำ", "ทองคํา", "xauusd", "thai_gold"}:
-        try:
-            from modules.v42_gold_institutional_core import build_v42_gold_text
-            return build_v42_gold_text()
-        except Exception as e:
-            return f"ไม่สามารถดึงระบบ V1300.1 GOLD ได้ในขณะนี้: {e}"
-    if _v41_previous_handle_line_command_final:
-        return _v41_previous_handle_line_command_final(user_text)
-    return None
 
 
 @app.route("/v41/top5", methods=["GET"])
@@ -13498,26 +12887,6 @@ def build_v1300_1_status_payload():
     except Exception as e:
         return {"ok": False, "version": "V1300_1_WORLD_CLASS_FINAL_STATUS_FIXED", "error": str(e)}
 
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower().replace(" ", "")
-    status_commands = {
-        "สถานะระบบ", "ระบบ", "ตรวจระบบ", "เช็คระบบ", "เช็กระบบ",
-        "status", "systemstatus", "health", "version", "เวอร์ชั่น", "เวอร์ชัน",
-        "v1300", "v1300.1", "latest"
-    }
-    if low in status_commands:
-        return build_v1300_1_status_text()
-    if _v1300_1_previous_handle_line_command:
-        result = _v1300_1_previous_handle_line_command(user_text)
-        try:
-            if isinstance(result, str) and "v1300_1_clean_line_versions" in globals():
-                result = v1300_1_clean_line_versions(result)
-        except Exception:
-            pass
-        return result
-    return None
-
 @app.route("/v1300/status", methods=["GET"], endpoint="v1300_1_status_json")
 def v1300_1_status_json_route():
     return jsonify(build_v1300_1_status_payload())
@@ -13533,59 +12902,6 @@ def v1300_1_status_text_route():
 # no entry plan when probability < 50, no fake RSI=100 on unavailable data.
 # ============================================================
 V1300_1_TRUE_FINAL_VERSION = "V1300_1_WORLD_CLASS_FINAL"
-
-def v1300_1_true_final_clean_text(text):
-    try:
-        if not isinstance(text, str):
-            return text
-        # Remove all old user-visible version labels
-        text = re.sub(r"V1300.1(?:\.\d+)?[A-Z0-9_\.]*", V1300_1_TRUE_FINAL_VERSION, text)
-        text = re.sub(r"V1300.1(?:\.\d+)?[A-Z0-9_\.]*", V1300_1_TRUE_FINAL_VERSION, text)
-        text = text.replace("V1300.1.3", "V1300.1")
-        text = text.replace("V1300.1.5", "V1300.1")
-        text = text.replace("V1300.1.8", "V1300.1")
-        text = text.replace("DATA_UNAVAILABLE", "DATA_UNAVAILABLE")
-        text = text.replace("แหล่งข้อมูล: DATA_UNAVAILABLE", "แหล่งข้อมูล: DATA_UNAVAILABLE / งดออกสัญญาณ")
-        # Prevent fake RSI display from unavailable/fallback data
-        if "DATA_UNAVAILABLE" in text:
-            text = re.sub(r"RSI14:\s*100\.00", "RSI14: N/A", text)
-            text = re.sub(r"RSI14:\s*100", "RSI14: N/A", text)
-        # If probability is below 50, suppress real entry plan section.
-        m = re.search(r"Probability(?:\s*ประมาณ)?\s*:\s*(\d+(?:\.\d+)?)%", text)
-        if m:
-            try:
-                prob = float(m.group(1))
-                if prob < 50:
-                    text = re.sub(
-                        r"🧩 แผนเข้า/ออก 3 ไม้.*?(?=\n\n🧠|\n\nเหตุผลหลัก:|\n\n📰|\n\nVersion\s*:|\Z)",
-                        "🧩 แผนเข้า/ออก 3 ไม้\nสถานะ: NO TRADE / ยังไม่ออกไม้จริง\nเหตุผล: Probability ต่ำกว่า 50% จึงปิดแผนเข้าอัตโนมัติ\nเงื่อนไขกลับมาพิจารณา: ต้องรอ Probability ≥ 50%, Timeframe/Volume ยืนยัน และ Risk Gate ผ่าน",
-                        text,
-                        flags=re.S
-                    )
-                    text = re.sub(
-                        r"ซื้อไม้\s*\d+:[^\n]*\n?", "", text
-                    )
-                    text = re.sub(
-                        r"ขาย/ทำกำไร\s*\d+:[^\n]*\n?", "", text
-                    )
-            except Exception:
-                pass
-        # Hide CALL if all displayed timeframes are bearish
-        mtf_lines = re.findall(r"-\s*[^:\n]+:\s*(BULLISH|BEARISH|MIXED|NEUTRAL)", text)
-        if mtf_lines and all(x == "BEARISH" for x in mtf_lines):
-            text = re.sub(r"CALL:[^\n]*\n?", "", text)
-        # Force single final version line
-        text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1300_1_TRUE_FINAL_VERSION, text)
-        if "Version : " not in text:
-            text = text.rstrip() + "\n\nVersion : " + V1300_1_TRUE_FINAL_VERSION
-        return text
-    except Exception:
-        return text
-
-try:
-    _v1300_1_true_final_previous_handle_line_command = handle_line_command
-except Exception:
-    _v1300_1_true_final_previous_handle_line_command = None
 
 def build_v1300_1_true_final_status_text():
     return f"""🧭 V1300.1 WORLD CLASS FINAL STATUS
@@ -13612,27 +12928,6 @@ Ticker Mapping Guard: ✅
 status / version / สถานะระบบ / ตรวจระบบ
 
 Version : {V1300_1_TRUE_FINAL_VERSION}"""
-
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower().replace(" ", "")
-    status_commands = {
-        "สถานะระบบ", "ระบบ", "ตรวจระบบ", "เช็คระบบ", "เช็กระบบ",
-        "status", "systemstatus", "health", "version", "เวอร์ชั่น",
-        "เวอร์ชัน", "v1300", "v1300.1", "latest"
-    }
-    if low in status_commands:
-        return build_v1300_1_true_final_status_text()
-    if _v1300_1_true_final_previous_handle_line_command:
-        return v1300_1_true_final_clean_text(_v1300_1_true_final_previous_handle_line_command(user_text))
-    return v1300_1_true_final_clean_text("ไม่พบคำสั่ง\n\nVersion : " + V1300_1_TRUE_FINAL_VERSION)
-
-try:
-    _v1300_1_true_final_previous_push_line_message = push_line_message
-    def push_line_message(message, *args, **kwargs):
-        return _v1300_1_true_final_previous_push_line_message(v1300_1_true_final_clean_text(message), *args, **kwargs)
-except Exception:
-    pass
 
 @app.route("/v1300_1/final-status", methods=["GET"], endpoint="v1300_1_true_final_status")
 def v1300_1_true_final_status_route():
@@ -13682,33 +12977,6 @@ def v1300_1_hard_block_no_data_text(original_text):
 5) หลังแก้ Variables ให้ Redeploy ใหม่
 
 Version : V1300_1_WORLD_CLASS_FINAL"""
-
-def v1300_1_true_final_clean_text(text):
-    text = _v1300_1_hard_block_previous_clean_text(text) if _v1300_1_hard_block_previous_clean_text else text
-    try:
-        if isinstance(text, str) and "DATA_UNAVAILABLE" in text and "📊 วิเคราะห์" in text:
-            # Hard stop: do not allow fake analysis body to pass to LINE.
-            return v1300_1_hard_block_no_data_text(text)
-    except Exception:
-        pass
-    return text
-
-try:
-    _v1300_1_hard_block_previous_handle_line_command = handle_line_command
-except Exception:
-    _v1300_1_hard_block_previous_handle_line_command = None
-
-def handle_line_command(user_text):
-    if _v1300_1_hard_block_previous_handle_line_command:
-        return v1300_1_true_final_clean_text(_v1300_1_hard_block_previous_handle_line_command(user_text))
-    return v1300_1_true_final_clean_text("ไม่พบคำสั่ง\n\nVersion : V1300_1_WORLD_CLASS_FINAL")
-
-try:
-    _v1300_1_hard_block_previous_push_line_message = push_line_message
-    def push_line_message(message, *args, **kwargs):
-        return _v1300_1_hard_block_previous_push_line_message(v1300_1_true_final_clean_text(message), *args, **kwargs)
-except Exception:
-    pass
 
 @app.route("/v1300_1/hard-block-test", methods=["GET"], endpoint="v1300_1_hard_block_test")
 def v1300_1_hard_block_test_route():
@@ -13831,64 +13099,6 @@ try:
     _v1300_2_previous_force_filter = v1300_1_force_filter_before_line_send
 except Exception:
     _v1300_2_previous_force_filter = None
-
-def v1300_1_force_filter_before_line_send(text):
-    if _v1300_2_previous_force_filter:
-        text = _v1300_2_previous_force_filter(text)
-    return v1300_2_add_market_reference_to_text(text)
-
-try:
-    _v1300_2_previous_clean_text = v1300_1_true_final_clean_text
-except Exception:
-    _v1300_2_previous_clean_text = None
-
-def v1300_1_true_final_clean_text(text):
-    if _v1300_2_previous_clean_text:
-        text = _v1300_2_previous_clean_text(text)
-    return v1300_2_add_market_reference_to_text(text)
-
-try:
-    _v1300_2_previous_handle_line_command = handle_line_command
-except Exception:
-    _v1300_2_previous_handle_line_command = None
-
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower().replace(" ", "")
-    if low in {"สถานะระบบ", "ระบบ", "ตรวจระบบ", "เช็คระบบ", "เช็กระบบ", "status", "health", "version", "เวอร์ชั่น", "เวอร์ชัน", "v1300", "v1300.1", "v1300.2"}:
-        return v1300_2_add_market_reference_to_text(f"""🧭 V1300.2 WORLD CLASS FINAL STATUS
-SYSTEM HEALTH
-Core: ✅ | LINE Handler: ✅ | Runtime: ✅
-Price Source Layer: ✅
-Market Session Layer: ✅
-No Fake Analysis On Missing Data: ✅
-Old Version Label: ✅ Hidden
-
-Top5 Rule:
-- ตลาดปิด: ใช้ PREV_CLOSE
-- ก่อนเปิดตลาด: ใช้ PREMARKET เมื่อมีข้อมูล
-- ตลาดเปิด: ใช้ REGULAR_SESSION
-- หลังตลาดปิด: ใช้ AFTER_HOURS เมื่อมีข้อมูล
-- หุ้นไทย: ใช้ SET_LAST_CLOSE
-
-Version : {V1300_2_DISPLAY_VERSION}""")
-    if _v1300_2_previous_handle_line_command:
-        return v1300_2_add_market_reference_to_text(_v1300_2_previous_handle_line_command(user_text))
-    return v1300_2_add_market_reference_to_text("ไม่พบคำสั่ง")
-
-try:
-    _v1300_2_previous_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1300_2_previous_line_reply(reply_token, v1300_2_add_market_reference_to_text(text))
-except Exception:
-    pass
-
-try:
-    _v1300_2_previous_line_push = line_push
-    def line_push(user_id, text):
-        return _v1300_2_previous_line_push(user_id, v1300_2_add_market_reference_to_text(text))
-except Exception:
-    pass
 
 @app.route("/v1300_2/status", methods=["GET"], endpoint="v1300_2_status")
 def v1300_2_status_route():
@@ -14117,47 +13327,6 @@ try:
 except Exception:
     _v1300_3_prev_filter = None
 
-def v1300_1_force_filter_before_line_send(text):
-    if _v1300_3_prev_filter:
-        text = _v1300_3_prev_filter(text)
-    return v1300_3_apply_router_note(text)
-
-try:
-    _v1300_3_prev_handle = handle_line_command
-except Exception:
-    _v1300_3_prev_handle = None
-
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower().replace(" ", "")
-    if low in {"api", "apihealth", "api_health", "สถานะapi", "สถานะเอพีไอ", "เช็คapi", "เช็กapi", "ตรวจapi", "ตรวจเอพีไอ", "สถานะระบบ", "status", "health"}:
-        return v1300_3_api_health_text()
-    if low.startswith("สถานะ"):
-        parts = text.split()
-        if len(parts) >= 2:
-            return v1300_3_symbol_status_text(parts[1])
-    if low.startswith("api "):
-        parts = text.split()
-        if len(parts) >= 2:
-            return v1300_3_symbol_status_text(parts[1])
-    if _v1300_3_prev_handle:
-        return v1300_3_apply_router_note(_v1300_3_prev_handle(user_text))
-    return v1300_3_apply_router_note("ไม่พบคำสั่ง")
-
-try:
-    _v1300_3_prev_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1300_3_prev_line_reply(reply_token, v1300_3_apply_router_note(text))
-except Exception:
-    pass
-
-try:
-    _v1300_3_prev_line_push = line_push
-    def line_push(user_id, text):
-        return _v1300_3_prev_line_push(user_id, v1300_3_apply_router_note(text))
-except Exception:
-    pass
-
 @app.route("/v1300_3/api-health", methods=["GET"], endpoint="v1300_3_api_health")
 def v1300_3_api_health_route():
     return jsonify({
@@ -14306,20 +13475,6 @@ try:
 except Exception:
     _v1300_4_prev_handle_line_command = None
 
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower().replace(" ", "")
-    if low in {"สถานะ", "สถานะระบบ", "ระบบ", "status", "health", "api", "apihealth", "สถานะapi", "เช็คapi", "เช็กapi"}:
-        return v1300_4_unified_status_text()
-    if _v1300_4_prev_handle_line_command:
-        return v1300_4_clean_output(_v1300_4_prev_handle_line_command(user_text))
-    return v1300_4_clean_output("ไม่พบคำสั่ง")
-
-try:
-    _v1300_4_prev_filter = v1300_1_force_filter_before_line_send
-except Exception:
-    _v1300_4_prev_filter = None
-
 def v1300_1_force_filter_before_line_send(text):
     if _v1300_4_prev_filter:
         text = _v1300_4_prev_filter(text)
@@ -14342,6 +13497,230 @@ except Exception:
 @app.route("/v1300_4/status", methods=["GET"], endpoint="v1300_4_status")
 def v1300_4_status_route():
     return Response(v1300_4_unified_status_text(), mimetype="text/plain; charset=utf-8")
+
+
+# ============================================================
+# V1400 MASTER OS HEDGEFUND READY OVERLAY
+# Additive architecture: Journal AI + Monte Carlo + Portfolio Engine
+# + Risk Engine 2.0 + Backtest + Paper Trading Command Center.
+# ============================================================
+V1400_DISPLAY_VERSION = "V1400_MASTER_OS_HEDGEFUND_READY"
+
+def v1400_status_text():
+    try:
+        api_text = v1300_4_router_health_block() if "v1300_4_router_health_block" in globals() else ""
+    except Exception:
+        api_text = ""
+    try:
+        from v1400_master_os.control_center.dashboard import build_v1400_status_text
+        return build_v1400_status_text(api_text)
+    except Exception as e:
+        return f"🧭 V1400 MASTER OS\nStatus: fallback\nError: {e}\n\nVersion : {V1400_DISPLAY_VERSION}"
+
+def v1400_journal_text():
+    try:
+        from v1400_master_os.journal_ai.journal import JournalAI
+        j = JournalAI()
+        s = j.summary()
+        lessons = j.ai_lessons()
+        return "🧠 V1400 JOURNAL AI\n" + "\n".join([
+            f"Total: {s['total']}",
+            f"Closed: {s['closed']}",
+            f"Win Rate: {s['win_rate']}",
+            f"PF: {s['pf']}",
+            f"Expectancy(R): {s['expectancy_r']}",
+            "",
+            "Lessons:",
+            *["- " + x for x in lessons],
+            "",
+            "Version : " + V1400_DISPLAY_VERSION
+        ])
+    except Exception as e:
+        return f"Journal AI error: {e}\n\nVersion : {V1400_DISPLAY_VERSION}"
+
+def v1400_montecarlo_text():
+    try:
+        from v1400_master_os.monte_carlo.simulator import MonteCarloSimulator
+        r = MonteCarloSimulator().simulate(runs=5000, n_trades=100)
+        return f"""🎲 V1400 MONTE CARLO
+Runs: {r['runs']} | Trades: {r['n_trades']}
+Median Return: {r['median_return_pct']}%
+P05 Return: {r['p05_return_pct']}%
+P95 Return: {r['p95_return_pct']}%
+Median Max DD: {r['median_max_dd_pct']}%
+P95 Max DD: {r['p95_max_dd_pct']}%
+Risk of Ruin: {r['risk_of_ruin_pct']}%
+Verdict: {r['verdict']}
+
+Version : {V1400_DISPLAY_VERSION}"""
+    except Exception as e:
+        return f"Monte Carlo error: {e}\n\nVersion : {V1400_DISPLAY_VERSION}"
+
+def v1400_portfolio_text():
+    try:
+        from v1400_master_os.control_center.dashboard import sample_portfolio_text
+        return sample_portfolio_text()
+    except Exception as e:
+        return f"Portfolio Engine error: {e}\n\nVersion : {V1400_DISPLAY_VERSION}"
+
+def v1400_risk_text():
+    try:
+        from v1400_master_os.risk_engine.risk import RiskEngineV1400
+        r = RiskEngineV1400().evaluate({"breadth_score":50,"vix":22,"confidence":65,"news_risk":35})
+        return f"""🛡 V1400 RISK ENGINE 2.0
+Decision: {r['decision']}
+Grade: {r['grade']}
+Risk Score: {r['risk_score']}
+Recommended Risk: {r['risk_pct']*100:.2f}%
+
+Rules:
+- VIX > 30 = BLOCK / NO TRADE
+- High Impact Event = Reduce Risk
+- Breadth < 40 = Reduce Risk
+- Confidence < 60 = Reduce Risk
+
+Version : {V1400_DISPLAY_VERSION}"""
+    except Exception as e:
+        return f"Risk Engine error: {e}\n\nVersion : {V1400_DISPLAY_VERSION}"
+
+try:
+    _v1400_prev_handle_line_command = handle_line_command
+except Exception:
+    _v1400_prev_handle_line_command = None
+
+@app.route("/v1400/status", methods=["GET"], endpoint="v1400_status")
+def v1400_status_route():
+    return Response(v1400_status_text(), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1400/montecarlo", methods=["GET"], endpoint="v1400_montecarlo")
+def v1400_montecarlo_route():
+    return Response(v1400_montecarlo_text(), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1400/portfolio", methods=["GET"], endpoint="v1400_portfolio")
+def v1400_portfolio_route():
+    return Response(v1400_portfolio_text(), mimetype="text/plain; charset=utf-8")
+
+
+# ============================================================
+# V1410 MASTER OS ENHANCED OVERLAY
+# Adds LINE commands: top5 us/th/etf/gold/call/put,
+# Webull-ready API priority, early-entry watch, beginner-readable output.
+# ============================================================
+V1410_DISPLAY_VERSION = "V1410_MASTER_OS_ENHANCED"
+
+def v1410_enhanced_clean(text):
+    try:
+        if text is None:
+            text = ""
+        text = str(text).strip()
+        text = text.replace("V1400_MASTER_OS_HEDGEFUND_READY", V1410_DISPLAY_VERSION)
+        text = text.replace("V1300.4_STATUS_API_ROUTER_FIXED", V1410_DISPLAY_VERSION)
+        text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1410_DISPLAY_VERSION, text)
+        if "Version : " not in text:
+            text = text.rstrip() + "\n\nVersion : " + V1410_DISPLAY_VERSION
+        return text
+    except Exception:
+        return str(text)
+
+def v1410_top5_text(kind):
+    try:
+        from v1410_master_os_enhanced.top5.top5_engine import build_top5
+        return build_top5(kind)
+    except Exception as e:
+        return f"Top5 error: {e}\n\nVersion : {V1410_DISPLAY_VERSION}"
+
+def v1410_api_text(symbol=None):
+    try:
+        from v1410_master_os_enhanced.api_router.router import api_status_text
+        return api_status_text(symbol)
+    except Exception as e:
+        return f"API status error: {e}\n\nVersion : {V1410_DISPLAY_VERSION}"
+
+def v1410_early_text(symbol="NVDA"):
+    try:
+        from v1410_master_os_enhanced.early_entry.early import early_entry_text
+        return early_entry_text(symbol)
+    except Exception as e:
+        return f"Early Entry error: {e}\n\nVersion : {V1410_DISPLAY_VERSION}"
+
+def v1410_help_text():
+    try:
+        from v1410_master_os_enhanced.line_messages.help import help_text
+        return help_text()
+    except Exception:
+        return "V1410 commands: top5 us, top5 th, top5 etf, top5 gold, top5 call, top5 put, api, early nvda\n\nVersion : " + V1410_DISPLAY_VERSION
+
+try:
+    _v1410_prev_handle_line_command = handle_line_command
+except Exception:
+    _v1410_prev_handle_line_command = None
+
+def handle_line_command(user_text):
+    text = (user_text or "").strip()
+    low = text.lower().strip()
+    compact = low.replace(" ", "")
+
+    if compact in {"v1410", "help1410", "commands", "คำสั่ง", "เมนู"}:
+        return v1410_help_text()
+
+    if compact in {"top5", "top5us", "topus"}:
+        return v1410_top5_text("US")
+    if compact in {"top5call", "topcall", "call"}:
+        return v1410_top5_text("CALL")
+    if compact in {"top5put", "topput", "put"}:
+        return v1410_top5_text("PUT")
+    if compact in {"top5th", "topthai", "top5thai"}:
+        return v1410_top5_text("TH")
+    if compact in {"top5etf", "topetf"}:
+        return v1410_top5_text("ETF")
+    if compact in {"top5gold", "topgold", "goldtop"}:
+        return v1410_top5_text("GOLD")
+
+    if low.startswith("api "):
+        parts = text.split()
+        return v1410_api_text(parts[1] if len(parts) > 1 else None)
+    if compact in {"api", "apihealth", "สถานะapi", "เช็คapi", "เช็กapi"}:
+        return v1410_api_text(None)
+
+    if low.startswith("early "):
+        parts = text.split()
+        return v1410_early_text(parts[1] if len(parts) > 1 else "NVDA")
+    if compact in {"early", "earlyentry", "setup"}:
+        return v1410_early_text("NVDA")
+
+    if _v1410_prev_handle_line_command:
+        return v1410_enhanced_clean(_v1410_prev_handle_line_command(user_text))
+    return None
+
+try:
+    _v1410_prev_line_reply = line_reply
+    def line_reply(reply_token, text):
+        return _v1410_prev_line_reply(reply_token, v1410_enhanced_clean(text))
+except Exception:
+    pass
+
+try:
+    _v1410_prev_line_push = line_push
+    def line_push(user_id, text):
+        return _v1410_prev_line_push(user_id, v1410_enhanced_clean(text))
+except Exception:
+    pass
+
+@app.route("/v1410/top5/<kind>", methods=["GET"], endpoint="v1410_top5")
+def v1410_top5_route(kind):
+    return Response(v1410_top5_text(kind), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1410/api", methods=["GET"], endpoint="v1410_api")
+def v1410_api_route():
+    return Response(v1410_api_text(None), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1410/api/<symbol>", methods=["GET"], endpoint="v1410_api_symbol")
+def v1410_api_symbol_route(symbol):
+    return Response(v1410_api_text(symbol), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1410/early/<symbol>", methods=["GET"], endpoint="v1410_early_symbol")
+def v1410_early_symbol_route(symbol):
+    return Response(v1410_early_text(symbol), mimetype="text/plain; charset=utf-8")
 
 
 if __name__ == "__main__":

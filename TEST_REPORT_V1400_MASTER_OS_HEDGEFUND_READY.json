@@ -1,0 +1,72 @@
+{
+  "version": "V1400_MASTER_OS_HEDGEFUND_READY",
+  "generated_at": "2026-06-11T15:45:22.373735+00:00",
+  "main_lines": 14530,
+  "compile_targeted_errors": [],
+  "smoke": {
+    "ok": true,
+    "journal": {
+      "total": 1,
+      "closed": 1,
+      "win_rate": 100.0,
+      "expectancy_r": 1.2,
+      "pf": 1200000000.0
+    },
+    "mc": {
+      "runs": 100,
+      "n_trades": 20,
+      "median_return_pct": 11.67,
+      "p05_return_pct": 1.47,
+      "p95_return_pct": 19.99,
+      "median_max_dd_pct": 2.71,
+      "p95_max_dd_pct": 4.9,
+      "risk_of_ruin_pct": 0.0,
+      "verdict": "PASS"
+    },
+    "portfolio": {
+      "positions": [
+        {
+          "symbol": "SPY",
+          "score": 80,
+          "confidence": 70,
+          "risk_grade": "A"
+        }
+      ],
+      "weights": {
+        "SPY": 1.0
+      },
+      "cash_policy": "NORMAL"
+    },
+    "risk": {
+      "risk_score": 100,
+      "grade": "A",
+      "risk_pct": 0.01,
+      "decision": "ALLOW"
+    },
+    "backtest": {
+      "trades": 4,
+      "win_rate": 50.0,
+      "pf": 1.667,
+      "expectancy_r": 0.25,
+      "max_dd_r": 1.0
+    },
+    "paper": {
+      "open": 0,
+      "closed": 1,
+      "today_pnl": 20
+    },
+    "status_preview": "🧭 V1400 MASTER OS / HEDGE FUND READY\n\nSYSTEM LAYERS\nData Router: ✅\nJournal AI: ✅\nMonte Carlo: ✅\nPortfolio Engine: ✅\nRisk Engine 2.0: ✅\nBacktest Center: ✅\nPaper Trade Engine: ✅\n\nRISK ENGINE\nDecision: ALLOW | Grade: A | Risk: 1.00% | Score: 100\n\nMONTE CARLO\nVerdict: PASS | Median Return: 27.19% | P95 "
+  },
+  "checks": {
+    "journal_ai": true,
+    "monte_carlo": true,
+    "portfolio_engine": true,
+    "risk_engine": true,
+    "backtest_center": true,
+    "paper_trade": true,
+    "route_status": true,
+    "line_commands": true,
+    "version_current": true
+  },
+  "passed": true
+}

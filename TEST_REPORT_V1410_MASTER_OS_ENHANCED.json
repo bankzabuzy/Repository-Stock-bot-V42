@@ -1,0 +1,33 @@
+{
+  "version": "V1410_MASTER_OS_ENHANCED",
+  "generated_at": "2026-06-12T02:32:52.697093+00:00",
+  "base": "Repository-Stock-bot_V1410_DEDUP_FIXED.zip",
+  "main_lines": 13782,
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "top5_us": "🏆 TOP5 US STOCKS\nMarket Reference: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. NVDA | CALL | Score 88/100 | Prob 82% | Conf 86% | Risk A\n   Regime: UPTREND | Entry: รอยืนเหนือ pre-market high\n   Source: YAHOO | Reliability 42/100 | Market: US\n   เหตุผล: AI/Semiconductor leader + liquidity สูง\n2. TSM | CALL | Score 84/100 | Prob 78% | Conf 80% | Risk A\n   Regime: UPTREND | Entry: รอย่อไม่หลุด VWAP\n   Source: YAHOO | Reliability 42/100 | Market: US\n   เหตุผล: Foundry leader + sec",
+    "top5_call": "🏆 TOP5 CALL / EARLY LONG SETUP\nMarket Reference: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. NVDA | CALL | Score 88/100 | Prob 82% | Conf 86% | Risk A\n   Regime: UPTREND | Entry: รอยืนเหนือ pre-market high\n   Source: YAHOO | Reliability 42/100 | Market: US\n   เหตุผล: AI/Semiconductor leader + liquidity สูง\n2. TSM | CALL | Score 84/100 | Prob 78% | Conf 80% | Risk A\n   Regime: UPTREND | Entry: รอย่อไม่หลุด VWAP\n   Source: YAHOO | Reliability 42/100 | Market: US\n   เหตุผล: Foundr",
+    "top5_put": "🏆 TOP5 PUT / HEDGE SETUP\nMarket Reference: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. NVDA | PUT | Score 70/100 | Prob 61% | Conf 65% | Risk B\n   Regime: PULLBACK | Entry: หลุด support + TF bearish\n   Source: YAHOO | Reliability 42/100 | Market: US\n   เหตุผล: ใช้เฉพาะเมื่อต่ำกว่า risk gate\n2. QQQ | PUT | Score 68/100 | Prob 60% | Conf 63% | Risk B\n   Regime: PULLBACK | Entry: หลุด VWAP + breadth risk-off\n   Source: YAHOO | Reliability 42/100 | Market: ETF\n   เหตุผล: index hedg",
+    "top5_th": "🏆 TOP5 THAI STOCKS\nMarket Reference: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. SCB.BK | BUY | Score 78/100 | Prob 60% | Conf 64% | Risk B\n   Regime: UPTREND | Entry: ใช้ SET_LAST_CLOSE/Yahoo .BK fallback\n   Source: YAHOO_BK | Reliability 72/100 | Market: TH\n   เหตุผล: ปันผลสูง + valuation ไม่แพง\n2. KBANK.BK | BUY | Score 73/100 | Prob 58% | Conf 62% | Risk B\n   Regime: UPTREND | Entry: รอย่อไม่หลุด EMA50\n   Source: YAHOO_BK | Reliability 72/100 | Market: TH\n   เหตุผล: กลุ่มธน",
+    "top5_etf": "🏆 TOP5 ETF\nMarket Reference: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. SPY | CALL | Score 79/100 | Prob 70% | Conf 76% | Risk A\n   Regime: UPTREND | Entry: รอ breadth > 55\n   Source: YAHOO | Reliability 42/100 | Market: ETF\n   เหตุผล: ตลาดกว้าง\n2. QQQ | CALL | Score 76/100 | Prob 69% | Conf 72% | Risk B\n   Regime: MIXED | Entry: รอ XLK ยืนยัน\n   Source: YAHOO | Reliability 42/100 | Market: ETF\n   เหตุผล: growth momentum\n3. XLK | CALL | Score 74/100 | Prob 66% | Conf 70% | Ris",
+    "top5_gold": "🏆 TOP5 GOLD / XAUUSD\nMarket Reference: Prev Close / Pre-market / After-hours ตาม source ที่พร้อม\n\n1. GOLD | WAIT | Score 70/100 | Prob 62% | Conf 66% | Risk B\n   Regime: MIXED | Entry: รอ London/NY session\n   Source: GOLDTRADERS | Reliability 100/100 | Market: GOLD\n   เหตุผล: GoldTraders + GoldAPI + XAUUSD\n2. XAUUSD | WAIT | Score 68/100 | Prob 60% | Conf 64% | Risk B\n   Regime: MIXED | Entry: รอ break structure\n   Source: GOLDTRADERS | Reliability 100/100 | Market: GOLD\n   เหตุผล: spot gold\n3. ",
+    "api_nvda": "🔎 API STATUS: NVDA\nMarket: US\nCurrent Source: YAHOO\nReliability Score: 42/100\n\n❌ WEBULL | NOT_CONFIGURED | env=WEBULL_API_KEY\n❌ POLYGON | NOT_CONFIGURED | env=POLYGON_API_KEY\n❌ FINNHUB | NOT_CONFIGURED | env=FINNHUB_API_KEY\n❌ TWELVEDATA | NOT_CONFIGURED | env=TWELVEDATA_API_KEY\n❌ ALPHAVANTAGE | NOT_CONFIGURED | env=ALPHAVANTAGE_API_KEY\n✅ YAHOO | ACTIVE | env=-\n\nPriority:\nUS/ETF: Webull > Polygon > Finnhub > TwelveData > AlphaVantage > Yahoo\nOptions: Webull > Polygon > Yahoo\nThai: SET API > Thai ",
+    "api_scb": "🔎 API STATUS: SCB.BK\nMarket: TH\nCurrent Source: YAHOO_BK\nReliability Score: 72/100\n\n❌ SET_API | NOT_CONFIGURED | env=SET_API_KEY\n❌ THAI_MARKET_API | NOT_CONFIGURED | env=THAI_MARKET_API_KEY\n✅ YAHOO_BK | ACTIVE | env=-\n\nPriority:\nUS/ETF: Webull > Polygon > Finnhub > TwelveData > AlphaVantage > Yahoo\nOptions: Webull > Polygon > Yahoo\nThai: SET API > Thai Market API > Yahoo .BK\nGold: GoldTraders > GoldAPI > XAUUSD TwelveData > GC=F Yahoo\n\nVersion : V1410_MASTER_OS_ENHANCED",
+    "early": "⚠ EARLY ENTRY WATCH: NVDA\n\nสถานะ: กำลังเข้า Setup แต่ยังไม่ใช่ BUY เต็มระบบ\nProbability: 72%\nConfidence: 68%\nRisk Gate: WAIT_CONFIRMATION\n\nเงื่อนไขที่ต้องผ่าน:\n✅ Data Source: YAHOO | Reliability 42/100\n✅ Market Session: Prev/Pre/After ตรวจตามเวลาจริง\n✅ Volume ต้องยืนยัน\n✅ Breadth ต้องไม่ RISK_OFF\n❌ Breakout / VWAP ยังต้องรอยืนยัน\n\nAction:\n- มือใหม่: รอระบบเปลี่ยนเป็น BUY\n- มือโปร: ตั้ง Alert เหนือ high สำคัญ\n- ห้ามไล่ราคาเมื่อแท่งวิ่งไปไกลแล้ว\n\nVersion : V1410_MASTER_OS_ENHANCED",
+    "help": "🧭 V1410 MASTER OS ENHANCED COMMANDS\n\nTop5:\n- top5 us\n- top5 th\n- top5 etf\n- top5 gold\n- top5 call\n- top5 put\n\nAPI:\n- api\n- api nvda\n- api scb\n- api gold\n\nRisk / Portfolio:\n- v1400\n- journal\n- montecarlo\n- portfolio\n- risk1400\n\nEarly Entry:\n- early nvda\n- early qqq\n- early scb\n\nVersion : V1410_MASTER_OS_ENHANCED"
+  },
+  "checks": {
+    "top5_us_command": true,
+    "top5_call_command": true,
+    "top5_put_command": true,
+    "top5_th_command": true,
+    "top5_gold_command": true,
+    "api_symbol": true,
+    "early_entry": true,
+    "webull_priority": true,
+    "routes": true,
+    "version_current": true
+  },
+  "passed": true
+}

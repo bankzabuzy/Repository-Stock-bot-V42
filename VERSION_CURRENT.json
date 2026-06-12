@@ -1,7 +1,7 @@
 {
-  "current_version": "V1300.4_STATUS_API_ROUTER_FIXED",
-  "base": "V1300_PHASE13_TRUE_LATEST_FULL_MAIN_PRESERVED",
-  "generated_at": "2026-06-11T09:24:00.882384+00:00",
+  "current_version": "V1410_MASTER_OS_ENHANCED",
+  "base": "V1410_DEDUP_FIXED",
+  "generated_at": "2026-06-12T02:32:32.201833+00:00",
   "main_py_preserved": true,
   "main_py_lines": 13245,
   "main_py_size_bytes": 562822,
@@ -52,18 +52,47 @@
     "thai": "SET_LAST_CLOSE"
   },
   "api_router": true,
-  "api_priority": "see main.py V1300_3_API_PRIORITY",
+  "api_priority": {
+    "US_ETF": "Webull > Polygon > Finnhub > TwelveData > AlphaVantage > Yahoo",
+    "THAI": "SET API > Thai Market API > Yahoo .BK",
+    "GOLD": "GoldTraders > GoldAPI > XAUUSD TwelveData > GC=F Yahoo",
+    "MACRO": "FRED > AlphaVantage > Yahoo"
+  },
   "commands": [
-    "สถานะระบบ",
-    "api",
-    "สถานะ SCB.BK",
-    "สถานะ GOLD",
-    "api NVDA"
+    "v1400",
+    "journal",
+    "montecarlo",
+    "portfolio",
+    "risk1400"
   ],
   "fixes": [
     "status checks polygon/gold/fred/thai api",
     "no leading None",
     "remove v42 quick links",
     "unified status command"
+  ],
+  "modules_added": [
+    "Journal AI",
+    "Monte Carlo",
+    "Portfolio Engine",
+    "Risk Engine 2.0",
+    "Backtest Center",
+    "Paper Trade Engine"
+  ],
+  "routes": [
+    "/v1400/status",
+    "/v1400/montecarlo",
+    "/v1400/portfolio"
+  ],
+  "added": [
+    "top5 us",
+    "top5 th",
+    "top5 etf",
+    "top5 gold",
+    "top5 call",
+    "top5 put",
+    "api symbol status",
+    "early entry watch",
+    "webull-ready priority"
   ]
 }
