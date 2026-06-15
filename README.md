@@ -1,12 +1,14 @@
 
-V1438.5 FINAL STABLE RUNTIME
+V1438.6 FIX DEPLOY SPLIT
 
-FIXES:
-- Worker restart loop root cause analysis
-- Separation of web vs worker runtime
-- Railway deployment stabilization
+CHANGES:
+- HARD SEPARATION of WEB and WORKER
+- Removed all gunicorn from worker path
+- Railway-ready dual service structure
 
-ARCHITECTURE:
-- app.py -> WEB API ONLY
-- worker.py -> BACKGROUND PROCESS (run separately)
-- engine.py -> AI logic isolated
+DEPLOY:
+WEB SERVICE:
+  uvicorn app:app
+
+WORKER SERVICE:
+  python worker.py

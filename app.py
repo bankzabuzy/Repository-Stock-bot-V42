@@ -1,14 +1,14 @@
 
 from fastapi import FastAPI
 
-app = FastAPI(title="V1438.5 FINAL STABLE RUNTIME")
+app = FastAPI(title="V1438.6 FIX DEPLOY SPLIT")
 
 @app.get("/")
 def health():
     return {
         "status": "OK",
-        "version": "V1438.5_FINAL_STABLE_RUNTIME",
-        "message": "WEB SERVICE RUNNING STABLE"
+        "version": "V1438.6_FIX_DEPLOY_SPLIT",
+        "service": "WEB"
     }
 
 application = app
