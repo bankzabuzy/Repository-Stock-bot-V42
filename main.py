@@ -14385,3 +14385,19 @@ def v1418_live_symbol_route(symbol_text):
 def v1418_live_scan_route(kind):
     from v1418_force_live_decision_engine.commands.live_line import live_scan_message
     return Response(v1418_clean(live_scan_message(kind)), mimetype="text/plain; charset=utf-8")
+
+
+# V1429 INTEGRATION PATCH
+try:
+    from modules.v1429_adapter.adapter import v1429_enrich
+    print('V1429 integrated successfully')
+except Exception as e:
+    print('V1429 integration failed:', e)
+
+
+# V1430 INTEGRATION PATCH
+try:
+    from modules.v1430_market_brain.market_brain import market_brain
+    print('V1430 MARKET BRAIN ACTIVE')
+except Exception as e:
+    print('V1430 fallback mode:', e)
