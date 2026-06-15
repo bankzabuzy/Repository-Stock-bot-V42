@@ -1,15 +1,14 @@
 
 from fastapi import FastAPI
 
-app = FastAPI(title="V1438.4 STABLE DEPLOY FIX")
+app = FastAPI(title="V1438.5 FINAL STABLE RUNTIME")
 
 @app.get("/")
 def health():
     return {
         "status": "OK",
-        "version": "V1438.4_STABLE_DEPLOY_FIX",
-        "message": "ENTRY POINT WORKING"
+        "version": "V1438.5_FINAL_STABLE_RUNTIME",
+        "message": "WEB SERVICE RUNNING STABLE"
     }
 
-# compatibility for gunicorn setups
 application = app

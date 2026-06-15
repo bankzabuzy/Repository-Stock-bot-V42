@@ -1,13 +1,12 @@
 
-V1438.4 STABLE DEPLOY FIX
+V1438.5 FINAL STABLE RUNTIME
 
 FIXES:
-- Worker crash loop
-- Missing app entry
-- Gunicorn binding mismatch
-- Railway deployment instability
+- Worker restart loop root cause analysis
+- Separation of web vs worker runtime
+- Railway deployment stabilization
 
-STRUCTURE:
-- app.py = HTTP ENTRY POINT
-- worker.py = SAFE BACKGROUND LOOP
-- engine.py = AI LOGIC ISOLATED
+ARCHITECTURE:
+- app.py -> WEB API ONLY
+- worker.py -> BACKGROUND PROCESS (run separately)
+- engine.py -> AI logic isolated
