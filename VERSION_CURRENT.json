@@ -1,7 +1,7 @@
 {
-  "current_version": "V1419_MASTER_CLEAN_FINAL",
+  "current_version": "V1420_UNIFIED_LIVE_TRADING_FINAL",
   "base": "V1417_CLEAN_LIVE_FINAL",
-  "generated_at": "2026-06-14T04:46:19.436202+00:00",
+  "generated_at": "2026-06-15T09:20:49.336740+00:00",
   "main_py_preserved": true,
   "main_py_lines": 14323,
   "main_py_size_bytes": 562822,
@@ -10,7 +10,7 @@
     "run_phase13_current.py"
   ],
   "railway_start_command_recommended": "gunicorn main:app --bind 0.0.0.0:$PORT --workers 1 --threads 4",
-  "notes": "V1419: handle_line_command 2→1. All 89 files version-updated to V1419. Full beginner-friendly output. Sector rotation. Expanded universe US:20/TH:15/CALL:15/PUT:15. Glossary command. Fear&Greed cached.",
+  "notes": "V1420: รวม paper_trading + live_broker + hedge_fund + v1419. แก้ Railway worker CRASH (ลบ worker process ออก, pytz เพิ่ม). Webull PAPER/LIVE broker. Paper trade journal. คำสั่ง LINE: เปิด/ปิด/broker/paper",
   "patches": [
     "DATA_UNAVAILABLE_RSI_NA",
     "NO_ENTRY_IF_PROBABILITY_LT_50",
@@ -71,29 +71,22 @@
   "commands": [
     "[SYMBOL]",
     "top5",
-    "top5 us",
     "top5 call",
     "top5 put",
     "top5 th",
     "top5 etf",
-    "top5 gold",
+    "scan",
+    "gold",
     "premarket",
     "market",
     "kelly",
-    "scan",
-    "scan us",
-    "scan th",
-    "scan etf",
-    "gold",
+    "broker",
+    "paper",
+    "เปิด NVDA 1",
+    "ปิด 1 185.50",
     "status",
-    "api SYMBOL",
-    "live SYMBOL",
     "help",
-    "คำศัพท์",
-    "rsi",
-    "ema",
-    "sl",
-    "tp"
+    "คำศัพท์"
   ],
   "fixes": [
     "Top5 filters/gates symbols: Prob>=50 and non-BEARISH first",
@@ -191,5 +184,7 @@
   "files_updated": 89,
   "duplicates_fixed": "handle_line_command(2→1), all previous fixes retained",
   "old_version_strings_remaining": 0,
-  "syntax_errors": 0
+  "syntax_errors": 0,
+  "railway_fix": "Removed separate worker process (was crashing). All background tasks run as daemon threads inside gunicorn.",
+  "webull_status": "PAPER mode ready. LIVE mode needs WEBULL_ACCESS_TOKEN+WEBULL_DID+WEBULL_ACCOUNT_ID+WEBULL_LIVE_MODE=true"
 }
