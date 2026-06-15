@@ -1,8 +1,7 @@
 
-from modules.v1438_core.brain import unified_brain
+from modules.v1438_integration.brain import integrate
 
-def run(symbol_data):
-    return unified_brain(symbol_data)
+def run(v1419=None, v1437=None, market=None):
+    return integrate(v1419, v1437, market)
 
-if __name__ == "__main__":
-    print(run({"price":100,"volume":2,"rsi":30,"sentiment":1}))
+app = None  # kept for Railway compatibility (safe placeholder)
