@@ -1,11 +1,13 @@
 
-V1438.3 DEPLOY FIXED
+V1438.4 STABLE DEPLOY FIX
 
 FIXES:
-- Missing app:app error
-- Gunicorn startup crash
-- Railway deployment loop
-- Added uvicorn Procfile
+- Worker crash loop
+- Missing app entry
+- Gunicorn binding mismatch
+- Railway deployment instability
 
-ENTRY:
-- app.py = main service
+STRUCTURE:
+- app.py = HTTP ENTRY POINT
+- worker.py = SAFE BACKGROUND LOOP
+- engine.py = AI LOGIC ISOLATED

@@ -1,16 +1,15 @@
 
 from fastapi import FastAPI
 
-app = FastAPI()
+app = FastAPI(title="V1438.4 STABLE DEPLOY FIX")
 
-# health check (Railway will hit this)
 @app.get("/")
 def health():
     return {
         "status": "OK",
-        "version": "V1438.3_DEPLOY_FIXED",
-        "message": "DEPLOY SUCCESS ENTRY ACTIVE"
+        "version": "V1438.4_STABLE_DEPLOY_FIX",
+        "message": "ENTRY POINT WORKING"
     }
 
-# compatibility for gunicorn
+# compatibility for gunicorn setups
 application = app
