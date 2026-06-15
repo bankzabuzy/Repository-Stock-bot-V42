@@ -1,7 +1,7 @@
 
-from modules.v1438_integration.brain import integrate
+from app import app
 
-def run(v1419=None, v1437=None, market=None):
-    return integrate(v1419, v1437, market)
+# optional legacy compatibility
+def run():
+    return {"status": "running"}
 
-app = None  # kept for Railway compatibility (safe placeholder)
