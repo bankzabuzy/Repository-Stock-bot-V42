@@ -1,6 +1,6 @@
 from v1410_master_os_enhanced.api_router.router import price_source_note, api_status_text
 
-VERSION = "V1410_MASTER_OS_ENHANCED"
+VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 SAMPLE = {
     "US": [

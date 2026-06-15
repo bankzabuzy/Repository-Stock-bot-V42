@@ -3,7 +3,7 @@ from __future__ import annotations
 import os, sqlite3, json, time
 from datetime import datetime, timezone, timedelta
 from typing import Any, Optional
-V350_VERSION="V350_PRODUCTION_PROOF_AND_GOVERNANCE_STABLE"
+V350_VERSION="V1419_MASTER_CLEAN_FINAL"
 def now_th(): return datetime.now(timezone(timedelta(hours=7))).strftime("%d/%m/%Y %H:%M")
 def safe_float(x:Any, default:Optional[float]=None):
     try:

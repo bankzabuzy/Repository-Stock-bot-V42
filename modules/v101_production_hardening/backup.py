@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any
 from .state import db_path, init_state_db
 
-V101_VERSION = "V101_PRODUCTION_HARDENING_SECURITY_STABLE"
+V101_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def db_summary() -> Dict[str, Any]:
     init_state_db()

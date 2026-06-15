@@ -8,7 +8,7 @@ from .data_providers import provider_layer_status
 from .forward_test import forward_test_status
 from .performance_proof import performance_dashboard
 from .line_governance import line_alert_governance, line_governance_status
-V350_VERSION="V350_PRODUCTION_PROOF_AND_GOVERNANCE_STABLE"
+V350_VERSION="V1419_MASTER_CLEAN_FINAL"
 def data_staleness_guard(ps):
     bad=[i for i in ps.get("items",[]) if not i.get("ok")]
     return {"ok":len(bad)==0,"bad_count":len(bad),"decision":"ALLOW" if not bad else "WAIT_DATA"}

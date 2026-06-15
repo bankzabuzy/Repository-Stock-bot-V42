@@ -1,0 +1,16 @@
+{
+  "version": "V1415_GLOBAL_SCANNER_ENGINE_FINAL",
+  "generated_at": "2026-06-12T10:24:03.143949+00:00",
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "scan_has_global": true,
+    "scan_has_sections": true,
+    "top5_uses_scanner": true,
+    "nvda_still_analysis": true,
+    "api_control": true,
+    "version_ok": true,
+    "no_old_version": true
+  },
+  "passed": true
+}

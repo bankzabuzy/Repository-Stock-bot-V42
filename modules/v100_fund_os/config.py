@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass
 from typing import Dict, Any
 
-V100_VERSION = "V100_FUND_OPERATING_SYSTEM_STABLE"
+V100_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 @dataclass
 class FundConfig:

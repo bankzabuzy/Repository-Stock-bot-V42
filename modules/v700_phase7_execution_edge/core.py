@@ -5,7 +5,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Any, Optional
 
-V700_VERSION = "V700_PHASE7_TRUE_INTEGRATED_WITH_V620_STABLE"
+V700_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def now_th():
     return datetime.now(timezone(timedelta(hours=7))).strftime("%d/%m/%Y %H:%M")

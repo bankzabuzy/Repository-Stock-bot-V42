@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timezone, timedelta
 
-VERSION = "V1414.1_UNIFIED_STATUS_CONTROL_FINAL"
+VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def ok_env(name):
     return "✅" if bool(os.getenv(name, "").strip()) else "❌"
@@ -73,7 +73,7 @@ Win: None | PF: None | DD(R): None | Expectancy(R): None
 
 US EXTENDED HOURS
 Session: {session} | Items: 7
-Price Rule: LIVE > PREMARKET > AFTERHOURS > PREV_CLOSE
+Price Rule: FORCE LIVE > PREMARKET > AFTERHOURS > PREV_CLOSE | Reject stale
 
 MARKET BREADTH
 Regime: {breadth_regime} | Score: {breadth_score}
@@ -82,7 +82,7 @@ LATEST JOURNAL
 - ยังไม่มีรายการ journal
 
 COMMANDS
-สถานะ | สถานะระบบ | api | dashboard | api NVDA
+สถานะ | api | dashboard | scan | scan us | scan th | api NVDA
 nvda | qqq | scb | gold | top5 us | top5 th
 
 Quick Links:
@@ -111,6 +111,6 @@ Version : {VERSION}"""
     return f"""🔎 API STATUS {s}
 Market: US/ETF
 POLYGON:{ok_env('POLYGON_API_KEY')} | FINNHUB:{ok_env('FINNHUB_API_KEY')} | TWELVEDATA:{ok_env('TWELVEDATA_API_KEY')} | ALPHAVANTAGE:{ok_env('ALPHAVANTAGE_API_KEY')} | YAHOO_BACKUP:✅
-Price Rule: LIVE > PREMARKET > AFTERHOURS > PREV_CLOSE
+Price Rule: FORCE LIVE > PREMARKET > AFTERHOURS > PREV_CLOSE | Reject stale
 
 Version : {VERSION}"""

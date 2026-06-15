@@ -1,7 +1,7 @@
 from v1411_stable_world_class.api.router import status, classify, normalize_symbol, best_provider, reliability, session_label
 from v1411_stable_world_class.storage.queue import AlertQueue
 
-VERSION = "V1411_STABLE_WORLD_CLASS_FINAL"
+VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 DATA = {
     "US": [

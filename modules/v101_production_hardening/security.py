@@ -3,7 +3,7 @@ from __future__ import annotations
 import os, hashlib, hmac, time
 from typing import Dict, Any
 
-V101_VERSION = "V101_PRODUCTION_HARDENING_SECURITY_STABLE"
+V101_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def is_admin_token_set() -> bool:
     return bool(os.getenv("ADMIN_TOKEN"))

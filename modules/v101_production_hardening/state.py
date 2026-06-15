@@ -4,7 +4,7 @@ import os, sqlite3
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 
-V101_VERSION = "V101_PRODUCTION_HARDENING_SECURITY_STABLE"
+V101_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def db_path() -> str:
     return os.getenv("DB_PATH", "signals.db")

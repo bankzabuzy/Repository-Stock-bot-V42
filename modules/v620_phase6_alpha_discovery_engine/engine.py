@@ -4,7 +4,7 @@ import os, sqlite3, json, re, importlib
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
-V620_VERSION = "V620_PHASE6_ALPHA_DISCOVERY_ENGINE_STABLE"
+V620_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def now_th():
     return datetime.now(timezone(timedelta(hours=7))).strftime("%d/%m/%Y %H:%M")

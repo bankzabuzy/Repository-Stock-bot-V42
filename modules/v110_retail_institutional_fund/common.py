@@ -4,7 +4,7 @@ import os, sqlite3, math, random
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
 
-V110_VERSION = "V110_RETAIL_INSTITUTIONAL_FUND_PLATFORM_STABLE"
+V110_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def now_th() -> str:
     return datetime.now(timezone(timedelta(hours=7))).strftime("%d/%m/%Y %H:%M")

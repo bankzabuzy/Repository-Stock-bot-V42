@@ -1,0 +1,14 @@
+{
+  "version": "V1418_FORCE_LIVE_DECISION_ENGINE_FINAL",
+  "generated_at": "2026-06-13T02:53:12.164160+00:00",
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "live_scanner": true,
+    "api_control": true,
+    "version_ok": true,
+    "no_old_version": true,
+    "force_live_module_exists": true
+  },
+  "passed": true
+}

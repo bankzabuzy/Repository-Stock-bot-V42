@@ -5,7 +5,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List
 
-V140_VERSION = "V140_SYSTEM_VERSION_CONSISTENCY_AUDIT_STABLE"
+V140_VERSION = "V1419_MASTER_CLEAN_FINAL"
 EXPECTED_LATEST = V140_VERSION
 
 def now_th() -> str:

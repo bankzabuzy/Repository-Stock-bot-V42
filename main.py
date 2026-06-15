@@ -2193,7 +2193,7 @@ def build_gold_report(asset, analysis, news_text, reasons):
 # - Sector Rotation
 # - Ticker Mapping Guard
 # ============================================================
-V1300_1_VERSION = "V1300_1_WORLD_CLASS_FINAL"
+V1300_1_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 V1300_1_TICKER_MAP = {
     "BRK.B": "BRK-B",
@@ -2304,9 +2304,9 @@ def v1300_1_clean_line_versions(text):
     for p in patterns:
         text = re.sub(p, lambda m: "Version : " + V1300_1_VERSION if m.group(0).startswith("Version") else m.group(0).split()[0] + " " + V1300_1_VERSION, text)
     text = text.replace("V1300.1 Institutional", "V1300.1 Institutional")
-    text = text.replace("V1300_1_WORLD_CLASS_FINAL", V1300_1_VERSION)
-    text = text.replace("V1300_1_WORLD_CLASS_FINAL", V1300_1_VERSION)
-    text = text.replace("V1300_1_WORLD_CLASS_FINAL", V1300_1_VERSION)
+    text = text.replace("V1417_CLEAN_LIVE_FINAL", V1300_1_VERSION)
+    text = text.replace("V1417_CLEAN_LIVE_FINAL", V1300_1_VERSION)
+    text = text.replace("V1417_CLEAN_LIVE_FINAL", V1300_1_VERSION)
     return text
 
 
@@ -5373,7 +5373,7 @@ def v42_gold_filter_route_legacy():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V1300_1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1417_CLEAN_LIVE_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 
@@ -5408,7 +5408,7 @@ def v42_gold_fund_grade_route():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V1300_1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1417_CLEAN_LIVE_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/status", methods=["GET"])
@@ -12202,7 +12202,7 @@ def v41_top5_buy_text():
 # - Old V8.1 rank_top5_picks/compact_top5_message are overridden below.
 # - Thai gold is handled through GoldTraders/estimate fallback, not Yahoo THAI_GOLD.
 # ============================================================
-V1300_1_LATEST_VERSION = "V1300_1_WORLD_CLASS_FINAL"
+V1300_1_LATEST_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 
 def _v41_num(value, default=0.0):
@@ -12457,7 +12457,7 @@ def thai_gold_latest_route():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V1300_1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1417_CLEAN_LIVE_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/v42/gold", methods=["GET"])
@@ -12466,7 +12466,7 @@ def v42_gold_route():
         from modules.v42_gold_institutional_core import build_v42_gold_payload
         return jsonify(build_v42_gold_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V1300_1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1417_CLEAN_LIVE_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 @app.route("/v42/gold-text", methods=["GET"])
@@ -12501,7 +12501,7 @@ def v42_gold_filter_route_v2():
             "push_alert": payload.get("push_alert"),
         })
     except Exception as e:
-        return jsonify({"ok": False, "version": "V1300_1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1417_CLEAN_LIVE_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 def production_scan_once(symbols=None, save_all=True):
@@ -12660,7 +12660,7 @@ def v428_control_center_json_route():
         from modules.v42_gold_institutional_core import build_v428_control_center_payload
         return jsonify(build_v428_control_center_payload())
     except Exception as e:
-        return jsonify({"ok": False, "version": "V1300_1_WORLD_CLASS_FINAL", "error": str(e), "time_th": now_text()}), 200
+        return jsonify({"ok": False, "version": "V1417_CLEAN_LIVE_FINAL", "error": str(e), "time_th": now_text()}), 200
 
 
 # V51 Institutional Validation & Execution Proof routes
@@ -12901,7 +12901,7 @@ def v1300_1_status_text_route():
 # Final safety layer: no old version labels, no DATA_UNAVAILABLE text,
 # no entry plan when probability < 50, no fake RSI=100 on unavailable data.
 # ============================================================
-V1300_1_TRUE_FINAL_VERSION = "V1300_1_WORLD_CLASS_FINAL"
+V1300_1_TRUE_FINAL_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def build_v1300_1_true_final_status_text():
     return f"""🧭 V1300.1 WORLD CLASS FINAL STATUS
@@ -12989,7 +12989,7 @@ def v1300_1_hard_block_test_route():
 # Adds market session / price source to LINE text and Top5 output.
 # This is an output-layer patch only. It does not rewrite legacy engine internals.
 # ============================================================
-V1300_2_DISPLAY_VERSION = "V1300.2_WORLD_CLASS_FINAL"
+V1300_2_DISPLAY_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1300_2_market_session_info(symbol=None):
     """
@@ -13057,7 +13057,7 @@ def v1300_2_add_market_reference_to_text(text):
         if not isinstance(text, str):
             text = str(text)
 
-        text = text.replace("V1300_1_WORLD_CLASS_FINAL", V1300_2_DISPLAY_VERSION)
+        text = text.replace("V1417_CLEAN_LIVE_FINAL", V1300_2_DISPLAY_VERSION)
         text = text.replace("V1300.1_WORLD_CLASS_FINAL", V1300_2_DISPLAY_VERSION)
         text = text.replace("V1300.1 WORLD CLASS FINAL", "V1300.2 WORLD CLASS FINAL")
 
@@ -13124,7 +13124,7 @@ def v1300_2_health_route():
 # - Thai stocks work with SET/yahoo .BK fallback
 # - LINE status reports API health per provider
 # ============================================================
-V1300_3_DISPLAY_VERSION = "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY"
+V1300_3_DISPLAY_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1300_3_env_has(name):
     try:
@@ -13353,7 +13353,7 @@ def v1300_3_symbol_status_route(symbol):
 # - Removes V42 quick links from status output
 # - Adds real API router status to "สถานะระบบ"
 # ============================================================
-V1300_4_DISPLAY_VERSION = "V1300.4_STATUS_API_ROUTER_FIXED"
+V1300_4_DISPLAY_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1300_4_bool_env(name):
     try:
@@ -13630,7 +13630,7 @@ def v1400_portfolio_route():
 # Adds LINE commands: top5 us/th/etf/gold/call/put,
 # Webull-ready API priority, early-entry watch, beginner-readable output.
 # ============================================================
-V1410_DISPLAY_VERSION = "V1410_MASTER_OS_ENHANCED"
+V1410_DISPLAY_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1410_enhanced_clean(text):
     try:
@@ -13679,57 +13679,6 @@ try:
 except Exception:
     _v1410_prev_handle_line_command = None
 
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower().strip()
-    compact = low.replace(" ", "")
-
-    if compact in {"v1410", "help1410", "commands", "คำสั่ง", "เมนู"}:
-        return v1410_help_text()
-
-    if compact in {"top5", "top5us", "topus"}:
-        return v1410_top5_text("US")
-    if compact in {"top5call", "topcall", "call"}:
-        return v1410_top5_text("CALL")
-    if compact in {"top5put", "topput", "put"}:
-        return v1410_top5_text("PUT")
-    if compact in {"top5th", "topthai", "top5thai"}:
-        return v1410_top5_text("TH")
-    if compact in {"top5etf", "topetf"}:
-        return v1410_top5_text("ETF")
-    if compact in {"top5gold", "topgold", "goldtop"}:
-        return v1410_top5_text("GOLD")
-
-    if low.startswith("api "):
-        parts = text.split()
-        return v1410_api_text(parts[1] if len(parts) > 1 else None)
-    if compact in {"api", "apihealth", "สถานะapi", "เช็คapi", "เช็กapi"}:
-        return v1410_api_text(None)
-
-    if low.startswith("early "):
-        parts = text.split()
-        return v1410_early_text(parts[1] if len(parts) > 1 else "NVDA")
-    if compact in {"early", "earlyentry", "setup"}:
-        return v1410_early_text("NVDA")
-
-    if _v1410_prev_handle_line_command:
-        return v1410_enhanced_clean(_v1410_prev_handle_line_command(user_text))
-    return None
-
-try:
-    _v1410_prev_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1410_prev_line_reply(reply_token, v1410_enhanced_clean(text))
-except Exception:
-    pass
-
-try:
-    _v1410_prev_line_push = line_push
-    def line_push(user_id, text):
-        return _v1410_prev_line_push(user_id, v1410_enhanced_clean(text))
-except Exception:
-    pass
-
 @app.route("/v1410/top5/<kind>", methods=["GET"], endpoint="v1410_top5")
 def v1410_top5_route(kind):
     return Response(v1410_top5_text(kind), mimetype="text/plain; charset=utf-8")
@@ -13767,14 +13716,14 @@ except NameError:
 # Full production overlay for LINE commands and API priority.
 # Fixes missing previous-filter variable issues by not relying on v1300_4_prev_filter.
 # ============================================================
-V1410_FULL_READY_VERSION = "V1410_FULL_READY_LINE_COMMANDS_FIXED"
+V1410_FULL_READY_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1410_full_clean(text):
     try:
         if text is None:
             return "ไม่พบข้อมูล\n\nVersion : " + V1410_FULL_READY_VERSION
         text = str(text).strip()
-        text = text.replace("V1410_MASTER_OS_ENHANCED", V1410_FULL_READY_VERSION)
+        text = text.replace("V1417_CLEAN_LIVE_FINAL", V1410_FULL_READY_VERSION)
         text = text.replace("V1400_MASTER_OS_HEDGEFUND_READY", V1410_FULL_READY_VERSION)
         text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1410_FULL_READY_VERSION, text)
         if "Version : " not in text:
@@ -13816,57 +13765,6 @@ try:
 except Exception:
     _v1410_full_prev_handle_line_command = None
 
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower().strip()
-    compact = low.replace(" ", "")
-
-    if compact in {"v1410", "help", "help1410", "commands", "คำสั่ง", "เมนู"}:
-        return v1410_full_help()
-
-    if compact in {"top5", "top5us", "topus"}:
-        return v1410_full_top5("US")
-    if compact in {"top5call", "topcall", "call"}:
-        return v1410_full_top5("CALL")
-    if compact in {"top5put", "topput", "put"}:
-        return v1410_full_top5("PUT")
-    if compact in {"top5th", "topthai", "top5thai"}:
-        return v1410_full_top5("TH")
-    if compact in {"top5etf", "topetf"}:
-        return v1410_full_top5("ETF")
-    if compact in {"top5gold", "topgold", "goldtop"}:
-        return v1410_full_top5("GOLD")
-
-    if low.startswith("api "):
-        parts = text.split()
-        return v1410_full_api(parts[1] if len(parts) > 1 else None)
-    if compact in {"api", "apihealth", "สถานะapi", "เช็คapi", "เช็กapi"}:
-        return v1410_full_api(None)
-
-    if low.startswith("early "):
-        parts = text.split()
-        return v1410_full_early(parts[1] if len(parts) > 1 else "NVDA")
-    if compact in {"early", "earlyentry", "setup"}:
-        return v1410_full_early("NVDA")
-
-    if _v1410_full_prev_handle_line_command:
-        return v1410_full_clean(_v1410_full_prev_handle_line_command(user_text))
-    return v1410_full_clean(None)
-
-try:
-    _v1410_full_prev_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1410_full_prev_line_reply(reply_token, v1410_full_clean(text))
-except Exception:
-    pass
-
-try:
-    _v1410_full_prev_line_push = line_push
-    def line_push(user_id, text):
-        return _v1410_full_prev_line_push(user_id, v1410_full_clean(text))
-except Exception:
-    pass
-
 @app.route("/v1410/full/top5/<kind>", methods=["GET"], endpoint="v1410_full_top5")
 def v1410_full_top5_route(kind):
     return Response(v1410_full_top5(kind), mimetype="text/plain; charset=utf-8")
@@ -13900,7 +13798,7 @@ for _missing_name, _default_value in {
 # Fixes bare symbols like "scb", "nvda", "qqq", "gold" falling back to old V1300 handler.
 # Also makes LINE push 429 quota-limit non-fatal.
 # ============================================================
-V1410_1_DISPLAY_VERSION = "V1410.1_SYMBOL_ROUTE_LINE429_SAFE"
+V1410_1_DISPLAY_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1410_1_is_symbol_command(text):
     s = (text or "").strip().upper()
@@ -13930,7 +13828,7 @@ def v1410_1_clean_all_versions(text):
         "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
         "V1410_FULL_READY_LINE_COMMANDS_FIXED",
         "V1410_FINAL_RUNTIME_FILTER_FIXED",
-        "V1410_MASTER_OS_ENHANCED",
+        "V1417_CLEAN_LIVE_FINAL",
         "V1400_MASTER_OS_HEDGEFUND_READY",
     ]:
         text = text.replace(old, V1410_1_DISPLAY_VERSION)
@@ -13943,45 +13841,6 @@ try:
     _v1410_1_prev_handle_line_command = handle_line_command
 except Exception:
     _v1410_1_prev_handle_line_command = None
-
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower().strip()
-    compact = low.replace(" ", "")
-
-    if compact in {"v14101", "v1410.1", "status1410", "สถานะ1410"}:
-        return "🧭 V1410.1 STATUS\nCore: ✅\nSymbol Route: ✅\nLINE 429 Safe: ✅\nOld Version Cleaner: ✅\n\nVersion : " + V1410_1_DISPLAY_VERSION
-
-    if v1410_1_is_symbol_command(text):
-        return v1410_1_symbol_to_status(text)
-
-    if _v1410_1_prev_handle_line_command:
-        return v1410_1_clean_all_versions(_v1410_1_prev_handle_line_command(user_text))
-    return v1410_1_clean_all_versions("ไม่พบข้อมูล")
-
-try:
-    _v1410_1_prev_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1410_1_prev_line_reply(reply_token, v1410_1_clean_all_versions(text))
-except Exception:
-    pass
-
-try:
-    _v1410_1_prev_line_push = line_push
-    def line_push(user_id, text):
-        try:
-            return _v1410_1_prev_line_push(user_id, v1410_1_clean_all_versions(text))
-        except Exception as e:
-            msg = str(e)
-            if "429" in msg or "monthly limit" in msg.lower() or "quota" in msg.lower():
-                try:
-                    print("LINE push quota reached; worker continues safely:", msg[:300])
-                except Exception:
-                    pass
-                return None
-            raise
-except Exception:
-    pass
 
 @app.route("/v1410_1/status", methods=["GET"], endpoint="v1410_1_status")
 def v1410_1_status_route():
@@ -13996,7 +13855,7 @@ def v1410_1_symbol_route(symbol):
 # V1411 STABLE WORLD CLASS FINAL OVERLAY
 # Final command router + version cleaner + LINE 429 queue + no fake signal guard.
 # ============================================================
-V1411_VERSION = "V1411_STABLE_WORLD_CLASS_FINAL"
+V1411_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1411_clean(text):
     try:
@@ -14007,7 +13866,7 @@ def v1411_clean(text):
             "V1410_FULL_READY_LINE_COMMANDS_FIXED",
             "V1410_FINAL_RUNTIME_FILTER_FIXED",
             "V1410.1_SYMBOL_ROUTE_LINE429_SAFE",
-            "V1410_MASTER_OS_ENHANCED",
+            "V1417_CLEAN_LIVE_FINAL",
             "V1400_MASTER_OS_HEDGEFUND_READY",
         ]:
             text = text.replace(old, V1411_VERSION)
@@ -14069,40 +13928,6 @@ try:
 except Exception:
     _v1411_prev_handle_line_command = None
 
-def handle_line_command(user_text):
-    out = v1411_dispatch(user_text)
-    if out is not None:
-        return v1411_clean(out)
-    if _v1411_prev_handle_line_command:
-        return v1411_clean(_v1411_prev_handle_line_command(user_text))
-    return v1411_clean("ไม่พบข้อมูล")
-
-try:
-    _v1411_prev_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1411_prev_line_reply(reply_token, v1411_clean(text))
-except Exception:
-    pass
-
-try:
-    _v1411_prev_line_push = line_push
-    def line_push(user_id, text):
-        try:
-            return _v1411_prev_line_push(user_id, v1411_clean(text))
-        except Exception as e:
-            msg = str(e)
-            if "429" in msg or "monthly limit" in msg.lower() or "quota" in msg.lower():
-                try:
-                    from v1411_stable_world_class.storage.queue import AlertQueue
-                    AlertQueue().add({"reason": "LINE_429_QUOTA", "text": v1411_clean(text), "user_id": user_id})
-                    print("LINE 429 quota reached. Alert queued. Core continues.")
-                except Exception as qe:
-                    print("LINE 429 quota reached. Queue failed:", qe)
-                return None
-            raise
-except Exception:
-    pass
-
 @app.route("/v1411/status", methods=["GET"], endpoint="v1411_status")
 def v1411_status_route():
     from v1411_stable_world_class.api.router import status
@@ -14123,7 +13948,7 @@ def v1411_symbol_route(symbol_text):
 # V1412 RESTORE FULL ANALYSIS FINAL OVERLAY
 # Restores rich LINE output: price, pre-market, dividend, 3 entries, TP, SL, options, technicals, breadth.
 # ============================================================
-V1412_RESTORE_VERSION = "V1412_RESTORE_FULL_ANALYSIS_FINAL"
+V1412_RESTORE_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1412_restore_clean(text):
     text = "" if text is None else str(text)
@@ -14134,7 +13959,7 @@ def v1412_restore_clean(text):
         "V1410_FINAL_RUNTIME_FILTER_FIXED",
         "V1410.1_SYMBOL_ROUTE_LINE429_SAFE",
         "V1411_STABLE_WORLD_CLASS_FINAL",
-        "V1410_MASTER_OS_ENHANCED",
+        "V1417_CLEAN_LIVE_FINAL",
         "V1400_MASTER_OS_HEDGEFUND_READY",
     ]:
         text = text.replace(old, V1412_RESTORE_VERSION)
@@ -14154,35 +13979,6 @@ try:
     _v1412_restore_prev_handle_line_command = handle_line_command
 except Exception:
     _v1412_restore_prev_handle_line_command = None
-
-def handle_line_command(user_text):
-    out = v1412_restore_dispatch(user_text)
-    if out:
-        return v1412_restore_clean(out)
-    if _v1412_restore_prev_handle_line_command:
-        return v1412_restore_clean(_v1412_restore_prev_handle_line_command(user_text))
-    return v1412_restore_clean("ไม่พบข้อมูล")
-
-try:
-    _v1412_restore_prev_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1412_restore_prev_line_reply(reply_token, v1412_restore_clean(text))
-except Exception:
-    pass
-
-try:
-    _v1412_restore_prev_line_push = line_push
-    def line_push(user_id, text):
-        try:
-            return _v1412_restore_prev_line_push(user_id, v1412_restore_clean(text))
-        except Exception as e:
-            msg = str(e)
-            if "429" in msg or "monthly limit" in msg.lower() or "quota" in msg.lower():
-                print("LINE 429 quota reached. Core continues safely.")
-                return None
-            raise
-except Exception:
-    pass
 
 @app.route("/v1412/full/<symbol_text>", methods=["GET"], endpoint="v1412_full_symbol")
 def v1412_full_symbol_route(symbol_text):
@@ -14204,7 +14000,7 @@ def v1412_health_route():
 # V1412.1 CLEAN LINE GOLDTRADERS FINAL OVERLAY
 # Short beginner-friendly LINE output + Thai Gold Association first.
 # ============================================================
-V1412_1_VERSION = "V1412.1_CLEAN_LINE_GOLDTRADERS_FINAL"
+V1412_1_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1412_1_clean(text):
     text = "" if text is None else str(text)
@@ -14235,34 +14031,6 @@ try:
 except Exception:
     _v1412_1_prev_handle_line_command = None
 
-def handle_line_command(user_text):
-    out = v1412_1_dispatch(user_text)
-    if out:
-        return v1412_1_clean(out)
-    if _v1412_1_prev_handle_line_command:
-        return v1412_1_clean(_v1412_1_prev_handle_line_command(user_text))
-    return v1412_1_clean("ไม่พบข้อมูล")
-
-try:
-    _v1412_1_prev_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1412_1_prev_line_reply(reply_token, v1412_1_clean(text))
-except Exception:
-    pass
-
-try:
-    _v1412_1_prev_line_push = line_push
-    def line_push(user_id, text):
-        try:
-            return _v1412_1_prev_line_push(user_id, v1412_1_clean(text))
-        except Exception as e:
-            if "429" in str(e) or "monthly limit" in str(e).lower() or "quota" in str(e).lower():
-                print("LINE quota reached. Core continues.")
-                return None
-            raise
-except Exception:
-    pass
-
 @app.route("/v1412_1/full/<symbol_text>", methods=["GET"], endpoint="v1412_1_full_symbol")
 def v1412_1_full_symbol_route(symbol_text):
     from v1412_clean_line.commands.clean_formatter import dispatch
@@ -14278,7 +14046,7 @@ def v1412_1_health_route():
 # V1413 WORLDCLASS LINE OS FINAL OVERLAY
 # Beginner-friendly LINE answers, global-fund style risk/forecast/entry engine.
 # ============================================================
-V1413_VERSION = "V1413_WORLDCLASS_LINE_OS_FINAL"
+V1413_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1413_clean(text):
     text = "" if text is None else str(text)
@@ -14311,34 +14079,6 @@ try:
 except Exception:
     _v1413_prev_handle_line_command = None
 
-def handle_line_command(user_text):
-    out = v1413_dispatch(user_text)
-    if out:
-        return v1413_clean(out)
-    if _v1413_prev_handle_line_command:
-        return v1413_clean(_v1413_prev_handle_line_command(user_text))
-    return v1413_clean("ไม่พบข้อมูล")
-
-try:
-    _v1413_prev_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1413_prev_line_reply(reply_token, v1413_clean(text))
-except Exception:
-    pass
-
-try:
-    _v1413_prev_line_push = line_push
-    def line_push(user_id, text):
-        try:
-            return _v1413_prev_line_push(user_id, v1413_clean(text))
-        except Exception as e:
-            if "429" in str(e) or "monthly limit" in str(e).lower() or "quota" in str(e).lower():
-                print("LINE quota reached. Message skipped/queued by platform. Core continues.")
-                return None
-            raise
-except Exception:
-    pass
-
 @app.route("/v1413/full/<symbol_text>", methods=["GET"], endpoint="v1413_full_symbol")
 def v1413_full_symbol_route(symbol_text):
     from v1413_worldclass_line_os.commands.worldclass_line_builder import dispatch
@@ -14359,7 +14099,7 @@ def v1413_health_route():
 # V1414 REALTIME PRICE ROUTER FINAL OVERLAY
 # Uses freshest price first: live/current -> pre-market -> after-hours -> prev close.
 # ============================================================
-V1414_VERSION = "V1414_REALTIME_PRICE_ROUTER_FINAL"
+V1414_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1414_clean(text):
     text = "" if text is None else str(text)
@@ -14368,7 +14108,7 @@ def v1414_clean(text):
         "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
         "V1412.1_CLEAN_LINE_GOLDTRADERS_FINAL",
         "V1412_RESTORE_FULL_ANALYSIS_FINAL",
-        "V1413_WORLDCLASS_LINE_OS_FINAL",
+        "V1417_CLEAN_LIVE_FINAL",
         "V1411_STABLE_WORLD_CLASS_FINAL",
         "V1410.1_SYMBOL_ROUTE_LINE429_SAFE",
         "V1410_FINAL_RUNTIME_FILTER_FIXED",
@@ -14393,34 +14133,6 @@ try:
 except Exception:
     _v1414_prev_handle_line_command = None
 
-def handle_line_command(user_text):
-    out = v1414_dispatch(user_text)
-    if out:
-        return v1414_clean(out)
-    if _v1414_prev_handle_line_command:
-        return v1414_clean(_v1414_prev_handle_line_command(user_text))
-    return v1414_clean("ไม่พบข้อมูล")
-
-try:
-    _v1414_prev_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1414_prev_line_reply(reply_token, v1414_clean(text))
-except Exception:
-    pass
-
-try:
-    _v1414_prev_line_push = line_push
-    def line_push(user_id, text):
-        try:
-            return _v1414_prev_line_push(user_id, v1414_clean(text))
-        except Exception as e:
-            if "429" in str(e) or "monthly limit" in str(e).lower() or "quota" in str(e).lower():
-                print("LINE quota reached. Message skipped/queued by platform. Core continues.")
-                return None
-            raise
-except Exception:
-    pass
-
 @app.route("/v1414/full/<symbol_text>", methods=["GET"], endpoint="v1414_full_symbol")
 def v1414_full_symbol_route(symbol_text):
     from v1413_worldclass_line_os.commands.worldclass_line_builder import dispatch
@@ -14442,7 +14154,7 @@ def v1414_health_route():
 # V1414.1 UNIFIED STATUS CONTROL FINAL OVERLAY
 # Restores full Control Center for: api / status / สถานะ / dashboard.
 # ============================================================
-V1414_1_VERSION = "V1414.1_UNIFIED_STATUS_CONTROL_FINAL"
+V1414_1_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def v1414_1_clean(text):
     text = "" if text is None else str(text)
@@ -14451,8 +14163,8 @@ def v1414_1_clean(text):
         "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
         "V1412.1_CLEAN_LINE_GOLDTRADERS_FINAL",
         "V1412_RESTORE_FULL_ANALYSIS_FINAL",
-        "V1413_WORLDCLASS_LINE_OS_FINAL",
-        "V1414_REALTIME_PRICE_ROUTER_FINAL",
+        "V1417_CLEAN_LIVE_FINAL",
+        "V1417_CLEAN_LIVE_FINAL",
         "V1411_STABLE_WORLD_CLASS_FINAL",
         "V1410.1_SYMBOL_ROUTE_LINE429_SAFE",
     ]:
@@ -14474,34 +14186,6 @@ try:
 except Exception:
     _v1414_1_prev_handle_line_command = None
 
-def handle_line_command(user_text):
-    out = v1414_1_dispatch(user_text)
-    if out:
-        return v1414_1_clean(out)
-    if _v1414_1_prev_handle_line_command:
-        return v1414_1_clean(_v1414_1_prev_handle_line_command(user_text))
-    return v1414_1_clean("ไม่พบข้อมูล")
-
-try:
-    _v1414_1_prev_line_reply = line_reply
-    def line_reply(reply_token, text):
-        return _v1414_1_prev_line_reply(reply_token, v1414_1_clean(text))
-except Exception:
-    pass
-
-try:
-    _v1414_1_prev_line_push = line_push
-    def line_push(user_id, text):
-        try:
-            return _v1414_1_prev_line_push(user_id, v1414_1_clean(text))
-        except Exception as e:
-            if "429" in str(e) or "monthly limit" in str(e).lower() or "quota" in str(e).lower():
-                print("LINE quota reached. Core continues.")
-                return None
-            raise
-except Exception:
-    pass
-
 @app.route("/v1414_1/status", methods=["GET"], endpoint="v1414_1_status")
 def v1414_1_status_route():
     from v1414_unified_status_control.commands.unified_status import unified_control_center
@@ -14522,7 +14206,7 @@ if __name__ == "__main__":
 # This block only controls text displayed to LINE/user.
 # Python identifiers remain V1300_1_* to avoid invalid decimal literal.
 # ============================================================
-V1300_1_FINAL_DISPLAY_VERSION = "V1300.1_WORLD_CLASS_FINAL"
+V1300_1_FINAL_DISPLAY_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 try:
     _v1300_1_display_previous_clean_text = v1300_1_true_final_clean_text
@@ -14534,7 +14218,7 @@ def v1300_1_true_final_clean_text(text):
         text = _v1300_1_display_previous_clean_text(text)
     try:
         if isinstance(text, str):
-            text = text.replace("V1300_1_WORLD_CLASS_FINAL", V1300_1_FINAL_DISPLAY_VERSION)
+            text = text.replace("V1417_CLEAN_LIVE_FINAL", V1300_1_FINAL_DISPLAY_VERSION)
             text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1300_1_FINAL_DISPLAY_VERSION, text)
             if "Version : " not in text:
                 text = text.rstrip() + "\n\nVersion : " + V1300_1_FINAL_DISPLAY_VERSION
@@ -14547,25 +14231,157 @@ try:
 except Exception:
     _v1300_1_display_previous_handle_line_command = None
 
-def handle_line_command(user_text):
-    text = (user_text or "").strip()
-    low = text.lower().replace(" ", "")
-    if low in {"สถานะระบบ", "ระบบ", "ตรวจระบบ", "เช็คระบบ", "เช็กระบบ", "status", "health", "version", "เวอร์ชั่น", "เวอร์ชัน", "v1300", "v1300.1"}:
-        return v1300_1_true_final_clean_text(f"""🧭 V1300.1 WORLD CLASS FINAL STATUS
-SYSTEM HEALTH
-Core: ✅ | LINE Handler: ✅ | Runtime Fixed: ✅
-Invalid Decimal Literal: ✅ Fixed
-No Old Version Label: ✅
-No Fake Analysis On Missing Data: ✅
+def v1414_2_clean(text):
+    text = "" if text is None else str(text)
+    for old in [
+        "V1300.4_STATUS_API_ROUTER_FIXED",
+        "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
+        "V1412.1_CLEAN_LINE_GOLDTRADERS_FINAL",
+        "V1412_RESTORE_FULL_ANALYSIS_FINAL",
+        "V1417_CLEAN_LIVE_FINAL",
+        "V1417_CLEAN_LIVE_FINAL",
+        "V1414.1_UNIFIED_STATUS_CONTROL_FINAL",
+        "V1411_STABLE_WORLD_CLASS_FINAL",
+        "V1410.1_SYMBOL_ROUTE_LINE429_SAFE",
+    ]:
+        text = text.replace(old, V1414_2_VERSION)
+    text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1414_2_VERSION, text)
+    if "Version : " not in text:
+        text = text.rstrip() + "\n\nVersion : " + V1414_2_VERSION
+    return text.strip()
 
-Version : {V1300_1_FINAL_DISPLAY_VERSION}""")
-    if _v1300_1_display_previous_handle_line_command:
-        return v1300_1_true_final_clean_text(_v1300_1_display_previous_handle_line_command(user_text))
-    return v1300_1_true_final_clean_text("ไม่พบคำสั่ง")
+def v1414_2_dispatch(user_text):
+    try:
+        from v1413_worldclass_line_os.commands.worldclass_line_builder import dispatch
+        return dispatch(user_text)
+    except Exception as e:
+        return f"V1414.2 error: {e}\n\nVersion : {V1414_2_VERSION}"
+
+@app.route("/v1414_2/top5/<kind>", methods=["GET"], endpoint="v1414_2_top5")
+def v1414_2_top5_route(kind):
+    from v1413_worldclass_line_os.commands.worldclass_line_builder import build_top5
+    return Response(v1414_2_clean(build_top5(kind)), mimetype="text/plain; charset=utf-8")
+
+
+
+# ============================================================
+# V1415 GLOBAL SCANNER ENGINE FINAL OVERRIDE
+# Adds market-wide scanner universe and scanner/top5 commands.
+# ============================================================
+V1415_VERSION = "V1419_MASTER_CLEAN_FINAL"
+
+def v1415_clean(text):
+    text = "" if text is None else str(text)
+    for old in [
+        "V1300.4_STATUS_API_ROUTER_FIXED",
+        "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
+        "V1412.1_CLEAN_LINE_GOLDTRADERS_FINAL",
+        "V1417_CLEAN_LIVE_FINAL",
+        "V1417_CLEAN_LIVE_FINAL",
+        "V1414.1_UNIFIED_STATUS_CONTROL_FINAL",
+        "V1414.2_TOP5_GATE_VERSION_FINAL",
+    ]:
+        text = text.replace(old, V1415_VERSION)
+    text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1415_VERSION, text)
+    if "Version : " not in text:
+        text = text.rstrip() + "\n\nVersion : " + V1415_VERSION
+    return text.strip()
+
+def v1415_dispatch(user_text):
+    try:
+        from v1413_worldclass_line_os.commands.worldclass_line_builder import dispatch
+        return dispatch(user_text)
+    except Exception as e:
+        return f"V1415 error: {e}\n\nVersion : {V1415_VERSION}"
 
 try:
-    _v1300_1_display_previous_push_line_message = push_line_message
-    def push_line_message(message, *args, **kwargs):
-        return _v1300_1_display_previous_push_line_message(v1300_1_true_final_clean_text(message), *args, **kwargs)
+    _v1415_prev_line_reply = line_reply
+    def line_reply(reply_token, text):
+        return _v1415_prev_line_reply(reply_token, v1415_clean(text))
 except Exception:
     pass
+
+try:
+    _v1415_prev_line_push = line_push
+    def line_push(user_id, text):
+        try:
+            return _v1415_prev_line_push(user_id, v1415_clean(text))
+        except Exception as e:
+            if "429" in str(e) or "monthly limit" in str(e).lower() or "quota" in str(e).lower():
+                print("LINE quota reached. Core continues.")
+                return None
+            raise
+except Exception:
+    pass
+
+@app.route("/v1415/scan/<kind>", methods=["GET"], endpoint="v1415_scan")
+def v1415_scan_route(kind):
+    from v1415_global_scanner_engine.scanner.global_scanner import global_scan_message
+    return Response(v1415_clean(global_scan_message(kind)), mimetype="text/plain; charset=utf-8")
+
+
+
+# ============================================================
+# V1418 FORCE LIVE DECISION ENGINE FINAL OVERRIDE
+# Forces every direct symbol decision through live/freshness gate.
+# ============================================================
+V1418_VERSION = "V1419_MASTER_CLEAN_FINAL"
+
+def v1418_clean(text):
+    text = "" if text is None else str(text)
+    for old in [
+        "V1300.4_STATUS_API_ROUTER_FIXED",
+        "V1300.3_MULTI_API_ROUTER_GOLD_THAI_READY",
+        "V1412.1_CLEAN_LINE_GOLDTRADERS_FINAL",
+        "V1413_WORLDCLASS_LINE_OS_FINAL",
+        "V1414_REALTIME_PRICE_ROUTER_FINAL",
+        "V1414.1_UNIFIED_STATUS_CONTROL_FINAL",
+        "V1414.2_TOP5_GATE_VERSION_FINAL",
+        "V1415_GLOBAL_SCANNER_ENGINE_FINAL",
+        "V1417_CLEAN_LIVE_FINAL",
+    ]:
+        text = text.replace(old, V1418_VERSION)
+    text = re.sub(r"Version\s*:\s*[^\n]+", "Version : " + V1418_VERSION, text)
+    if "Version : " not in text:
+        text = text.rstrip() + "\n\nVersion : " + V1418_VERSION
+    return text.strip()
+
+def v1418_dispatch(user_text):
+    try:
+        from v1413_worldclass_line_os.commands.worldclass_line_builder import dispatch
+        return dispatch(user_text)
+    except Exception as e:
+        return f"V1418 error: {e}\n\nVersion : {V1418_VERSION}"
+
+def handle_line_command(user_text):
+    return v1418_clean(v1418_dispatch(user_text))
+
+try:
+    _v1418_prev_line_reply = line_reply
+    def line_reply(reply_token, text):
+        return _v1418_prev_line_reply(reply_token, v1418_clean(text))
+except Exception:
+    pass
+
+try:
+    _v1418_prev_line_push = line_push
+    def line_push(user_id, text):
+        try:
+            return _v1418_prev_line_push(user_id, v1418_clean(text))
+        except Exception as e:
+            if "429" in str(e) or "monthly limit" in str(e).lower() or "quota" in str(e).lower():
+                print("LINE quota reached. Core continues.")
+                return None
+            raise
+except Exception:
+    pass
+
+@app.route("/v1418/live/<symbol_text>", methods=["GET"], endpoint="v1418_live_symbol")
+def v1418_live_symbol_route(symbol_text):
+    from v1418_force_live_decision_engine.commands.live_line import live_symbol_message
+    return Response(v1418_clean(live_symbol_message(symbol_text)), mimetype="text/plain; charset=utf-8")
+
+@app.route("/v1418/scan/<kind>", methods=["GET"], endpoint="v1418_live_scan")
+def v1418_live_scan_route(kind):
+    from v1418_force_live_decision_engine.commands.live_line import live_scan_message
+    return Response(v1418_clean(live_scan_message(kind)), mimetype="text/plain; charset=utf-8")

@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timezone
 
-VERSION = "V1411_STABLE_WORLD_CLASS_FINAL"
+VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 PRIORITY = {
     "US": ["WEBULL", "POLYGON", "FINNHUB", "TWELVEDATA", "ALPHAVANTAGE", "YAHOO"],

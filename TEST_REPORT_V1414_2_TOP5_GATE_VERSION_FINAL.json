@@ -1,0 +1,15 @@
+{
+  "version": "V1414.2_TOP5_GATE_VERSION_FINAL",
+  "generated_at": "2026-06-12T09:35:07.226182+00:00",
+  "compile_errors": [],
+  "smoke": {
+    "ok": true,
+    "top5_gate_has_watch": true,
+    "top5_nvda_not_passed": true,
+    "version_ok": true,
+    "no_old_version": true,
+    "api_still_full": true,
+    "nvda_still_analysis": true
+  },
+  "passed": true
+}

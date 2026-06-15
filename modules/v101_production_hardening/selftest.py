@@ -6,7 +6,7 @@ from .state import init_state_db, log_error
 from .security import safe_public_config
 from .guardrails import alert_gate
 
-V101_VERSION = "V101_PRODUCTION_HARDENING_SECURITY_STABLE"
+V101_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 MODULES_TO_TEST = [
     "modules.v100_fund_os.fund_os",

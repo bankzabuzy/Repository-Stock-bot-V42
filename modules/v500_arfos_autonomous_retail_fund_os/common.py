@@ -4,7 +4,7 @@ import os, sqlite3, json, math
 from datetime import datetime, timezone, timedelta
 from typing import Any, Optional
 
-V500_VERSION = "V500_ARFOS_AUTONOMOUS_RETAIL_FUND_OS_STABLE"
+V500_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def now_th():
     return datetime.now(timezone(timedelta(hours=7))).strftime("%d/%m/%Y %H:%M")

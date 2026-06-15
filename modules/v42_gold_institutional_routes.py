@@ -3,7 +3,7 @@
 
 from flask import Blueprint, jsonify, Response
 
-V1300_1_ROUTE_VERSION = "V1300_1_WORLD_CLASS_FINAL"
+V1300_1_ROUTE_VERSION = "V1419_MASTER_CLEAN_FINAL"
 v42_gold_bp = Blueprint("v42_gold", __name__)
 
 

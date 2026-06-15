@@ -4,7 +4,7 @@ import os, sqlite3, json, hashlib, hmac, math, time
 from datetime import datetime, timezone, timedelta
 from typing import Any, Optional
 
-V550_VERSION = "V550_PHASE5_WEBULL_API_READY_SAFE_EXECUTION_STABLE"
+V550_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def now_th():
     return datetime.now(timezone(timedelta(hours=7))).strftime("%d/%m/%Y %H:%M")

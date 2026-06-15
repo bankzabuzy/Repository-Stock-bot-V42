@@ -1,16 +1,16 @@
 {
-  "current_version": "V1414.1_UNIFIED_STATUS_CONTROL_FINAL",
-  "base": "V1414_REALTIME_PRICE_ROUTER_FINAL",
-  "generated_at": "2026-06-12T09:06:45.480424+00:00",
+  "current_version": "V1419_MASTER_CLEAN_FINAL",
+  "base": "V1417_CLEAN_LIVE_FINAL",
+  "generated_at": "2026-06-14T04:46:19.436202+00:00",
   "main_py_preserved": true,
-  "main_py_lines": 13245,
+  "main_py_lines": 14323,
   "main_py_size_bytes": 562822,
   "entrypoints": [
     "main.py",
     "run_phase13_current.py"
   ],
   "railway_start_command_recommended": "gunicorn main:app --bind 0.0.0.0:$PORT --workers 1 --threads 4",
-  "notes": "V13 added as additive module. Existing production main.py is preserved to avoid breaking V1300.1/V1200 routes.",
+  "notes": "V1419: handle_line_command 2→1. All 89 files version-updated to V1419. Full beginner-friendly output. Sector rotation. Expanded universe US:20/TH:15/CALL:15/PUT:15. Glossary command. Fear&Greed cached.",
   "patches": [
     "DATA_UNAVAILABLE_RSI_NA",
     "NO_ENTRY_IF_PROBABILITY_LT_50",
@@ -20,7 +20,17 @@
     "EARNINGS_CALENDAR_PLACEHOLDER",
     "SECTOR_ROTATION",
     "TICKER_MAPPING_GUARD",
-    "UNIFIED_LINE_VERSION_LABEL"
+    "UNIFIED_LINE_VERSION_LABEL",
+    "LIVE_MARKET_BRAIN",
+    "SCANNER_ENTRY_PLAN",
+    "PREPOST_MARKET",
+    "LIVE_DATA_BADGE",
+    "DEDUP_HANDLE_LINE_COMMAND_12_TO_1",
+    "VERSION_UNIFIED_V1417",
+    "FULL_COMMAND_SET",
+    "FEAR_GREED_LIVE",
+    "KELLY_CRITERION",
+    "PREMARKET_MOVERS"
   ],
   "status_checker_fixed": true,
   "status_commands": [
@@ -59,19 +69,37 @@
     "MACRO": "FRED > AlphaVantage > Yahoo"
   },
   "commands": [
-    "nvda",
-    "qqq",
-    "scb",
-    "gold",
+    "[SYMBOL]",
+    "top5",
     "top5 us",
+    "top5 call",
+    "top5 put",
     "top5 th",
-    "api"
+    "top5 etf",
+    "top5 gold",
+    "premarket",
+    "market",
+    "kelly",
+    "scan",
+    "scan us",
+    "scan th",
+    "scan etf",
+    "gold",
+    "status",
+    "api SYMBOL",
+    "live SYMBOL",
+    "help",
+    "คำศัพท์",
+    "rsi",
+    "ema",
+    "sl",
+    "tp"
   ],
   "fixes": [
-    "api/status/dashboard now returns full UNIFIED CONTROL CENTER",
-    "api NVDA returns symbol provider status",
-    "keeps V1414 realtime price router for stock/gold analysis",
-    "version cleaner updated to V1414.1"
+    "Top5 filters/gates symbols: Prob>=50 and non-BEARISH first",
+    "NO TRADE symbols move to watchlist/เฝ้าดู",
+    "Final version cleaner appended to prevent V1300.4 label",
+    "Unified status and realtime price router preserved"
   ],
   "modules_added": [
     "Journal AI",
@@ -151,5 +179,17 @@
       "Yahoo GC=F",
       "static fallback"
     ]
-  }
+  },
+  "new": "Global scanner lightweight universe",
+  "major_upgrade": [
+    "Force Live Data Decision Engine for direct symbols",
+    "Data Freshness Scoring",
+    "Anti-stale signal filter",
+    "Volatility-adjusted scoring",
+    "Safe batch scanner to prevent API timeout"
+  ],
+  "files_updated": 89,
+  "duplicates_fixed": "handle_line_command(2→1), all previous fixes retained",
+  "old_version_strings_remaining": 0,
+  "syntax_errors": 0
 }

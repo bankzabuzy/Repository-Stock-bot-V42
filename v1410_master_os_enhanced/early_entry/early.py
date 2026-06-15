@@ -1,6 +1,6 @@
 from v1410_master_os_enhanced.api_router.router import price_source_note
 
-VERSION = "V1410_MASTER_OS_ENHANCED"
+VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def early_entry_text(symbol="NVDA"):
     note = price_source_note(symbol)

@@ -4,7 +4,7 @@ import os
 from typing import Dict, Any
 from .state import get_state
 
-V101_VERSION = "V101_PRODUCTION_HARDENING_SECURITY_STABLE"
+V101_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def maintenance_mode() -> Dict[str, Any]:
     enabled = get_state("maintenance_mode", os.getenv("MAINTENANCE_MODE", "false")).lower() in {"1","true","yes","on"}

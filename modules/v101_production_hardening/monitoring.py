@@ -8,7 +8,7 @@ from .guardrails import alert_gate, maintenance_mode, live_trading_guard
 from .selftest import full_self_test
 from .backup import db_summary
 
-V101_VERSION = "V101_PRODUCTION_HARDENING_SECURITY_STABLE"
+V101_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def _now_th() -> str:
     return datetime.now(timezone(timedelta(hours=7))).strftime("%d/%m/%Y %H:%M")

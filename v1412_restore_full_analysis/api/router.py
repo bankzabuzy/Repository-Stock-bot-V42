@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timezone, timedelta
 
-VERSION = "V1412_RESTORE_FULL_ANALYSIS_FINAL"
+VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 PRIORITY = {
     "US": ["WEBULL", "POLYGON", "FINNHUB", "TWELVEDATA", "ALPHAVANTAGE", "YAHOO"],

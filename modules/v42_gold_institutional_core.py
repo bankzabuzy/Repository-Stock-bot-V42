@@ -22,7 +22,7 @@ try:
 except Exception:  # pragma: no cover
     BeautifulSoup = None
 
-V1300_1_GOLD_VERSION = "V1300.1.2_GOLD_INSTITUTIONAL_ENTRY_FILTER_STABLE"
+V1300_1_GOLD_VERSION = "V1419_MASTER_CLEAN_FINAL"
 REQUEST_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -558,7 +558,7 @@ def build_v42_gold_text() -> str:
 # High-conviction alert layer: Entry Score + Session + News + Spread
 # + Smart Trailing Stop + STRONG BUY. Existing Thai Gold fallback remains intact.
 # ============================================================
-V1300_1_GOLD_VERSION = "V1300.1.3_GOLD_INSTITUTIONAL_HIGH_CONVICTION_STABLE"
+V1300_1_GOLD_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 
 def _env_bool(name: str, default: bool = False) -> bool:
@@ -1086,7 +1086,7 @@ def build_v42_gold_text() -> str:
 # Winrate Dashboard + Self Learning
 # ============================================================
 
-V1300_1_GOLD_VERSION = "V1300.1.4_GOLD_INSTITUTIONAL_FUND_GRADE_STABLE"
+V1300_1_GOLD_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 try:
     _V1300_13_BUILD_V1300_1_GOLD_PAYLOAD = build_v42_gold_payload
@@ -1550,7 +1550,7 @@ def build_v42_gold_dashboard_text(payload: Optional[Dict[str, Any]] = None) -> s
 # Market Breadth SPY/QQQ/VIX
 # ============================================================
 
-V1300_1_GOLD_VERSION = "V1300_1_WORLD_CLASS_FINAL"
+V1300_1_GOLD_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 try:
     _V1300_14_BUILD_V1300_1_GOLD_PAYLOAD = build_v42_gold_payload
@@ -2015,7 +2015,7 @@ def build_us_extended_hours_first_line(symbol: str) -> str:
 # Position Sizing + Cooldown + Signal Grade + Options Safety
 # ============================================================
 
-V1300_17_VERSION = "V1300.1.7_INSTITUTIONAL_RISK_PERFORMANCE_TRACKER_STABLE"
+V1300_17_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 
 def _v427_db_path() -> str:
@@ -2377,7 +2377,7 @@ def build_v427_dashboard_text() -> str:
 # One-page status for Gold, Risk, US Extended, Breadth, DB, LINE
 # ============================================================
 
-V1300_18_VERSION = "V1300_1_WORLD_CLASS_FINAL"
+V1300_18_VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 
 def _v428_bool_status(value: Any) -> str:

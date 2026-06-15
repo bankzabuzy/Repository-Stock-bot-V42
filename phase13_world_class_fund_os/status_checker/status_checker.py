@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timezone
 
-VERSION = "V1300_1_WORLD_CLASS_FINAL_STATUS_FIXED"
+VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 def _ok(value):
     return "✅" if value else "❌"

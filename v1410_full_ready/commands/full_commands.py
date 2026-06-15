@@ -1,7 +1,7 @@
 from v1410_full_ready.api_router.full_router import source_block, status_text
 from v1410_full_ready.storage.simple_store import SimpleSignalStore
 
-VERSION = "V1410_FULL_READY_LINE_COMMANDS_FIXED"
+VERSION = "V1419_MASTER_CLEAN_FINAL"
 
 DATA = {
     "US": [
