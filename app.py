@@ -1,14 +1,19 @@
+from flask import Flask, request
+from engine.line_bot import handle_line
 
-from fastapi import FastAPI
+app = Flask(__name__)
 
-app = FastAPI(title="V1438.6 FIX DEPLOY SPLIT")
+@app.route("/", methods=["GET"])
+def home():
+    return {"status": "v1419 PRODUCTION+ running"}
 
-@app.get("/")
-def health():
-    return {
-        "status": "OK",
-        "version": "V1438.6_FIX_DEPLOY_SPLIT",
-        "service": "WEB"
-    }
+@app.route("/webhook", methods=["POST"])
+def webhook():
+    body = request.get_json()
+    handle_line(body)
+    return "OK"
 
-application = app
+if __name__ == "__main__":
+    import os
+port = int(os.environ.get("PORT", 8080))
+app.run(host="0.0.0.0", port=port)
