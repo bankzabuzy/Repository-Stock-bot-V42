@@ -4,4 +4,3 @@ gunicorn
 yfinance
 beautifulsoup4
 psycopg2-binary
-pytz
