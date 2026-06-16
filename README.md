@@ -1,15 +1,11 @@
 
-V1450 STOCK SYSTEM
+V1450 ULTRA+ WORKING SYSTEM
 
 Run:
 uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
-ENV:
-- LINE_CHANNEL_ACCESS_TOKEN
-- OPENAI_API_KEY
-
-Commands:
-- AAPL
-- PRICE TSLA
-- ANALYZE NVDA
-- SET ALERT AAPL 200
+Features:
+- Queue system
+- Worker background
+- Stock simulation
+- Signal BUY/SELL/HOLD

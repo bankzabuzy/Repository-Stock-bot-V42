@@ -1,7 +1,7 @@
 
 from fastapi import APIRouter, Request
-from app.engine.router import handle_message
-from app.services.line_service import reply_message
+from app.queue.queue import push_task
+from app.engine.processor import process_message
 
 router = APIRouter()
 
@@ -14,8 +14,9 @@ async def webhook(req: Request):
             msg = e["message"].get("text", "")
             token = e.get("replyToken")
 
-            if token:
-                result = handle_message(msg)
-                reply_message(token, str(result))
+            def task(msg=msg, token=token):
+                process_message(msg, token)
+
+            push_task(task)
 
     return {"ok": True}
