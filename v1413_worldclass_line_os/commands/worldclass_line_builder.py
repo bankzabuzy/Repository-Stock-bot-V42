@@ -525,3 +525,84 @@ def dispatch(text):
     if c in _GLOSSARY: return build_glossary(c)
     if t: return build_stock(t)
     return None
+
+# ─── V1420 Trading Commands ───────────────────────────────────
+def _trading_commands(c, t, low):
+    """Handle paper + live broker commands."""
+    try:
+        from v1420_trading_engine.broker import broker_status_text, place_order, get_account_info
+        from v1420_trading_engine.paper_engine import (
+            paper_status_text, open_paper_trade, close_paper_trade, get_open_trades
+        )
+    except Exception as e:
+        return f"Trading engine error: {e}\n\nVersion : {VERSION}"
+
+    # Broker / account status
+    if c in {"broker","webull","account","บัญชี","พอร์ต","portfolio"}:
+        return broker_status_text()
+
+    # Paper summary
+    if c in {"paper","papertrade","paperstatus","เปเปอร์","ผลเทรด","สรุปเทรด"}:
+        return paper_status_text()
+
+    # Open paper trade: "เปิด NVDA 1" or "open NVDA 1 185.50"
+    if low.startswith("เปิด ") or low.startswith("open "):
+        parts = t.split()
+        if len(parts) >= 3:
+            try:
+                sym  = parts[1].upper()
+                qty  = int(parts[2])
+                entry = float(parts[3]) if len(parts)>3 else 0
+                from v1413_worldclass_line_os.core.market_brain import get_snapshot, trade_plan
+                s = get_snapshot(sym)
+                plan = trade_plan(s)
+                if not entry: entry = s.price or 0
+                tp1 = plan["tp"][0] if plan.get("tp") else round(entry*1.02,2)
+                tp2 = plan["tp"][1] if plan.get("tp") and len(plan["tp"])>1 else round(entry*1.04,2)
+                sl  = plan.get("sl") or round(entry*0.98,2)
+                trade_id = open_paper_trade(sym,"BUY",qty,entry,tp1,tp2,sl,
+                                            score=s.score,conf=s.confidence)
+                return (f"✅ เปิด Paper Trade #{trade_id}\n"
+                       f"{sym} BUY {qty} หุ้น\n"
+                       f"Entry: ${entry:.2f}\n"
+                       f"TP1: ${tp1:.2f} | TP2: ${tp2:.2f}\n"
+                       f"SL: ${sl:.2f}\n\n"
+                       f"พิมพ์ 'ปิด {trade_id} [ราคา]' เพื่อปิด\n"
+                       f"Version : {VERSION}")
+            except Exception as e:
+                return f"เปิด trade error: {e}"
+
+    # Close paper trade: "ปิด 1 185.50" or "close 1 185.50"
+    if low.startswith("ปิด ") or low.startswith("close "):
+        parts = t.split()
+        if len(parts) >= 3:
+            try:
+                tid   = int(parts[1])
+                price = float(parts[2])
+                result = close_paper_trade(tid, price)
+                pnl = result.get("pnl",0)
+                wr  = result.get("r_multiple",0)
+                e   = "🟢 กำไร" if pnl>=0 else "🔴 ขาดทุน"
+                return (f"{e} ปิด Trade #{tid}\n"
+                       f"Exit: ${price:.2f}\n"
+                       f"P&L: ${pnl:+,.2f} ({result.get('pnl_pct',0):+.2f}%)\n"
+                       f"R-Multiple: {wr:+.2f}R\n\n"
+                       f"พิมพ์ 'paper' เพื่อดูสรุป\n"
+                       f"Version : {VERSION}")
+            except Exception as e:
+                return f"ปิด trade error: {e}"
+
+    return None
+
+# Patch dispatch to include trading commands
+_original_dispatch = dispatch
+def dispatch(text):
+    t = (text or "").strip()
+    low = t.lower()
+    c = low.replace(" ","")
+    # Try trading commands first
+    result = _trading_commands(c, t, low)
+    if result:
+        return result
+    # Fall through to original
+    return _original_dispatch(text)
