@@ -1,14 +1,15 @@
 
-V1438.6 FIX DEPLOY SPLIT
+V1450 STOCK SYSTEM
 
-CHANGES:
-- HARD SEPARATION of WEB and WORKER
-- Removed all gunicorn from worker path
-- Railway-ready dual service structure
+Run:
+uvicorn app.main:app --host 0.0.0.0 --port $PORT
 
-DEPLOY:
-WEB SERVICE:
-  uvicorn app:app
+ENV:
+- LINE_CHANNEL_ACCESS_TOKEN
+- OPENAI_API_KEY
 
-WORKER SERVICE:
-  python worker.py
+Commands:
+- AAPL
+- PRICE TSLA
+- ANALYZE NVDA
+- SET ALERT AAPL 200
